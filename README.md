@@ -1,5 +1,8 @@
 # Korra
 
+![Infra](https://img.shields.io/github/actions/workflow/status/mburumaxwell/korra/iac.yml?branch=main&label=Infra&style=flat-square)
+[![license](https://img.shields.io/github/license/mburumaxwell/korra.svg?style=flat-square)](LICENSE.md)
+
 <!-- TODO: add description of the project -->
 > An explanation will soon be here for the project. Please bear with me.
 
