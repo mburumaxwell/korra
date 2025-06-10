@@ -1,0 +1,5 @@
+.venv/
+external
+.west
+**/build*/
+.vscode/compile_commands.json
