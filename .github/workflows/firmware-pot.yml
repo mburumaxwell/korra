@@ -1,0 +1,75 @@
+name: Firmware - Pot
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - firmware/pot/**
+      - west-manifest/**
+      - .west/**
+      - .github/workflows/firmware-pot.yml
+  pull_request:
+    branches: [main]
+    paths:
+      - firmware/pot/**
+      - west-manifest/**
+      - .west/**
+      - .github/workflows/firmware-pot.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Zephyr SDK
+        uses: zephyrproject-rtos/action-zephyr-setup@v1
+        with:
+          app-path: ${{ github.workspace }}/west-manifest
+          toolchains: arm-zephyr-eabi:xtensa-espressif_esp32s3_zephyr-elf
+
+      - name: Build (ESP32-S3-DevKitC-1)
+        run: >
+          west build firmware/pot
+          --board esp32s3_devkitc/esp32s3/procpu
+          --pristine
+          --build-dir firmware/pot/build/esp32s3_devkitc
+
+      - name: Build (YD-ESP32-S3-DevKitC)
+        run: >
+          west build firmware/pot
+          --board esp32s3_devkitc/esp32s3/procpu
+          --pristine
+          --build-dir firmware/pot/build/yd_esp32s3_devkitc
+          --
+          -DEXTRA_DTC_OVERLAY_FILE='boards/yd_esp32s3_devkitc_procpu.overlay'
+
+      - name: Collect output
+        run: |
+          mkdir -p binaries && \
+
+          cp firmware/pot/build/esp32s3_devkitc/zephyr/zephyr.bin binaries/pot-esp32s3_devkitc.bin && \
+          cp firmware/pot/build/esp32s3_devkitc/zephyr/zephyr.elf binaries/pot-esp32s3_devkitc.elf && \
+
+          cp firmware/pot/build/yd_esp32s3_devkitc/zephyr/zephyr.bin binaries/pot-yd_esp32s3_devkitc.bin && \
+          cp firmware/pot/build/yd_esp32s3_devkitc/zephyr/zephyr.elf binaries/pot-yd_esp32s3_devkitc.elf && \
+
+          echo 'Done'
+
+      - name: Upload Artifact (binaries)
+        uses: actions/upload-artifact@v4
+        with:
+          path: binaries
+          name: binaries
+          retention-days: 1
