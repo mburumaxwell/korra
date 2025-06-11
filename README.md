@@ -8,6 +8,10 @@
 <!-- TODO: add description of the project -->
 > An explanation will soon be here for the project. Please bear with me.
 
+## Versioning
+
+Versioning for zephyr applications is [detailed in their docs](https://docs.zephyrproject.org/latest/build/version/index.html). This repository uses [changesets](https://github.com/changesets/changesets) to manage versions and changelogs and mostly as private because the tool is fairly mature.
+
 ## Infrastructure
 
 The [`deploy` folder](./deploy/) contains the deployment templates for Azure resources used by/for Korra. This forms most of the infrastructure that Korra runs on.
