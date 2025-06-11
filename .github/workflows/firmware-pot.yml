@@ -81,15 +81,13 @@ jobs:
         if: ${{ startsWith(github.ref, 'refs/tags/') && github.event.repository.public }}
         uses: actions/attest-build-provenance@v2
         with:
-          subject-path: |
-            ${{ github.workspace }}/binaries/*.bin
-            ${{ github.workspace }}/binaries/*.hex
+          subject-path: ${{ github.workspace }}/binaries/*.bin
 
       - name: Upload Release Artifact
         if: ${{ startsWith(github.ref, 'refs/tags/') }}
         uses: ncipollo/release-action@v1
         with:
-          artifacts: '${{ github.workspace }}/binaries/*.bin,${{ github.workspace }}/binaries/*.hex'
+          artifacts: '${{ github.workspace }}/binaries/*.bin'
           token: ${{ secrets.GITHUB_TOKEN }}
           allowUpdates: true
           omitBodyDuringUpdate: true
