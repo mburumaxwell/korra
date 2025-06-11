@@ -1,0 +1,20 @@
+{
+  "name": "korra",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "changeset": "changeset",
+    "packages:version": "changeset version && pnpm zephyr:version",
+    "packages:publish": "changeset publish",
+    "zephyr:version": "node scripts/update-firmware-versions.mjs"
+  },
+  "devDependencies": {
+    "@changesets/cli": "2.29.4",
+    "@types/semver": "7.7.0",
+    "semver": "7.7.2"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "pnpm@10.12.1"
+}

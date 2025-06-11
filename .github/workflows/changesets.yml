@@ -1,0 +1,59 @@
+name: Changesets
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+    paths:
+      - '.changeset/config.json'
+      - '.github/workflows/changesets.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  Changeset:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Download deps
+        run: pnpm install
+
+      - name: Generate token
+        id: generate-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.GH_APP_ID_RELEASER }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY_RELEASER }}
+          permission-contents: write
+          permission-pull-requests: write
+
+      - name: Create release pull request
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: changesets/action@v1
+        with:
+          title: 'Versioning'
+          version: pnpm packages:version
+          publish: pnpm packages:publish
+          commit: 'Version packages'
+          commitMode: 'github-api'
+        env:
+          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}

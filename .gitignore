@@ -3,3 +3,5 @@ external
 .west
 **/build*/
 .vscode/compile_commands.json
+
+node_modules/

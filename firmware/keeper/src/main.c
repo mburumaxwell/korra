@@ -19,6 +19,8 @@ LOG_MODULE_REGISTER(main);
 #include <zephyr/drivers/spi.h>
 #include <zephyr/sys/util.h>
 
+#include <app_version.h>
+
 #define STRIP_NODE		DT_ALIAS(led_strip)
 
 #if DT_NODE_HAS_PROP(STRIP_NODE, chain_length)
@@ -43,6 +45,8 @@ static const struct device *const strip = DEVICE_DT_GET(STRIP_NODE);
 
 int main(void)
 {
+	LOG_INF("App version: %s", APP_VERSION_STRING);
+
 	size_t color = 0;
 	int rc;
 
