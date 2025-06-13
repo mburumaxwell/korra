@@ -29,12 +29,19 @@ concurrency:
 
 jobs:
   Build:
-    runs-on: ubuntu-latest
+    # using macos-latest because it tends to be faster and closely mirrors dev environment
+    runs-on: macos-latest
     timeout-minutes: 15
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          # cache: 'pip' # cache works when there is a requirements.txt, pyproject.toml, poetry.lock or pipfile.lock
 
       - name: Set up Zephyr SDK
         uses: zephyrproject-rtos/action-zephyr-setup@v1
