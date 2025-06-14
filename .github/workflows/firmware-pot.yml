@@ -56,14 +56,12 @@ jobs:
           --pristine
           --build-dir firmware/pot/build/esp32s3_devkitc
 
-      - name: Build (YD-ESP32-S3-DevKitC)
+      - name: Build (FRDM-RW612)
         run: >
           west build firmware/pot
           --board esp32s3_devkitc/esp32s3/procpu
           --pristine
-          --build-dir firmware/pot/build/yd_esp32s3_devkitc
-          --
-          -DEXTRA_DTC_OVERLAY_FILE='boards/yd_esp32s3_devkitc_procpu.overlay'
+          --build-dir firmware/pot/build/frdm_rw612
 
       - name: Collect output
         run: |
@@ -72,8 +70,8 @@ jobs:
           cp firmware/pot/build/esp32s3_devkitc/zephyr/zephyr.bin binaries/pot-esp32s3_devkitc.bin && \
           cp firmware/pot/build/esp32s3_devkitc/zephyr/zephyr.elf binaries/pot-esp32s3_devkitc.elf && \
 
-          cp firmware/pot/build/yd_esp32s3_devkitc/zephyr/zephyr.bin binaries/pot-yd_esp32s3_devkitc.bin && \
-          cp firmware/pot/build/yd_esp32s3_devkitc/zephyr/zephyr.elf binaries/pot-yd_esp32s3_devkitc.elf && \
+          cp firmware/pot/build/frdm_rw612/zephyr/zephyr.bin binaries/pot-frdm_rw612.bin && \
+          cp firmware/pot/build/frdm_rw612/zephyr/zephyr.elf binaries/pot-frdm_rw612.elf && \
 
           echo 'Done'
 

@@ -14,22 +14,24 @@
 LOG_MODULE_REGISTER(main);
 
 #include <zephyr/kernel.h>
-#include <zephyr/drivers/led_strip.h>
 #include <zephyr/device.h>
 #include <zephyr/drivers/spi.h>
 #include <zephyr/sys/util.h>
 
 #include <app_version.h>
 
-#define STRIP_NODE		DT_ALIAS(led_strip)
+#define DELAY_TIME K_MSEC(500)
+
+#if CONFIG_LED_STRIP
+#include <zephyr/drivers/led_strip.h>
+
+#define STRIP_NODE			DT_ALIAS(led_strip)
 
 #if DT_NODE_HAS_PROP(STRIP_NODE, chain_length)
 #define STRIP_NUM_PIXELS	DT_PROP(STRIP_NODE, chain_length)
 #else
 #error Unable to determine length of LED strip
 #endif
-
-#define DELAY_TIME K_MSEC(500)
 
 #define RGB(_r, _g, _b) { .r = (_r), .g = (_g), .b = (_b) }
 
@@ -42,11 +44,13 @@ static const struct led_rgb colors[] = {
 static struct led_rgb pixels[STRIP_NUM_PIXELS];
 
 static const struct device *const strip = DEVICE_DT_GET(STRIP_NODE);
+#endif
 
 int main(void)
 {
 	LOG_INF("App version: %s", APP_VERSION_STRING);
 
+#if CONFIG_LED_STRIP
 	size_t color = 0;
 	int rc;
 
@@ -73,6 +77,11 @@ int main(void)
 
 		color = (color + 1) % ARRAY_SIZE(colors);
 	}
+#else
+	LOG_INF("No LED functionality configured");
+	k_sleep(K_FOREVER);
+	LOG_ERR("This should not happen!!!");
+#endif
 
 	return 0;
 }
