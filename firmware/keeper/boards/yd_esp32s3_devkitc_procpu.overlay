@@ -1,8 +1,0 @@
-&pinctrl {
-	i2s0_pinconf: i2s0_pinconf {
-		group1 {
-			pinmux = <I2S0_O_SD_GPIO48>;
-			output-enable;
-		};
-	};
-};

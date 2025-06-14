@@ -24,19 +24,17 @@
             }
           }
         },
-        "build/yd_esp32s3_devkitc": {
-          "board": "esp32s3_devkitc/esp32s3/procpu",
-          "relBoardSubDir": "espressif/esp32s3_devkitc",
-          "name": "build/yd_esp32s3_devkitc",
+        "build/frdm_rw612": {
+          "board": "frdm_rw612",
+          "relBoardSubDir": "nxp/frdm_rw612",
+          "name": "build/frdm_rw612",
           "westBuildArgs": "",
           "westBuildCMakeArgs": " -DCONFIG_DEBUG_OPTIMIZATIONS=y -DCONFIG_DEBUG_THREAD_INFO=y ",
           "confFiles": {
             "config": [],
             "extraConfig": [],
             "overlay": [],
-            "extraOverlay": [
-              "firmware/keeper/boards/yd_esp32s3_devkitc_procpu.overlay"
-            ]
+            "extraOverlay": []
           },
           "runnerConfigs": {
             "default": {
@@ -78,19 +76,17 @@
             }
           }
         },
-        "build/yd_esp32s3_devkitc": {
-          "board": "esp32s3_devkitc/esp32s3/procpu",
-          "relBoardSubDir": "espressif/esp32s3_devkitc",
-          "name": "build/yd_esp32s3_devkitc",
+        "build/frdm_rw612": {
+          "board": "frdm_rw612",
+          "relBoardSubDir": "nxp/frdm_rw612",
+          "name": "build/frdm_rw612",
           "westBuildArgs": "",
           "westBuildCMakeArgs": " -DCONFIG_DEBUG_OPTIMIZATIONS=y -DCONFIG_DEBUG_THREAD_INFO=y ",
           "confFiles": {
             "config": [],
             "extraConfig": [],
             "overlay": [],
-            "extraOverlay": [
-              "firmware/pot/boards/yd_esp32s3_devkitc_procpu.overlay"
-            ]
+            "extraOverlay": []
           },
           "runnerConfigs": {
             "default": {

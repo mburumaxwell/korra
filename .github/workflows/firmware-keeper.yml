@@ -56,14 +56,12 @@ jobs:
           --pristine
           --build-dir firmware/keeper/build/esp32s3_devkitc
 
-      - name: Build (YD-ESP32-S3-DevKitC)
+      - name: Build (FRDM-RW612)
         run: >
           west build firmware/keeper
           --board esp32s3_devkitc/esp32s3/procpu
           --pristine
-          --build-dir firmware/keeper/build/yd_esp32s3_devkitc
-          --
-          -DEXTRA_DTC_OVERLAY_FILE='boards/yd_esp32s3_devkitc_procpu.overlay'
+          --build-dir firmware/keeper/build/frdm_rw612
 
       - name: Collect output
         run: |
@@ -72,8 +70,8 @@ jobs:
           cp firmware/keeper/build/esp32s3_devkitc/zephyr/zephyr.bin binaries/keeper-esp32s3_devkitc.bin && \
           cp firmware/keeper/build/esp32s3_devkitc/zephyr/zephyr.elf binaries/keeper-esp32s3_devkitc.elf && \
 
-          cp firmware/keeper/build/yd_esp32s3_devkitc/zephyr/zephyr.bin binaries/keeper-yd_esp32s3_devkitc.bin && \
-          cp firmware/keeper/build/yd_esp32s3_devkitc/zephyr/zephyr.elf binaries/keeper-yd_esp32s3_devkitc.elf && \
+          cp firmware/keeper/build/frdm_rw612/zephyr/zephyr.bin binaries/keeper-frdm_rw612.bin && \
+          cp firmware/keeper/build/frdm_rw612/zephyr/zephyr.elf binaries/keeper-frdm_rw612.elf && \
 
           echo 'Done'
 
