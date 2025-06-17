@@ -103,7 +103,9 @@
       },
       "confFiles": {
         "config": [],
-        "extraConfig": [],
+        "extraConfig": [
+          "firmware/local.conf"
+        ],
         "overlay": [],
         "extraOverlay": []
       }

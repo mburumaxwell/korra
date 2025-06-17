@@ -1,0 +1,23 @@
+# ==============================================================================
+# local.conf.template
+#
+# This file defines default configuration values for local development.
+# 
+# ➤ How to use:
+#   1. Copy this file to `local.conf` in the same directory.
+#   2. Edit `local.conf` to override settings for your local machine,
+#      such as WiFi credentials, API keys, or debug flags.
+#
+# ➤ Version control:
+#   - This template file IS tracked in Git to provide defaults.
+#   - `local.conf` itself is listed in `.gitignore` to avoid accidentally
+#     committing local secrets or machine-specific changes.
+#
+# ➤ Note:
+#   - Changes to THIS FILE (`local.conf.template`) WILL be tracked in Git.
+#   - Changes to your personal `local.conf` WILL NOT be tracked.
+#
+# ==============================================================================
+
+# Example override for WiFi scanning:
+# CONFIG_WIFI_SCAN_NETWORKS=y
