@@ -1,21 +1,21 @@
-name: Firmware - Pot
+name: Firmware
 
 on:
   push:
     # branches: [main]
-    tags: ['firmware-pot*']
+    tags: ['firmware*']
     paths:
-      - firmware/pot/**
+      - firmware/**
       - west-manifest/**
       - .west/**
-      - .github/workflows/firmware-pot.yml
+      - .github/workflows/firmware.yml
   pull_request:
     branches: [main]
     paths:
-      - firmware/pot/**
+      - firmware/**
       - west-manifest/**
       - .west/**
-      - .github/workflows/firmware-pot.yml
+      - .github/workflows/firmware.yml
   workflow_dispatch:
 
 permissions:
@@ -49,29 +49,57 @@ jobs:
           app-path: ${{ github.workspace }}/west-manifest
           toolchains: arm-zephyr-eabi:xtensa-espressif_esp32s3_zephyr-elf
 
-      - name: Build (ESP32-S3-DevKitC-1)
+      - name: Build (ESP32-S3-DevKitC-1, keeper)
         run: >
-          west build firmware/pot
+          west build firmware
           --board esp32s3_devkitc/esp32s3/procpu
           --pristine
-          --build-dir firmware/pot/build/esp32s3_devkitc
+          --build-dir firmware/build/keeper/esp32s3_devkitc
+          -DEXTRA_DTC_OVERLAY_FILE='apps/keeper.overlay'
+          -DEXTRA_CONF_FILE='apps/keeper.conf'
 
-      - name: Build (FRDM-RW612)
+      - name: Build (FRDM-RW612, keeper)
         run: >
-          west build firmware/pot
+          west build firmware
           --board esp32s3_devkitc/esp32s3/procpu
           --pristine
-          --build-dir firmware/pot/build/frdm_rw612
+          --build-dir firmware/build/keeper/frdm_rw612
+          -DEXTRA_DTC_OVERLAY_FILE='apps/keeper.overlay'
+          -DEXTRA_CONF_FILE='apps/keeper.conf'
+
+      - name: Build (ESP32-S3-DevKitC-1, pot)
+        run: >
+          west build firmware
+          --board esp32s3_devkitc/esp32s3/procpu
+          --pristine
+          --build-dir firmware/build/pot/esp32s3_devkitc
+          -DEXTRA_DTC_OVERLAY_FILE='apps/pot.overlay'
+          -DEXTRA_CONF_FILE='apps/pot.conf'
+
+      - name: Build (FRDM-RW612, pot)
+        run: >
+          west build firmware
+          --board esp32s3_devkitc/esp32s3/procpu
+          --pristine
+          --build-dir firmware/build/pot/frdm_rw612
+          -DEXTRA_DTC_OVERLAY_FILE='apps/pot.overlay'
+          -DEXTRA_CONF_FILE='apps/pot.conf'
 
       - name: Collect output
         run: |
           mkdir -p binaries && \
 
-          cp firmware/pot/build/esp32s3_devkitc/zephyr/zephyr.bin binaries/pot-esp32s3_devkitc.bin && \
-          cp firmware/pot/build/esp32s3_devkitc/zephyr/zephyr.elf binaries/pot-esp32s3_devkitc.elf && \
+          cp firmware/build/keeper/esp32s3_devkitc/zephyr/zephyr.bin binaries/keeper-esp32s3_devkitc.bin && \
+          cp firmware/build/keeper/esp32s3_devkitc/zephyr/zephyr.elf binaries/keeper-esp32s3_devkitc.elf && \
 
-          cp firmware/pot/build/frdm_rw612/zephyr/zephyr.bin binaries/pot-frdm_rw612.bin && \
-          cp firmware/pot/build/frdm_rw612/zephyr/zephyr.elf binaries/pot-frdm_rw612.elf && \
+          cp firmware/build/keeper/frdm_rw612/zephyr/zephyr.bin binaries/keeper-frdm_rw612.bin && \
+          cp firmware/build/keeper/frdm_rw612/zephyr/zephyr.elf binaries/keeper-frdm_rw612.elf && \
+
+          cp firmware/build/pot/esp32s3_devkitc/zephyr/zephyr.bin binaries/pot-esp32s3_devkitc.bin && \
+          cp firmware/build/pot/esp32s3_devkitc/zephyr/zephyr.elf binaries/pot-esp32s3_devkitc.elf && \
+
+          cp firmware/build/pot/frdm_rw612/zephyr/zephyr.bin binaries/pot-frdm_rw612.bin && \
+          cp firmware/build/pot/frdm_rw612/zephyr/zephyr.elf binaries/pot-frdm_rw612.elf && \
 
           echo 'Done'
 

@@ -1,20 +1,24 @@
 {
   "projects": {
-    "keeper": {
-      "rel_path": "firmware/keeper",
-      "name": "keeper",
+    "firmware": {
+      "rel_path": "firmware",
+      "name": "firmware",
       "buildConfigs": {
-        "build/esp32s3_devkitc": {
+        "build/keeper/esp32s3_devkitc": {
           "board": "esp32s3_devkitc/esp32s3/procpu",
           "relBoardSubDir": "espressif/esp32s3_devkitc",
-          "name": "build/esp32s3_devkitc",
+          "name": "build/keeper/esp32s3_devkitc",
           "westBuildArgs": "",
           "westBuildCMakeArgs": " -DCONFIG_DEBUG_OPTIMIZATIONS=y -DCONFIG_DEBUG_THREAD_INFO=y ",
           "confFiles": {
             "config": [],
-            "extraConfig": [],
+            "extraConfig": [
+              "firmware/apps/keeper.conf"
+            ],
             "overlay": [],
-            "extraOverlay": []
+            "extraOverlay": [
+              "firmware/apps/keeper.overlay"
+            ]
           },
           "runnerConfigs": {
             "default": {
@@ -24,49 +28,21 @@
             }
           }
         },
-        "build/frdm_rw612": {
+        "build/keeper/frdm_rw612": {
           "board": "frdm_rw612",
           "relBoardSubDir": "nxp/frdm_rw612",
-          "name": "build/frdm_rw612",
+          "name": "build/keeper/frdm_rw612",
           "westBuildArgs": "",
           "westBuildCMakeArgs": " -DCONFIG_DEBUG_OPTIMIZATIONS=y -DCONFIG_DEBUG_THREAD_INFO=y ",
           "confFiles": {
             "config": [],
-            "extraConfig": [],
+            "extraConfig": [
+              "firmware/apps/keeper.conf"
+            ],
             "overlay": [],
-            "extraOverlay": []
-          },
-          "runnerConfigs": {
-            "default": {
-              "runner": "default",
-              "name": "default",
-              "args": ""
-            }
-          }
-        }
-      },
-      "confFiles": {
-        "config": [],
-        "extraConfig": [],
-        "overlay": [],
-        "extraOverlay": []
-      }
-    },
-    "pot": {
-      "rel_path": "firmware/pot",
-      "name": "pot",
-      "buildConfigs": {
-        "build/esp32s3_devkitc": {
-          "board": "esp32s3_devkitc/esp32s3/procpu",
-          "relBoardSubDir": "espressif/esp32s3_devkitc",
-          "name": "build/esp32s3_devkitc",
-          "westBuildArgs": "",
-          "westBuildCMakeArgs": " -DCONFIG_DEBUG_OPTIMIZATIONS=y -DCONFIG_DEBUG_THREAD_INFO=y ",
-          "confFiles": {
-            "config": [],
-            "extraConfig": [],
-            "overlay": [],
-            "extraOverlay": []
+            "extraOverlay": [
+              "firmware/apps/keeper.overlay"
+            ]
           },
           "runnerConfigs": {
             "default": {
@@ -76,17 +52,45 @@
             }
           }
         },
-        "build/frdm_rw612": {
-          "board": "frdm_rw612",
-          "relBoardSubDir": "nxp/frdm_rw612",
-          "name": "build/frdm_rw612",
+        "build/pot/esp32s3_devkitc": {
+          "board": "esp32s3_devkitc/esp32s3/procpu",
+          "relBoardSubDir": "espressif/esp32s3_devkitc",
+          "name": "build/pot/esp32s3_devkitc",
           "westBuildArgs": "",
           "westBuildCMakeArgs": " -DCONFIG_DEBUG_OPTIMIZATIONS=y -DCONFIG_DEBUG_THREAD_INFO=y ",
           "confFiles": {
             "config": [],
-            "extraConfig": [],
+            "extraConfig": [
+              "firmware/apps/pot.conf"
+            ],
             "overlay": [],
-            "extraOverlay": []
+            "extraOverlay": [
+              "firmware/apps/pot.overlay"
+            ]
+          },
+          "runnerConfigs": {
+            "default": {
+              "runner": "default",
+              "name": "default",
+              "args": ""
+            }
+          }
+        },
+        "build/pot/frdm_rw612": {
+          "board": "frdm_rw612",
+          "relBoardSubDir": "nxp/frdm_rw612",
+          "name": "build/pot/frdm_rw612",
+          "westBuildArgs": "",
+          "westBuildCMakeArgs": " -DCONFIG_DEBUG_OPTIMIZATIONS=y -DCONFIG_DEBUG_THREAD_INFO=y ",
+          "confFiles": {
+            "config": [],
+            "extraConfig": [
+              "firmware/apps/pot.conf"
+            ],
+            "overlay": [],
+            "extraOverlay": [
+              "firmware/apps/pot.overlay"
+            ]
           },
           "runnerConfigs": {
             "default": {

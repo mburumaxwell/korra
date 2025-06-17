@@ -1,0 +1,14 @@
+mainmenu "Korra Firmware application"
+
+choice
+    prompt "Kind of application"
+
+config APP_KIND_POT
+    bool "pot"
+
+config APP_KIND_KEEPER
+    bool "keeper"
+
+endchoice
+
+source "Kconfig.zephyr"
