@@ -58,12 +58,7 @@ async function generate({ dev, dir }) {
 
 async function run(dev) {
   const firmwareDir = join(process.cwd(), 'firmware'); // resolve firmware directory from project root
-  const entries = await readdir(firmwareDir, { withFileTypes: true });
-  const folders = entries.filter(entry => entry.isDirectory()).map(entry => join(firmwareDir, entry.name));
-
-  for(const dir of folders) {
-    generate({ dev, dir, });
-  }
+  generate({ dev, dir: firmwareDir, });
 }
 
 await run(process.argv.includes('--dev'));
