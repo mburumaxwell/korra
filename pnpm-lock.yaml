@@ -18,9 +18,7 @@ importers:
         specifier: 7.7.2
         version: 7.7.2
 
-  firmware/keeper: {}
-
-  firmware/pot: {}
+  firmware: {}
 
 packages:
 
