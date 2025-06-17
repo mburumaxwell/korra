@@ -49,7 +49,7 @@ jobs:
           app-path: ${{ github.workspace }}/west-manifest
           toolchains: arm-zephyr-eabi:xtensa-espressif_esp32s3_zephyr-elf
 
-      - name: Build (ESP32-S3-DevKitC-1, keeper)
+      - name: Build (ESP32S3-DevKitC-1, keeper)
         run: >
           west build firmware
           --board esp32s3_devkitc/esp32s3/procpu
@@ -67,7 +67,7 @@ jobs:
           -DEXTRA_DTC_OVERLAY_FILE='apps/keeper.overlay'
           -DEXTRA_CONF_FILE='apps/keeper.conf'
 
-      - name: Build (ESP32-S3-DevKitC-1, pot)
+      - name: Build (ESP32S3-DevKitC-1, pot)
         run: >
           west build firmware
           --board esp32s3_devkitc/esp32s3/procpu
