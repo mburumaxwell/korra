@@ -122,7 +122,6 @@ const build = new Command('build')
           `--extra-conf apps/${app}.conf`,
           (local && '--extra-conf local.conf'),
         ].filter(Boolean).join(' ');
-        console.log(`${prefix} 🏗️ Running: ${cmd}`);
 
         const proc = spawn(cmd, { shell: true });
         childProcs.push(proc);
@@ -138,6 +137,7 @@ const build = new Command('build')
 
           if (isCI) {
             console.log(`::group::Build ${prefix}`);
+            console.log(`${prefix} 🏗️ Running: ${cmd}`);
             // Buffer mode for CI
             let stdout = '';
             let stderr = '';
@@ -153,6 +153,7 @@ const build = new Command('build')
             });
           } else {
             // Local: stream with prefix
+            console.log(`${prefix} 🏗️ Running: ${cmd}`);
             const rlOut = readline.createInterface({ input: proc.stdout });
             rlOut.on('line', line => console.log(`${prefix} ${line}`));
 
