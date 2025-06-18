@@ -11,6 +11,7 @@
         "espressif",
         "frdm_rw612",
         "korra",
+        "printk",
         "procpu"
     ]
 }

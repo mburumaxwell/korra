@@ -3,13 +3,18 @@ mainmenu "Korra Firmware application"
 choice
     prompt "Kind of application"
 
-config APP_KIND_POT
-    bool "pot"
-
 config APP_KIND_KEEPER
     bool "keeper"
 
+config APP_KIND_POT
+    bool "pot"
+
 endchoice
+
+config APP_NAME
+    string
+    default "Keeper" if APP_KIND_KEEPER
+    default "Pot" if APP_KIND_POT
 
 config WIFI_SCAN_NETWORKS
     bool "Whether to scan WiFi networks"

@@ -9,7 +9,8 @@ LOG_MODULE_REGISTER(main);
 
 int main(void)
 {
-	LOG_INF("App version: %s", APP_VERSION_STRING);
+	// Log application version matching Kernel: *** Booting Zephyr OS build v4.1.0 ***
+	printk("*** Booting Korra %s build v%s ***\n", CONFIG_APP_NAME, APP_VERSION_STRING);
 
 	// This delay is to allow some drivers/modules to initialize (e.g. WPA_SUPPLICANT)
 	// Basically waiting until we see this log ---> <inf> wifi_supplicant: wpa_supplicant initialized
