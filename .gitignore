@@ -4,5 +4,6 @@ external
 **/build*/
 .vscode/compile_commands.json
 **/local.conf
+binaries
 
 node_modules/

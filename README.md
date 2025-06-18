@@ -14,8 +14,8 @@
 After installing zephyr you may need to install relevant binaries for connectivity to work:
 
 ```bash
-west blobs fetch hal_espressif
-west blobs fetch hal_nxp
+cd firmware
+pnpm blobs:fetch
 ```
 
 ## Versioning
