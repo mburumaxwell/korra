@@ -4,6 +4,10 @@
 
 #include <app_version.h>
 
+#if CONFIG_BOARD_HAS_ETHERNET
+#include "korra_ethernet.h"
+#endif // CONFIG_BOARD_HAS_ETHERNET
+
 #if CONFIG_WIFI
 #include "korra_wifi.h"
 #endif // CONFIG_WIFI
@@ -15,6 +19,10 @@ K_SEM_DEFINE(network_connected, 0, 1);
 
 int main(void)
 {
+#if CONFIG_BOARD_HAS_ETHERNET
+	korra_ethernet_init();
+#endif // CONFIG_BOARD_HAS_ETHERNET
+
 #if CONFIG_WIFI
 	korra_wifi_init();
 

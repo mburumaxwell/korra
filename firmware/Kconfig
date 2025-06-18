@@ -16,6 +16,17 @@ config APP_NAME
     default "Keeper" if APP_KIND_KEEPER
     default "Pot" if APP_KIND_POT
 
+config BOARD_HAS_ETHERNET
+    bool "Whether to board has Ethernet"
+    default n
+
+# config BOARD_HAS_WIFI
+#     bool "Whether to board has WiFi"
+#     default n
+#     select WIFI
+#     select NET_CONNECTION_MANAGER_CONNECTIVITY_WIFI_MGMT
+
+if WIFI
 config WIFI_SCAN_NETWORKS
     bool "Whether to scan WiFi networks"
     default n
@@ -50,5 +61,7 @@ config WIFI_ENTERPRISE_IDENTITY
 config WIFI_ENTERPRISE_PASSWORD
     string "Enterprise Password"
     depends on WIFI_ENTERPRISE
+
+endif # WIFI
 
 source "Kconfig.zephyr"
