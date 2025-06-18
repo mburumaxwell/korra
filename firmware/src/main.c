@@ -24,7 +24,7 @@ int main(void)
 	k_sleep(K_SECONDS(1));
 #endif // CONFIG_WIFI_NM_WPA_SUPPLICANT
 
-    korra_wifi_connect();
+	korra_wifi_connect();
 #endif // CONFIG_WIFI
 
 	k_sem_take(&network_connected, K_FOREVER);
@@ -36,13 +36,16 @@ int main(void)
 
 static void l4_event_handler(struct net_mgmt_event_callback *cb, uint32_t mgmt_event, struct net_if *iface)
 {
-    if (mgmt_event == NET_EVENT_L4_CONNECTED) {
-        k_sem_give(&network_connected);
-        LOG_INF("Network connectivity gained!");
-    } else if (mgmt_event == NET_EVENT_L4_DISCONNECTED) {
-        LOG_INF("Network connectivity lost!");
-        k_sem_take(&network_connected, K_FOREVER);
-    }
+	if (mgmt_event == NET_EVENT_L4_CONNECTED)
+	{
+		k_sem_give(&network_connected);
+		LOG_INF("Network connectivity gained!");
+	}
+	else if (mgmt_event == NET_EVENT_L4_DISCONNECTED)
+	{
+		LOG_INF("Network connectivity lost!");
+		k_sem_take(&network_connected, K_FOREVER);
+	}
 }
 
 static struct net_mgmt_event_callback l4_cb;
