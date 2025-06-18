@@ -50,69 +50,35 @@ jobs:
           app-path: ${{ github.workspace }}/west-manifest
           toolchains: arm-zephyr-eabi:xtensa-espressif_esp32s3_zephyr-elf
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Download deps
+        run: pnpm install
+        working-directory: '${{ github.workspace }}/firmware'
+
       - name: Fetch Blobs
-        run: |
-          west blobs fetch --auto-accept hal_espressif && \
-          west blobs fetch --auto-accept hal_nxp
+        run: pnpm blobs:fetch
+        working-directory: '${{ github.workspace }}/firmware'
 
-      - name: Build (ESP32S3-DevKitC-1, keeper)
-        run: >
-          west build firmware
-          --board esp32s3_devkitc/esp32s3/procpu
-          --pristine
-          --build-dir firmware/build/keeper/esp32s3_devkitc
-          -DEXTRA_DTC_OVERLAY_FILE='apps/keeper.overlay'
-          -DEXTRA_CONF_FILE='apps/keeper.conf'
-
-      - name: Build (FRDM-RW612, keeper)
-        run: >
-          west build firmware
-          --board esp32s3_devkitc/esp32s3/procpu
-          --pristine
-          --build-dir firmware/build/keeper/frdm_rw612
-          -DEXTRA_DTC_OVERLAY_FILE='apps/keeper.overlay'
-          -DEXTRA_CONF_FILE='apps/keeper.conf'
-
-      - name: Build (ESP32S3-DevKitC-1, pot)
-        run: >
-          west build firmware
-          --board esp32s3_devkitc/esp32s3/procpu
-          --pristine
-          --build-dir firmware/build/pot/esp32s3_devkitc
-          -DEXTRA_DTC_OVERLAY_FILE='apps/pot.overlay'
-          -DEXTRA_CONF_FILE='apps/pot.conf'
-
-      - name: Build (FRDM-RW612, pot)
-        run: >
-          west build firmware
-          --board esp32s3_devkitc/esp32s3/procpu
-          --pristine
-          --build-dir firmware/build/pot/frdm_rw612
-          -DEXTRA_DTC_OVERLAY_FILE='apps/pot.overlay'
-          -DEXTRA_CONF_FILE='apps/pot.conf'
+      - name: Build
+        run: pnpm build
+        working-directory: '${{ github.workspace }}/firmware'
 
       - name: Collect output
-        run: |
-          mkdir -p binaries && \
-
-          cp firmware/build/keeper/esp32s3_devkitc/zephyr/zephyr.bin binaries/keeper-esp32s3_devkitc.bin && \
-          cp firmware/build/keeper/esp32s3_devkitc/zephyr/zephyr.elf binaries/keeper-esp32s3_devkitc.elf && \
-
-          cp firmware/build/keeper/frdm_rw612/zephyr/zephyr.bin binaries/keeper-frdm_rw612.bin && \
-          cp firmware/build/keeper/frdm_rw612/zephyr/zephyr.elf binaries/keeper-frdm_rw612.elf && \
-
-          cp firmware/build/pot/esp32s3_devkitc/zephyr/zephyr.bin binaries/pot-esp32s3_devkitc.bin && \
-          cp firmware/build/pot/esp32s3_devkitc/zephyr/zephyr.elf binaries/pot-esp32s3_devkitc.elf && \
-
-          cp firmware/build/pot/frdm_rw612/zephyr/zephyr.bin binaries/pot-frdm_rw612.bin && \
-          cp firmware/build/pot/frdm_rw612/zephyr/zephyr.elf binaries/pot-frdm_rw612.elf && \
-
-          echo 'Done'
+        run: pnpm collect
+        working-directory: '${{ github.workspace }}/firmware'
 
       - name: Upload Artifact (binaries)
         uses: actions/upload-artifact@v4
         with:
-          path: binaries
+          path: ${{ github.workspace }}/firmware/binaries
           name: binaries
           retention-days: 1
 
@@ -120,13 +86,13 @@ jobs:
         if: ${{ startsWith(github.ref, 'refs/tags/') && github.event.repository.public }}
         uses: actions/attest-build-provenance@v2
         with:
-          subject-path: ${{ github.workspace }}/binaries/*.bin
+          subject-path: ${{ github.workspace }}/firmware/binaries/*.bin
 
       - name: Upload Release Artifact
         if: ${{ startsWith(github.ref, 'refs/tags/') }}
         uses: ncipollo/release-action@v1
         with:
-          artifacts: '${{ github.workspace }}/binaries/*.bin'
+          artifacts: '${{ github.workspace }}/firmware/binaries/*.bin'
           token: ${{ secrets.GITHUB_TOKEN }}
           allowUpdates: true
           omitBodyDuringUpdate: true

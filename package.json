@@ -4,14 +4,12 @@
   "private": true,
   "scripts": {
     "changeset": "changeset",
-    "packages:version": "changeset version && pnpm zephyr:version",
-    "packages:publish": "changeset publish",
-    "zephyr:version": "node scripts/update-firmware-versions.mjs"
+    "packages:version": "changeset version && turbo run packages:version",
+    "packages:publish": "changeset publish"
   },
   "devDependencies": {
     "@changesets/cli": "2.29.4",
-    "@types/semver": "7.7.0",
-    "semver": "7.7.2"
+    "rimraf": "6.0.1"
   },
   "engines": {
     "node": ">=22"
