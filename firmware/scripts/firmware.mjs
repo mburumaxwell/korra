@@ -113,14 +113,21 @@ const build = new Command('build')
         const id = `[${app}@${board}]`;
         const prefix = !isCI ? color(id) : id;
 
+        // The --pristine/-p option takes: auto|always|never
+        // Passing --pristine/-p is equivalent to passing 'always' value.
+        // Docs: https://docs.zephyrproject.org/latest/develop/west/build-flash-debug.html#pristine-builds
+        // If we include any --extra* option, we force pristine but mostly in dev, we need to save time
+        // The --extra* options are only passed if we have pristine which means by choice
+        // Scenarios where passing --pristine makes sense is in CI where the extra files are not already known
+        // or in dev when we add a new file or feel there is a need for it
         const cmd = [
           'west build',
           `--board ${board}`,
           `--build-dir ${buildDir}`,
           (pristine && '--pristine'),
-          `--extra-dtc-overlay apps/${app}.overlay`,
-          `--extra-conf apps/${app}.conf`,
-          (local && '--extra-conf local.conf'),
+          (pristine && `--extra-dtc-overlay apps/${app}.overlay`),
+          (pristine && `--extra-conf apps/${app}.conf`),
+          (pristine && local && '--extra-conf local.conf'),
         ].filter(Boolean).join(' ');
 
         const proc = spawn(cmd, { shell: true });

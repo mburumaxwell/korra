@@ -75,7 +75,7 @@ jobs:
         working-directory: '${{ github.workspace }}/firmware'
 
       - name: Build
-        run: pnpm build
+        run: pnpm build --pristine
         working-directory: '${{ github.workspace }}/firmware'
 
       - name: Collect output
