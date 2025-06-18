@@ -76,7 +76,7 @@ const build = new Command('build')
   .description('Build firmware.')
   .addOption(new Option('--app [app...]', 'The app kind(s).').choices(KNOWN_APPS).default(KNOWN_APPS))
   .addOption(new Option('--board [board...]', 'Board(s) to build for with optional board revision.').choices(KNOWN_BOARDS).default(KNOWN_BOARDS))
-  .option('--pristine', 'Whether to build pristine (from scratch).')
+  .option('-p, --pristine', 'Whether to build pristine (from scratch).')
   .action(async (...args) => {
     const [options/*, command*/] = args;
     const { app: apps, board: boards, pristine } = options;
