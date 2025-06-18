@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 import chalk from 'chalk';
-import { Argument, Command, Option } from 'commander';
-import { execSync, spawn, spawnSync } from 'node:child_process';
+import { Command, Option } from 'commander';
+import { execSync, spawn } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { mkdir, copyFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -76,7 +76,6 @@ const build = new Command('build')
   .description('Build firmware.')
   .addOption(new Option('--app [app...]', 'The app kind(s).').choices(KNOWN_APPS).default(KNOWN_APPS))
   .addOption(new Option('--board [board...]', 'Board(s) to build for with optional board revision.').choices(KNOWN_BOARDS).default(KNOWN_BOARDS))
-  // .addOption(new Option('--concurrency [concurrency]', 'Concurrency').default(4))
   .option('--pristine', 'Whether to build pristine (from scratch).')
   .action(async (...args) => {
     const [options/*, command*/] = args;
