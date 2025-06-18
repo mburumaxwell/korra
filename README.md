@@ -7,6 +7,17 @@
 <!-- TODO: add description of the project -->
 > An explanation will soon be here for the project. Please bear with me.
 
+## Installation
+
+<!-- TODO: add instructions for installing zephyr -->
+
+After installing zephyr you may need to install relevant binaries for connectivity to work:
+
+```bash
+west blobs fetch hal_espressif
+west blobs fetch hal_nxp
+```
+
 ## Versioning
 
 Versioning for zephyr applications is [detailed in their docs](https://docs.zephyrproject.org/latest/build/version/index.html). This repository uses [changesets](https://github.com/changesets/changesets) to manage versions and changelogs and mostly as private because the tool is fairly mature.
@@ -22,3 +33,7 @@ Ensure the Azure CLI tools are installed and that you are logged in. Then deploy
 ```bash
 az deployment group create --resource-group KORRA --template-file deploy/main.bicep --subscription KORRA --confirm-with-what-if
 ```
+
+## Troubleshooting
+
+Should you get stuck you may consult the [troubleshooting guide](./TROUBLESHOOTING.md).

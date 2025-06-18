@@ -49,6 +49,11 @@ jobs:
           app-path: ${{ github.workspace }}/west-manifest
           toolchains: arm-zephyr-eabi:xtensa-espressif_esp32s3_zephyr-elf
 
+      - name: Fetch Blobs
+        run: |
+          west blobs fetch --auto-accept hal_espressif && \
+          west blobs fetch --auto-accept hal_nxp
+
       - name: Build (ESP32S3-DevKitC-1, keeper)
         run: >
           west build firmware
