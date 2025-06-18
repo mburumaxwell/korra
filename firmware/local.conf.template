@@ -2,7 +2,7 @@
 # local.conf.template
 #
 # This file defines default configuration values for local development.
-# 
+#
 # ➤ How to use:
 #   1. Copy this file to `local.conf` in the same directory.
 #   2. Edit `local.conf` to override settings for your local machine,

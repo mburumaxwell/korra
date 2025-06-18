@@ -11,4 +11,39 @@ config APP_KIND_KEEPER
 
 endchoice
 
+config WIFI_SCAN_NETWORKS
+    bool "Whether to scan WiFi networks"
+    default n
+
+# TODO: find a way to not have WIFI credentials hard coded otherwise what is the point og OTAs
+
+config WIFI_SSID
+    string "Wi-Fi SSID"
+    help
+      "The SSID of the Wi-Fi network to connect to."
+
+config WIFI_PSK
+    string "Wi-Fi PSK"
+    depends on !WIFI_ENTERPRISE
+    help
+      "Pre-shared key (a.k.a. Passphrase) for Personal networks."
+
+config WIFI_ENTERPRISE
+    bool "Enable WPA Enterprise Authentication"
+    default n
+    select WIFI_NM_WPA_SUPPLICANT
+    select WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE
+
+config WIFI_ENTERPRISE_ANON_ID
+    string "Enterprise Identity (anonymous)"
+    depends on WIFI_ENTERPRISE
+
+config WIFI_ENTERPRISE_IDENTITY
+    string "Enterprise Identity (Username)"
+    depends on WIFI_ENTERPRISE
+
+config WIFI_ENTERPRISE_PASSWORD
+    string "Enterprise Password"
+    depends on WIFI_ENTERPRISE
+
 source "Kconfig.zephyr"

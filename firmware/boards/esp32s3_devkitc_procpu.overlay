@@ -38,3 +38,7 @@ i2s_led: &i2s0 {
 		};
 	};
 };
+
+&psram0 {
+  size = <DT_SIZE_M(8)>;
+};
