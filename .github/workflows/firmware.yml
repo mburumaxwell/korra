@@ -61,6 +61,15 @@ jobs:
         run: pnpm install
         working-directory: '${{ github.workspace }}/firmware'
 
+      - name: Restore blobs cache
+        id: cache-blobs-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ github.workspace }}/external/modules/hal/*/zephyr/blobs
+          key: blobs-${{ hashFiles('west-manifest/west.yml') }}
+          restore-keys: |
+            blobs-
+
       - name: Fetch Blobs
         run: pnpm blobs:fetch
         working-directory: '${{ github.workspace }}/firmware'
@@ -99,3 +108,10 @@ jobs:
           tag: ${{ github.ref_name }}
 
       # a web endpoint can be triggered at this point to push to devices
+
+      - name: Save blobs cache
+        if: always() && steps.cache-blobs-restore.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ github.workspace }}/external/modules/hal/*/zephyr/blobs
+          key: ${{ steps.cache-blobs-restore.outputs.cache-primary-key }}
