@@ -247,7 +247,7 @@ static void wifi_scan_event_handler(struct net_mgmt_event_callback *cb, uint32_t
         ssid_print[sizeof(ssid_print) - 1] = '\0';
 
         if (entry->mac_length)
-            net_sprint_ll_addr_buf(entry->mac, WIFI_MAC_ADDR_LEN, mac_string_buf, sizeof(mac_string_buf));
+            snprintf(mac_string_buf, sizeof(mac_string_buf), FMT_LL_ADDR_6, PRINT_LL_ADDR_6(entry->mac));
 
         printk("%-4d | %-32s | %-4u (%-6s) | %-4d | %-20s | %-17s | %-8s\n",
                scan_result,
