@@ -1,4 +1,6 @@
 #include <zephyr/logging/log.h>
+LOG_MODULE_REGISTER(main, LOG_LEVEL_DBG);
+
 #include <zephyr/kernel.h>
 #include <zephyr/net/conn_mgr_connectivity.h>
 
@@ -11,9 +13,6 @@
 #if CONFIG_WIFI
 #include "korra_wifi.h"
 #endif // CONFIG_WIFI
-
-#define LOG_LEVEL LOG_LEVEL_DBG
-LOG_MODULE_REGISTER(main);
 
 K_SEM_DEFINE(network_connected, 0, 1);
 

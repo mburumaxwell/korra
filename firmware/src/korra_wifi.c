@@ -1,14 +1,13 @@
 #if CONFIG_WIFI
-#include <errno.h>
 #include <zephyr/logging/log.h>
+LOG_MODULE_REGISTER(korra_wifi, LOG_LEVEL_DBG);
+
+#include <errno.h>
 #include <zephyr/kernel.h>
 #include <zephyr/net/wifi_mgmt.h>
 
 #include "korra_utils.h"
 #include "korra_wifi.h"
-
-#define LOG_LEVEL LOG_LEVEL_DBG
-LOG_MODULE_REGISTER(korra_wifi);
 
 static struct net_mgmt_event_callback wifi_cb;
 static struct k_work_delayable wifi_work;

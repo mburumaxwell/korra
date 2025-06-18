@@ -1,17 +1,8 @@
-// /*
-//  * Copyright (c) 2017 Linaro Limited
-//  * Copyright (c) 2018 Intel Corporation
-//  * Copyright (c) 2024 TOKITA Hiroshi
-//  *
-//  * SPDX-License-Identifier: Apache-2.0
-//  */
+// #include <zephyr/logging/log.h>
+// LOG_MODULE_REGISTER(main, LOG_LEVEL_DBG);
 
 // #include <errno.h>
 // #include <string.h>
-
-// #define LOG_LEVEL 4
-// #include <zephyr/logging/log.h>
-// LOG_MODULE_REGISTER(main);
 
 // #include <zephyr/kernel.h>
 // #include <zephyr/device.h>

@@ -1,14 +1,13 @@
 #ifdef CONFIG_BOARD_HAS_ETHERNET
-#include <errno.h>
 #include <zephyr/logging/log.h>
+LOG_MODULE_REGISTER(korra_ethernet, LOG_LEVEL_DBG);
+
+#include <errno.h>
 #include <zephyr/kernel.h>
 #include <zephyr/net/ethernet_mgmt.h>
 
 #include "korra_utils.h"
 #include "korra_ethernet.h"
-
-#define LOG_LEVEL LOG_LEVEL_DBG
-LOG_MODULE_REGISTER(korra_ethernet);
 
 static struct net_mgmt_event_callback ethernet_cb;
 
