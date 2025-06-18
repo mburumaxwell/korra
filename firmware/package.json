@@ -7,20 +7,21 @@
     "blobs:clean": "west blobs clean",
     "blobs:fetch": "west blobs fetch --auto-accept hal_espressif && west blobs fetch --auto-accept hal_nxp",
 
-    "build:keeper:esp32s3_devkitc": "node scripts/firmware.mjs build keeper esp32s3_devkitc/esp32s3/procpu",
-    "build:keeper:frdm_rw612": "node scripts/firmware.mjs build keeper frdm_rw612",
-    "build:keeper": "pnpm build:keeper:esp32s3_devkitc && pnpm build:keeper:frdm_rw612",
-    "build:pot:esp32s3_devkitc": "node scripts/firmware.mjs build pot esp32s3_devkitc/esp32s3/procpu",
-    "build:pot:frdm_rw612": "node scripts/firmware.mjs build pot frdm_rw612",
-    "build:pot": "pnpm build:pot:esp32s3_devkitc && pnpm build:pot:frdm_rw612",
-    "build": "pnpm build:keeper && pnpm build:pot",
+    "build": "node scripts/firmware.mjs build",
+    "build:keeper:esp32s3_devkitc": "pnpm build --app keeper --board esp32s3_devkitc/esp32s3/procpu",
+    "build:keeper:frdm_rw612": "pnpm build --app keeper --board frdm_rw612",
+    "build:keeper": "pnpm build --app keeper",
+    "build:pot:esp32s3_devkitc": "pnpm build --app pot --board esp32s3_devkitc/esp32s3/procpu",
+    "build:pot:frdm_rw612": "pnpm build --app pot --board frdm_rw612",
+    "build:pot": "pnpm build --app pot",
 
     "collect": "node scripts/firmware.mjs collect",
 
-    "flash:keeper:esp32s3_devkitc": "node scripts/firmware.mjs flash keeper esp32s3_devkitc/esp32s3/procpu",
-    "flash:keeper:frdm_rw612": "node scripts/firmware.mjs flash keeper frdm_rw612",
-    "flash:pot:esp32s3_devkitc": "node scripts/firmware.mjs flash pot esp32s3_devkitc/esp32s3/procpu",
-    "flash:pot:frdm_rw612": "node scripts/firmware.mjs flash pot frdm_rw612",
+    "flash": "node scripts/firmware.mjs flash",
+    "flash:keeper:esp32s3_devkitc": "pnpm flash --app keeper --board esp32s3_devkitc/esp32s3/procpu",
+    "flash:keeper:frdm_rw612": "pnpm flash --app keeper --board frdm_rw612",
+    "flash:pot:esp32s3_devkitc": "pnpm flash --app pot --board esp32s3_devkitc/esp32s3/procpu",
+    "flash:pot:frdm_rw612": "pnpm flash --app pot --board frdm_rw612",
 
     "clean:keeper": "rimraf build/keeper",
     "clean:pot": "rimraf build/pot",
@@ -30,7 +31,9 @@
   },
   "devDependencies": {
     "@types/semver": "7.7.0",
+    "chalk": "5.4.1",
     "commander": "14.0.0",
+    "p-limit": "6.2.0",
     "semver": "7.7.2"
   }
 }

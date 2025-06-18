@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 
-import { Argument, Command } from 'commander';
+import chalk from 'chalk';
+import { Argument, Command, Option } from 'commander';
+import { execSync, spawn, spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { mkdir, copyFile, rm, writeFile } from 'node:fs/promises';
-import { execSync, spawn, spawnSync } from 'node:child_process';
 import { join } from 'node:path';
 import process from 'node:process';
+import readline from 'node:readline';
 import * as semver from 'semver';
 
 import packageJson from '../../package.json' with { type: "json" };
@@ -18,8 +20,6 @@ const KNOWN_BOARDS = [
 ];
 
 const makeBuildDir = ({ app, board }) => `build/${app}/${board}`;
-const appArgument = new Argument('<app>', 'The app kind.').choices(KNOWN_APPS);
-const boardArgument = new Argument('<board>', 'Board to build for with optional board revision.').choices(KNOWN_BOARDS);
 
 const version = new Command('version')
   .description('Generate VERSION file for zephyr.')
@@ -74,49 +74,125 @@ const version = new Command('version')
 
 const build = new Command('build')
   .description('Build firmware.')
-  .addArgument(appArgument)
-  .addArgument(boardArgument)
+  .addOption(new Option('--app [app...]', 'The app kind(s).').choices(KNOWN_APPS).default(KNOWN_APPS))
+  .addOption(new Option('--board [board...]', 'Board(s) to build for with optional board revision.').choices(KNOWN_BOARDS).default(KNOWN_BOARDS))
+  // .addOption(new Option('--concurrency [concurrency]', 'Concurrency').default(4))
   .option('--pristine', 'Whether to build pristine (from scratch).')
   .action(async (...args) => {
-    const [app, board, options/*, command*/] = args;
-    const buildDir = makeBuildDir({ app, board });
-    if (isCI) console.log(`::group::Building app: ${app} for: ${board}`);
-    console.log(`🚀 Building app: ${app}, targeting: ${board}`);
-    const { pristine } = options;
+    const [options/*, command*/] = args;
+    const { app: apps, board: boards, pristine } = options;
 
     // if we are not in CI and the local file exists, mark it for inclusion
     const local = !isCI && existsSync('local.conf');
+    const colors = [
+      chalk.cyan,
+      chalk.magenta,
+      chalk.yellow,
+      chalk.green,
+      chalk.blue,
+      chalk.white,
+      chalk.gray,
+    ];
+    let colorIndex = 0;
 
-    const cmd = [
-      'west build',
-      `--board ${board}`,
-      `--build-dir ${buildDir}`,
-      (pristine && '--pristine'),
-      `--extra-dtc-overlay apps/${app}.overlay`,
-      `--extra-conf apps/${app}.conf`,
-      (local && '--extra-conf local.conf'),
-    ].filter(Boolean).join(' ');
-    console.log(`🏗️ Running: ${cmd}`);
+    const procs = [];
+    const childProcs = [];
+    const results = []; // NEW: keep success/failure per task
+    const startTime = Date.now(); // NEW: track elapsed time
 
-    const result = spawnSync(cmd, { shell: true, stdio: 'inherit' });
-    console.log(`✅ Build completed for app: ${app}, targeting: ${board}`);
+    ['SIGINT', 'SIGTERM'].forEach(signal => {
+      process.on(signal, () => {
+        childProcs.forEach((cp) => cp.kill('SIGINT'));
+        process.exit(1);
+      });
+    });
 
-    if (isCI) console.log(`::endgroup::`);
+    for (const app of apps) {
+      for (const board of boards) {
+        const buildDir = makeBuildDir({ app, board });
+        const color = colors[(colorIndex++) % colors.length];
+        const id = `[${app}@${board}]`;
+        const prefix = !isCI ? color(id) : id;
 
-    if (result.status !== 0) {
-      process.exit(result.status);
+        const cmd = [
+          'west build',
+          `--board ${board}`,
+          `--build-dir ${buildDir}`,
+          (pristine && '--pristine'),
+          `--extra-dtc-overlay apps/${app}.overlay`,
+          `--extra-conf apps/${app}.conf`,
+          (local && '--extra-conf local.conf'),
+        ].filter(Boolean).join(' ');
+        console.log(`${prefix} 🏗️ Running: ${cmd}`);
+
+        const proc = spawn(cmd, { shell: true });
+        childProcs.push(proc);
+        procs.push(new Promise((resolve) => {
+          const procStart = Date.now();
+
+          const finish = (code) => {
+            const success = code === 0;
+            const elapsed = ((Date.now() - procStart) / 1000).toFixed(1);
+            results.push({ id, success, duration: elapsed });
+            resolve();
+          };
+
+          if (isCI) {
+            console.log(`::group::Build ${prefix}`);
+            // Buffer mode for CI
+            let stdout = '';
+            let stderr = '';
+
+            proc.stdout.on('data', data => { stdout += data.toString(); });
+            proc.stderr.on('data', data => { stderr += data.toString(); });
+
+            proc.on('close', (code) => {
+              console.log(stdout.trim());
+              console.error(stderr.trim());
+              console.log(`::endgroup::`);
+              finish(code);
+            });
+          } else {
+            // Local: stream with prefix
+            const rlOut = readline.createInterface({ input: proc.stdout });
+            rlOut.on('line', line => console.log(`${prefix} ${line}`));
+
+            const rlErr = readline.createInterface({ input: proc.stderr });
+            rlErr.on('line', line => console.error(`${prefix} ${line}`));
+
+            proc.on('close', (code) => {
+              finish(code);
+            });
+          }
+        }));
+      }
+    }
+
+    await Promise.all(procs);
+
+    const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+    const succeeded = results.filter(r => r.success);
+    const failed = results.filter(r => !r.success);
+    console.log(`\n📊 Build Summary (${duration}s):`);
+    succeeded.forEach(r => console.log(`✅ ${r.id} (${r.duration}s)`));
+    failed.forEach(r => console.log(`❌ ${r.id} (${r.duration}s)`));
+
+    if (failed.length > 0) {
+      process.exit(1);
+    } else {
+      console.log(`\n🚀 All builds succeeded.`);
     }
   });
 
 const flash = new Command('flash')
   .description('Flash firmware.')
-  .addArgument(appArgument)
-  .addArgument(boardArgument)
+  .addOption(new Option('--app <app>', 'The app kind(s).').choices(KNOWN_APPS).makeOptionMandatory())
+  .addOption(new Option('--board <board>', 'Board(s) to build for with optional board revision.').choices(KNOWN_BOARDS).makeOptionMandatory())
   .action(async (...args) => {
-    const [app, board, options/*, command*/] = args;
+    const [options/*, command*/] = args;
+    const { app, board } = options;
     const buildDir = makeBuildDir({ app, board });
     console.log(`🚀 Flashing app ${app} to ${board}`);
-    const { } = options;
 
     const cmd = [
       'west flash',
@@ -135,13 +211,18 @@ const flash = new Command('flash')
 
 const collect = new Command('collect')
   .description('Collect firmware binaries.')
-  .action(async () => {
+  .addOption(new Option('--app [app...]', 'The app kind(s).').choices(KNOWN_APPS).default(KNOWN_APPS))
+  .addOption(new Option('--board [board...]', 'Board(s) to collect for with optional board revision.').choices(KNOWN_BOARDS).default(KNOWN_BOARDS))
+  .action(async (...args) => {
+    const [options/*, command*/] = args;
+    const { app: apps, board: boards } = options;
     console.log(`📦 Collecting build artifacts ...`);
     const outputDir = 'binaries';
+    if (existsSync(outputDir)) await rm(outputDir, { recursive: true });
     await mkdir(outputDir, { recursive: true });
 
-    for (const app of KNOWN_APPS) {
-      for (const board of KNOWN_BOARDS) {
+    for (const app of apps) {
+      for (const board of boards) {
         const buildDir = `build/${app}/${board}/zephyr`;
         const binSrc = join(buildDir, 'zephyr.bin');
         const elfSrc = join(buildDir, 'zephyr.elf');
