@@ -18,6 +18,10 @@ const KNOWN_BOARDS = [
   'esp32s3_devkitc/esp32s3/procpu',
   'frdm_rw612',
 ];
+const KNOWN_BLOBS_MODULES = [
+  'hal_espressif',
+  'hal_nxp',
+];
 
 const makeBuildDir = ({ app, board }) => `build/${app}/${board}`;
 
@@ -247,6 +251,52 @@ const collect = new Command('collect')
     console.log(`✅ Done collecting binaries in ${outputDir}/`);
   });
 
+const blobs = new Command('blobs')
+  .description('Manage blobs')
+  .addCommand(
+    new Command('fetch')
+      .description('Fetch blobs')
+      .addOption(new Option('--module [module...]', 'The blob module.').choices(KNOWN_BLOBS_MODULES).default(KNOWN_BLOBS_MODULES))
+      .addOption(new Option('-a, --auto-accept [module]', 'auto accept license if the fetching needs click-through').default(true))
+      .action(async (...args) => {
+        const [options/*, command*/] = args;
+        const { module: modules, autoAccept } = options;
+
+        for (const module of modules) {
+          const cmd = [
+            'west blobs fetch',
+            module,
+            (autoAccept && '--auto-accept')
+          ].filter(Boolean).join(' ');
+          console.log(`🏗️ Running: ${cmd}`);
+
+          try {
+            execSync(cmd, { stdio: 'inherit' });
+            // console.log(`✅ Blobs fetched`);
+          } catch (error) {
+            console.error(`❌ Blobs fetch failed:`, error.message);
+            process.exit(1);
+          }
+        }
+      })
+  )
+  .addCommand(
+    new Command('clean')
+      .description('Clean blobs')
+      .action(async (...args) => {
+        const cmd = ['west blobs clean'].filter(Boolean).join(' ');
+        console.log(`🏗️ Running: ${cmd}`);
+
+        try {
+          execSync(cmd, { stdio: 'inherit' });
+          console.log(`✅ Blobs cleaned`);
+        } catch (error) {
+          console.error(`❌ Blobs clean failed:`, error.message);
+          process.exit(1);
+        }
+      })
+  )
+
 const root = new Command();
 root.name('korra-firmware').description('CLI too for running firmware tasks for Korra.');
 root.usage();
@@ -255,6 +305,7 @@ root.addCommand(version);
 root.addCommand(build);
 root.addCommand(flash);
 root.addCommand(collect);
+root.addCommand(blobs);
 
 const args = process.argv;
 root.parse(args);

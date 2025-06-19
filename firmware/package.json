@@ -4,8 +4,9 @@
   "private": true,
   "license": "AGPL-3.0-later",
   "scripts": {
-    "blobs:clean": "west blobs clean",
-    "blobs:fetch": "west blobs fetch --auto-accept hal_espressif && west blobs fetch --auto-accept hal_nxp",
+    "blobs": "node scripts/firmware.mjs blobs",
+    "blobs:fetch": "pnpm blobs fetch",
+    "blobs:clean": "pnpm blobs clean",
 
     "build": "node scripts/firmware.mjs build",
     "build:keeper:esp32s3_devkitc": "pnpm build --app keeper --board esp32s3_devkitc/esp32s3/procpu",
