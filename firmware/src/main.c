@@ -34,6 +34,7 @@ int main(void)
 	korra_wifi_connect();
 #endif // CONFIG_WIFI
 
+	LOG_INF("Waiting for internet...");
 	k_sem_take(&network_connected, K_FOREVER);
 	LOG_INF("Internet is ready");
 
@@ -41,7 +42,7 @@ int main(void)
 	return 0;
 }
 
-static void l4_event_handler(struct net_mgmt_event_callback *cb, uint32_t mgmt_event, struct net_if *iface)
+static void network_event_handler(struct net_mgmt_event_callback *cb, uint32_t mgmt_event, struct net_if *iface)
 {
 	if (mgmt_event == NET_EVENT_L4_CONNECTED)
 	{
@@ -53,19 +54,55 @@ static void l4_event_handler(struct net_mgmt_event_callback *cb, uint32_t mgmt_e
 		LOG_INF("Network connectivity lost!");
 		k_sem_take(&network_connected, K_FOREVER);
 	}
+	else
+	{
+		// DHCPv* related events are only here because sometimes we lose network but want to see how the logs go
+		// We would remove this later after we are sure we have things setup correctly for L4 above
+		if (mgmt_event == NET_EVENT_IPV4_ADDR_ADD)
+		{
+			LOG_DBG("IPv4 address added!");
+		}
+		else if (mgmt_event == NET_EVENT_IPV4_ADDR_DEL)
+		{
+			LOG_DBG("IPv4 address removed!");
+		}
+		else if (mgmt_event == NET_EVENT_IPV6_ADDR_ADD)
+		{
+			LOG_DBG("IPv6 address added!");
+		}
+		else if (mgmt_event == NET_EVENT_IPV6_ADDR_DEL)
+		{
+			LOG_DBG("IPv6 address removed!");
+		}
+	}
 }
 
-static struct net_mgmt_event_callback l4_cb;
+static struct net_mgmt_event_callback l4_cb, ipv4_cb, ipv6_cb;
 static int before_main(void)
 {
 	// Log application version matching Kernel: *** Booting Zephyr OS build v4.1.0 ***
 	printk("*** Booting Korra %s build v%s (%s) ***\n", CONFIG_APP_NAME, APP_VERSION_STRING, STRINGIFY(APP_BUILD_VERSION));
 
-	/* Register callbacks for connection manager */
+	// Register callbacks for connection manager
 	net_mgmt_init_event_callback(&l4_cb,
-								 l4_event_handler,
+								 network_event_handler,
 								 NET_EVENT_L4_CONNECTED | NET_EVENT_L4_DISCONNECTED);
 	net_mgmt_add_event_callback(&l4_cb);
+
+	// We are registering for DHCPv* events because sometimes, we lose internet and want to track this in the logs
+	// We would remove this later after we are sure we have things setup correctly for L4 above
+
+	// Register callbacks for IPv4 assignment (DHCPv4)
+	net_mgmt_init_event_callback(&ipv4_cb,
+								 network_event_handler,
+								 NET_EVENT_IPV4_ADDR_ADD | NET_EVENT_IPV4_ADDR_DEL);
+	net_mgmt_add_event_callback(&ipv4_cb);
+
+	// Register callbacks for IPv6 assignment (DHCPv6)
+	net_mgmt_init_event_callback(&ipv6_cb,
+								 network_event_handler,
+								 NET_EVENT_IPV6_ADDR_ADD | NET_EVENT_IPV6_ADDR_DEL);
+	net_mgmt_add_event_callback(&ipv6_cb);
 
 	return 0;
 }
