@@ -7,6 +7,10 @@ LOG_MODULE_REGISTER(main, LOG_LEVEL_DBG);
 
 #include "korra_internet.h"
 
+#ifndef CONFIG_ARM
+#define SystemCoreClock CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC
+#endif
+
 int main(void)
 {
 	// Log application version matching Kernel: *** Booting Zephyr OS build v4.1.0 ***
