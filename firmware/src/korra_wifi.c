@@ -62,11 +62,8 @@ void korra_wifi_init()
 
 int korra_wifi_status(struct wifi_iface_status *status)
 {
-    struct net_if *iface;
-    int ret;
-
-    iface = get_wifi_iface();
-    ret = net_mgmt(NET_REQUEST_WIFI_IFACE_STATUS, iface, status, sizeof(struct wifi_iface_status));
+    struct net_if *iface = get_wifi_iface();
+    int ret = net_mgmt(NET_REQUEST_WIFI_IFACE_STATUS, iface, status, sizeof(struct wifi_iface_status));
     if (ret)
     {
         LOG_WRN("Status command failed: %d", ret);
@@ -79,10 +76,8 @@ int korra_wifi_status(struct wifi_iface_status *status)
 int korra_wifi_connect()
 {
     int ret;
-    struct net_if *iface;
+    struct net_if *iface = get_wifi_iface();
     struct wifi_connect_req_params con_req_params = {0};
-
-    iface = get_wifi_iface();
 
     /* Defaults */
     con_req_params.band = WIFI_FREQ_BAND_UNKNOWN;
@@ -251,11 +246,8 @@ static void wifi_scan_event_handler(struct net_mgmt_event_callback *cb, uint64_t
 
 int korra_wifi_scan(k_timeout_t timeout)
 {
-    int ret;
-    struct net_if *iface;
+    struct net_if *iface = get_wifi_iface();
     struct wifi_scan_params scan_params = {0};
-
-    iface = get_wifi_iface();
 
     net_mgmt_init_event_callback(&wifi_scan_cb,
                                  wifi_scan_event_handler,
@@ -263,7 +255,7 @@ int korra_wifi_scan(k_timeout_t timeout)
     net_mgmt_add_event_callback(&wifi_scan_cb);
 
     scan_result = 0U;
-    ret = net_mgmt(NET_REQUEST_WIFI_SCAN, iface, &scan_params, sizeof(scan_params));
+    int ret = net_mgmt(NET_REQUEST_WIFI_SCAN, iface, &scan_params, sizeof(scan_params));
     if (ret)
     {
         LOG_WRN("Scan request failed: %d", ret);
