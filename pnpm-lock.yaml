@@ -30,6 +30,8 @@ importers:
         specifier: 7.7.2
         version: 7.7.2
 
+  website: {}
+
 packages:
 
   '@babel/runtime@7.27.6':
