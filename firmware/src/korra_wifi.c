@@ -7,10 +7,6 @@ LOG_MODULE_REGISTER(korra_wifi, LOG_LEVEL_INF);
 #include "korra_utils.h"
 #include "korra_wifi.h"
 
-#ifdef CONFIG_NET_CONNECTION_MANAGER_CONNECTIVITY_WIFI_MGMT
-#define USING_CONNECTION_MANAGER
-#endif // CONFIG_NET_CONNECTION_MANAGER_CONNECTIVITY_WIFI_MGMT
-
 #define get_wifi_iface net_if_get_wifi_sta
 
 static struct k_work_delayable wifi_reconnect_work;
@@ -156,24 +152,10 @@ int korra_wifi_connect()
     // Connect to the WiFi network
     LOG_INF("Connecting to \"%s\"", con_req_params.ssid);
     ret = net_mgmt(NET_REQUEST_WIFI_CONNECT, iface, &con_req_params, sizeof(con_req_params));
+    ret = ret == -EALREADY ? 0 : ret; // skip if already connected
     if (ret)
     {
         LOG_ERR("Connect command failed: %d", ret);
-
-        // // for some reason this hangs on ESP32 as of 2025-June-19
-        // if (ret == -EALREADY)
-        // {
-        //     LOG_INF("Disconnecting ...");
-        //     ret = net_mgmt(NET_REQUEST_WIFI_DISCONNECT, iface, NULL, 0);
-        //     if (ret)
-        //     {
-        //         LOG_WRN("Disconnect command failed: %d", ret);
-        //     }
-        //     else
-        //     {
-        //         LOG_INF("Disconnected command issued");
-        //     }
-        // }
     }
 
     return ret;
@@ -198,13 +180,13 @@ static void wifi_mgmt_event_handler(struct net_mgmt_event_callback *cb, uint64_t
     {
         if (status->status)
         {
-#if !defined(USING_CONNECTION_MANAGER) && defined(CONFIG_INTERNET_RECONNECTION)
+#ifndef CONFIG_WIFI_ESP32
             // Retry in 5 seconds
             LOG_ERR("Connection request failed: %d. Retrying in 5 sec ...", status->status);
             k_work_schedule(&wifi_reconnect_work, K_SECONDS(5));
 #else
             LOG_ERR("Connection request failed: %d", status->status);
-#endif // !USING_CONNECTION_MANAGER && CONFIG_INTERNET_RECONNECTION
+#endif // CONFIG_WIFI_ESP32
         }
         else
         {
@@ -222,13 +204,9 @@ static void wifi_mgmt_event_handler(struct net_mgmt_event_callback *cb, uint64_t
         }
         else
         {
-#if !defined(USING_CONNECTION_MANAGER) && defined(CONFIG_INTERNET_RECONNECTION)
             // Retry in 5 seconds
             LOG_INF("Disconnected! disconn_reason: %d. Retrying in 5 sec ...", status->disconn_reason);
             k_work_schedule(&wifi_reconnect_work, K_SECONDS(5));
-#else
-            LOG_INF("Disconnected! disconn_reason: %d", status->disconn_reason);
-#endif // !USING_CONNECTION_MANAGER && CONFIG_INTERNET_RECONNECTION
         }
     }
 }
@@ -238,10 +216,8 @@ static void wifi_reconnect_work_handler(struct k_work *work)
     int ret = korra_wifi_connect();
     if (ret)
     {
-#ifndef USING_CONNECTION_MANAGER
         // Schedule reconnection in 30 sec (longer to skip errors)
         k_work_schedule(&wifi_reconnect_work, K_SECONDS(30));
-#endif // USING_CONNECTION_MANAGER
     }
 }
 

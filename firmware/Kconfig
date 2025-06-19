@@ -29,6 +29,7 @@ config BOARD_HAS_WIFI
     select WIFI
     select NET_CONNECTION_MANAGER_CONNECTIVITY_WIFI_MGMT
     select WIFI_NXP if SOC_SERIES_RW6XX
+    select WIFI_ESP32 if SOC_SERIES_ESP32S3
 
 config BOARD_HAS_INTERNET # Invisible because it has no prompt (no string after bool)
     bool
@@ -86,12 +87,6 @@ config WIFI_ENTERPRISE_IDENTITY
 config WIFI_ENTERPRISE_PASSWORD
     string "Enterprise Password"
     depends on WIFI_ENTERPRISE
-
-config INTERNET_RECONNECTION # Invisible because it has no prompt (no string after bool)
-    # bool "Whether to do reconnection for internet"
-    bool
-    default y if SOC_ESP32S3
-    default n if SOC_RW612
 
 endif # BOARD_HAS_WIFI
 
