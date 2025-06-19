@@ -82,7 +82,7 @@ int korra_internet_connect()
 	}
 #endif // CONFIG_BOARD_HAS_WIFI
 
-	return 0;
+	return ret;
 }
 
 static void network_event_handler(struct net_mgmt_event_callback *cb, uint64_t mgmt_event, struct net_if *iface)
