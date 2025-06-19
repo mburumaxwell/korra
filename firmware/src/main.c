@@ -10,6 +10,7 @@ int main(void)
 {
 	// Log application version matching Kernel: *** Booting Zephyr OS build v4.1.0 ***
 	printk("*** Booting Korra %s build v%s (%s) ***\n", CONFIG_APP_NAME, APP_VERSION_STRING, STRINGIFY(APP_BUILD_VERSION));
+	printk("*** Running Board %s at %d MHz ***\n", CONFIG_BOARD, SystemCoreClock / MHZ(1));
 
 	korra_internet_init();
 	korra_internet_connect();
