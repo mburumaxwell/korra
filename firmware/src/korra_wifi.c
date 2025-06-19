@@ -11,14 +11,14 @@ LOG_MODULE_REGISTER(korra_wifi, LOG_LEVEL_INF);
 #define USING_CONNECTION_MANAGER
 #endif // CONFIG_NET_CONNECTION_MANAGER_CONNECTIVITY_WIFI_MGMT
 
+#define get_wifi_iface net_if_get_wifi_sta
+
 static struct k_work_delayable wifi_reconnect_work;
 static void wifi_reconnect_work_handler(struct k_work *work);
 
 static struct net_mgmt_event_callback wifi_mgmt_cb;
 static void wifi_mgmt_event_handler(struct net_mgmt_event_callback *cb, uint64_t mgmt_event, struct net_if *iface);
 static void wifi_status_print(struct wifi_iface_status *status);
-
-#define get_wifi_iface net_if_get_wifi_sta
 
 #ifdef CONFIG_WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE
 static const char ca_cert_test[] = {
@@ -49,6 +49,12 @@ static const char client_key2_test[] = {
 void korra_wifi_init()
 {
     LOG_DBG("Initializing");
+
+    struct net_if *iface = get_wifi_iface();
+    struct net_linkaddr *linkaddr = net_if_get_link_addr(iface);
+    if (linkaddr && linkaddr->len == WIFI_MAC_ADDR_LEN) {
+        LOG_INF("Mac Address: " FMT_LL_ADDR_6, PRINT_LL_ADDR_6(linkaddr->addr));
+	}
 
     // Initialize and add event callbacks for management
     net_mgmt_init_event_callback(&wifi_mgmt_cb,
