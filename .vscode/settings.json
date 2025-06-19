@@ -7,11 +7,16 @@
     "C_Cpp.default.compileCommands": "${workspaceFolder}/.vscode/compile_commands.json",
     "cmake.configureOnOpen": false,
     "cSpell.words": [
+        "BSSID",
+        "delayable",
+        "eduroam",
         "esp32s3_devkitc",
         "espressif",
         "frdm_rw612",
         "korra",
+        "LJMU",
         "printk",
-        "procpu"
+        "procpu",
+        "RSSI"
     ]
 }

@@ -13,7 +13,8 @@
           "confFiles": {
             "config": [],
             "extraConfig": [
-              "firmware/apps/keeper.conf"
+              "firmware/apps/keeper.conf",
+              "firmware/local.conf"
             ],
             "overlay": [],
             "extraOverlay": [
@@ -37,7 +38,8 @@
           "confFiles": {
             "config": [],
             "extraConfig": [
-              "firmware/apps/keeper.conf"
+              "firmware/apps/keeper.conf",
+              "firmware/local.conf"
             ],
             "overlay": [],
             "extraOverlay": [
@@ -61,7 +63,8 @@
           "confFiles": {
             "config": [],
             "extraConfig": [
-              "firmware/apps/pot.conf"
+              "firmware/apps/pot.conf",
+              "firmware/local.conf"
             ],
             "overlay": [],
             "extraOverlay": [
@@ -85,7 +88,8 @@
           "confFiles": {
             "config": [],
             "extraConfig": [
-              "firmware/apps/pot.conf"
+              "firmware/apps/pot.conf",
+              "firmware/local.conf"
             ],
             "overlay": [],
             "extraOverlay": [
@@ -103,9 +107,7 @@
       },
       "confFiles": {
         "config": [],
-        "extraConfig": [
-          "firmware/local.conf"
-        ],
+        "extraConfig": [],
         "overlay": [],
         "extraOverlay": []
       }

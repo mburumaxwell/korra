@@ -1,6 +1,6 @@
 #ifdef CONFIG_BOARD_HAS_ETHERNET
 #include <zephyr/logging/log.h>
-LOG_MODULE_REGISTER(korra_ethernet, LOG_LEVEL_DBG);
+LOG_MODULE_REGISTER(korra_ethernet, LOG_LEVEL_INF);
 
 #include <errno.h>
 #include <zephyr/kernel.h>
@@ -11,11 +11,11 @@ LOG_MODULE_REGISTER(korra_ethernet, LOG_LEVEL_DBG);
 
 static struct net_mgmt_event_callback ethernet_cb;
 
-static void ethernet_event_handler(struct net_mgmt_event_callback *cb, uint32_t mgmt_event, struct net_if *iface);
+static void ethernet_event_handler(struct net_mgmt_event_callback *cb, uint64_t mgmt_event, struct net_if *iface);
 
 void korra_ethernet_init()
 {
-    LOG_INF("Initializing");
+    LOG_DBG("Initializing");
 
     // Initialize and add event callbacks for ethernet
     net_mgmt_init_event_callback(&ethernet_cb,
@@ -24,7 +24,7 @@ void korra_ethernet_init()
     net_mgmt_add_event_callback(&ethernet_cb);
 }
 
-static void ethernet_event_handler(struct net_mgmt_event_callback *cb, uint32_t mgmt_event, struct net_if *iface)
+static void ethernet_event_handler(struct net_mgmt_event_callback *cb, uint64_t mgmt_event, struct net_if *iface)
 {
     if (mgmt_event == NET_EVENT_ETHERNET_CARRIER_ON)
     {

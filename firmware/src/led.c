@@ -1,5 +1,5 @@
 // #include <zephyr/logging/log.h>
-// LOG_MODULE_REGISTER(main, LOG_LEVEL_DBG);
+// LOG_MODULE_REGISTER(main, LOG_LEVEL_INF);
 
 // #include <errno.h>
 // #include <string.h>
@@ -12,7 +12,7 @@
 
 // #define DELAY_TIME K_MSEC(500)
 
-// #if CONFIG_LED_STRIP
+// #ifdef CONFIG_LED_STRIP
 // #include <zephyr/drivers/led_strip.h>
 
 // #define STRIP_NODE			DT_ALIAS(led_strip)
@@ -40,7 +40,7 @@
 // {
 // 	LOG_INF("App version: %s", APP_VERSION_STRING);
 
-// #if CONFIG_LED_STRIP
+// #ifdef CONFIG_LED_STRIP
 // 	size_t color = 0;
 // 	int rc;
 

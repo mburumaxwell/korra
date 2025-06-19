@@ -19,14 +19,35 @@ config APP_NAME
 config BOARD_HAS_ETHERNET
     bool "Whether to board has Ethernet"
     default n
+    select BOARD_HAS_INTERNET
+    select NET_ARP
 
-# config BOARD_HAS_WIFI
-#     bool "Whether to board has WiFi"
-#     default n
-#     select WIFI
-#     select NET_CONNECTION_MANAGER_CONNECTIVITY_WIFI_MGMT
+config BOARD_HAS_WIFI
+    bool "Whether to board has WiFi"
+    default n
+    select BOARD_HAS_INTERNET
+    select WIFI
+    select NET_CONNECTION_MANAGER_CONNECTIVITY_WIFI_MGMT
+    select WIFI_NXP if SOC_SERIES_RW6XX
 
-if WIFI
+config BOARD_HAS_INTERNET # Invisible because it has no prompt (no string after bool)
+    bool
+    select NET_CONNECTION_MANAGER
+    select NETWORKING
+    select NET_LOG # Network debug config
+    select NET_L2_ETHERNET # Enable Ethernet (required for WiFi)
+    select NET_IPV4
+    select NET_IPV6
+    select NET_SOCKETS
+    select NET_TCP
+    select NET_UDP
+    select NET_DHCPV4 # Get IPv4 address from DHCP
+    select NET_DHCPV6 # Get IPv6 address from DHCP
+    select DNS_RESOLVER # Enable DNS resolver
+    select SNTP
+    select POSIX_API
+
+if BOARD_HAS_WIFI
 config WIFI_SCAN_NETWORKS
     bool "Whether to scan WiFi networks"
     default n
@@ -37,6 +58,7 @@ config WIFI_SSID
     string "Wi-Fi SSID"
     help
       "The SSID of the Wi-Fi network to connect to."
+    default "eduroam"
 
 config WIFI_PSK
     string "Wi-Fi PSK"
@@ -53,6 +75,7 @@ config WIFI_ENTERPRISE
 config WIFI_ENTERPRISE_ANON_ID
     string "Enterprise Identity (anonymous)"
     depends on WIFI_ENTERPRISE
+    default "anonymous"
 
 config WIFI_ENTERPRISE_IDENTITY
     string "Enterprise Identity (Username)"
@@ -62,6 +85,12 @@ config WIFI_ENTERPRISE_PASSWORD
     string "Enterprise Password"
     depends on WIFI_ENTERPRISE
 
-endif # WIFI
+config INTERNET_RECONNECTION # Invisible because it has no prompt (no string after bool)
+    # bool "Whether to do reconnection for internet"
+    bool
+    default y if SOC_ESP32S3
+    default n if SOC_RW612
+
+endif # BOARD_HAS_WIFI
 
 source "Kconfig.zephyr"

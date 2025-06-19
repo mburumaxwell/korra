@@ -1,26 +1,24 @@
-#if CONFIG_WIFI
+#ifdef CONFIG_BOARD_HAS_WIFI
 #include <zephyr/logging/log.h>
-LOG_MODULE_REGISTER(korra_wifi, LOG_LEVEL_DBG);
+LOG_MODULE_REGISTER(korra_wifi, LOG_LEVEL_INF);
 
 #include <errno.h>
-#include <zephyr/kernel.h>
-#include <zephyr/net/wifi_mgmt.h>
 
 #include "korra_utils.h"
 #include "korra_wifi.h"
 
-static struct net_mgmt_event_callback wifi_cb;
-static struct k_work_delayable wifi_work;
+#ifdef CONFIG_NET_CONNECTION_MANAGER_CONNECTIVITY_WIFI_MGMT
+#define USING_CONNECTION_MANAGER
+#endif // CONFIG_NET_CONNECTION_MANAGER_CONNECTIVITY_WIFI_MGMT
 
-static void wifi_work_handler(struct k_work *work);
-static void wifi_event_handler(struct net_mgmt_event_callback *cb, uint32_t mgmt_event, struct net_if *iface);
+static struct k_work_delayable wifi_reconnect_work;
+static void wifi_reconnect_work_handler(struct k_work *work);
 
-#if CONFIG_WIFI_SCAN_NETWORKS
-static uint32_t scan_result;
-static struct net_mgmt_event_callback wifi_scan_cb;
-static K_SEM_DEFINE(sem_wifi_scan, 0, 1);
-static void wifi_scan_event_handler(struct net_mgmt_event_callback *cb, uint32_t mgmt_event, struct net_if *iface);
-#endif // CONFIG_WIFI_SCAN_NETWORKS
+static struct net_mgmt_event_callback wifi_mgmt_cb;
+static void wifi_mgmt_event_handler(struct net_mgmt_event_callback *cb, uint64_t mgmt_event, struct net_if *iface);
+static void wifi_status_print(struct wifi_iface_status *status);
+
+#define get_wifi_iface net_if_get_wifi_sta
 
 #ifdef CONFIG_WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE
 static const char ca_cert_test[] = {
@@ -50,23 +48,32 @@ static const char client_key2_test[] = {
 
 void korra_wifi_init()
 {
-    LOG_INF("Initializing");
+    LOG_DBG("Initializing");
 
-    // Initialize and add event callbacks for WiFi
-    net_mgmt_init_event_callback(&wifi_cb,
-                                 wifi_event_handler,
+    // Initialize and add event callbacks for management
+    net_mgmt_init_event_callback(&wifi_mgmt_cb,
+                                 wifi_mgmt_event_handler,
                                  NET_EVENT_WIFI_CONNECT_RESULT | NET_EVENT_WIFI_DISCONNECT_RESULT);
-    net_mgmt_add_event_callback(&wifi_cb);
+    net_mgmt_add_event_callback(&wifi_mgmt_cb);
 
-#if CONFIG_WIFI_SCAN_NETWORKS
-    net_mgmt_init_event_callback(&wifi_scan_cb,
-                                 wifi_scan_event_handler,
-                                 NET_EVENT_WIFI_SCAN_RESULT | NET_EVENT_WIFI_SCAN_DONE);
-    net_mgmt_add_event_callback(&wifi_scan_cb);
-#endif // CONFIG_WIFI_SCAN_NETWORKS
+    // Initialize work item for reconnection
+    k_work_init_delayable(&wifi_reconnect_work, wifi_reconnect_work_handler);
+}
 
-    // Initialize work item
-    k_work_init_delayable(&wifi_work, wifi_work_handler);
+int korra_wifi_status(struct wifi_iface_status *status)
+{
+    struct net_if *iface;
+    int ret;
+
+    iface = get_wifi_iface();
+    ret = net_mgmt(NET_REQUEST_WIFI_IFACE_STATUS, iface, status, sizeof(struct wifi_iface_status));
+    if (ret)
+    {
+        LOG_WRN("Status command failed: %d", ret);
+        return ret;
+    }
+
+    return 0;
 }
 
 int korra_wifi_connect()
@@ -74,22 +81,8 @@ int korra_wifi_connect()
     int ret;
     struct net_if *iface;
     struct wifi_connect_req_params con_req_params = {0};
-#if CONFIG_WIFI_SCAN_NETWORKS
-    struct wifi_scan_params scan_params = {0};
-#endif // CONFIG_WIFI_SCAN_NETWORKS
 
-    iface = net_if_get_wifi_sta();
-
-#if CONFIG_WIFI_SCAN_NETWORKS
-    scan_result = 0U;
-    ret = net_mgmt(NET_REQUEST_WIFI_SCAN, iface, &scan_params, sizeof(scan_params));
-    if (ret)
-    {
-        LOG_WRN("Scan request failed: %d", ret);
-    }
-    // wait for scanning to complete
-    k_sem_take(&sem_wifi_scan, K_FOREVER);
-#endif // CONFIG_WIFI_SCAN_NETWORKS
+    iface = get_wifi_iface();
 
     /* Defaults */
     con_req_params.band = WIFI_FREQ_BAND_UNKNOWN;
@@ -102,7 +95,7 @@ int korra_wifi_connect()
     con_req_params.ssid = CONFIG_WIFI_SSID;
     con_req_params.ssid_length = strlen(con_req_params.ssid);
 
-#if CONFIG_WIFI_ENTERPRISE
+#ifdef CONFIG_WIFI_ENTERPRISE
     con_req_params.security = WIFI_SECURITY_TYPE_EAP_TTLS_MSCHAPV2;
     con_req_params.anon_id = CONFIG_WIFI_ENTERPRISE_ANON_ID;
     con_req_params.aid_length = strlen(con_req_params.anon_id);
@@ -163,23 +156,39 @@ int korra_wifi_connect()
     ret = net_mgmt(NET_REQUEST_WIFI_CONNECT, iface, &con_req_params, sizeof(con_req_params));
     if (ret)
     {
-        LOG_ERR("Connect request failed: %d", ret);
+        LOG_ERR("Connect command failed: %d", ret);
+
+        // // for some reason this hangs on ESP32 as of 2025-June-19
+        // if (ret == -EALREADY)
+        // {
+        //     LOG_INF("Disconnecting ...");
+        //     ret = net_mgmt(NET_REQUEST_WIFI_DISCONNECT, iface, NULL, 0);
+        //     if (ret)
+        //     {
+        //         LOG_WRN("Disconnect command failed: %d", ret);
+        //     }
+        //     else
+        //     {
+        //         LOG_INF("Disconnected command issued");
+        //     }
+        // }
     }
 
     return ret;
 }
 
-static void wifi_work_handler(struct k_work *work)
+static void wifi_status_print(struct wifi_iface_status *status)
 {
-    int ret = korra_wifi_connect();
-    if (ret)
-    {
-        LOG_ERR("Reconnection failed, retrying in 5 seconds...");
-        k_work_schedule(&wifi_work, K_SECONDS(5)); // Schedule reconnection in 5 sec
-    }
+    LOG_DBG("Link Mode: %s", wifi_link_mode_txt(status->link_mode));
+    LOG_DBG("SSID: %.32s", status->ssid);
+    LOG_DBG("BSSID: " FMT_LL_ADDR_6, PRINT_LL_ADDR_6(status->bssid));
+    LOG_DBG("Band: %s", wifi_band_txt(status->band));
+    LOG_DBG("Channel: %d", status->channel);
+    LOG_DBG("Security: %s", wifi_security_txt(status->security));
+    LOG_DBG("RSSI: %d", status->rssi);
 }
 
-static void wifi_event_handler(struct net_mgmt_event_callback *cb, uint32_t mgmt_event, struct net_if *iface)
+static void wifi_mgmt_event_handler(struct net_mgmt_event_callback *cb, uint64_t mgmt_event, struct net_if *iface)
 {
     const struct wifi_status *status = (const struct wifi_status *)cb->info;
 
@@ -187,28 +196,20 @@ static void wifi_event_handler(struct net_mgmt_event_callback *cb, uint32_t mgmt
     {
         if (status->status)
         {
+#if !defined(USING_CONNECTION_MANAGER) && defined(CONFIG_INTERNET_RECONNECTION)
+            // Retry in 5 seconds
+            LOG_ERR("Connection request failed: %d. Retrying in 5 sec ...", status->status);
+            k_work_schedule(&wifi_reconnect_work, K_SECONDS(5));
+#else
             LOG_ERR("Connection request failed: %d", status->status);
+#endif // !USING_CONNECTION_MANAGER && CONFIG_INTERNET_RECONNECTION
         }
         else
         {
             LOG_INF("Connected! conn_status: %d", status->conn_status);
-            struct net_if *iface = net_if_get_wifi_sta();
-            struct wifi_iface_status status = {0};
-            int ret = net_mgmt(NET_REQUEST_WIFI_IFACE_STATUS, iface, &status, sizeof(struct wifi_iface_status));
-            if (!ret)
-            {
-                LOG_DBG("Link Mode: %s", wifi_link_mode_txt(status.link_mode));
-                LOG_DBG("SSID: %.32s", status.ssid);
-                LOG_DBG("BSSID: " FMT_LL_ADDR_6, PRINT_LL_ADDR_6(status.bssid));
-                LOG_DBG("Band: %s", wifi_band_txt(status.band));
-                LOG_DBG("Channel: %d", status.channel);
-                LOG_DBG("Security: %s", wifi_security_txt(status.security));
-                LOG_DBG("RSSI: %d", status.rssi);
-            }
-            else
-            {
-                LOG_WRN("Status request failed: %d", ret);
-            }
+            struct wifi_iface_status wstatus = {0};
+            korra_wifi_status(&wstatus);
+            wifi_status_print(&wstatus);
         }
     }
     else if (mgmt_event == NET_EVENT_WIFI_DISCONNECT_RESULT)
@@ -219,14 +220,61 @@ static void wifi_event_handler(struct net_mgmt_event_callback *cb, uint32_t mgmt
         }
         else
         {
+#if !defined(USING_CONNECTION_MANAGER) && defined(CONFIG_INTERNET_RECONNECTION)
+            // Retry in 5 seconds
+            LOG_INF("Disconnected! disconn_reason: %d. Retrying in 5 sec ...", status->disconn_reason);
+            k_work_schedule(&wifi_reconnect_work, K_SECONDS(5));
+#else
             LOG_INF("Disconnected! disconn_reason: %d", status->disconn_reason);
-            k_work_schedule(&wifi_work, K_NO_WAIT); // Schedule reconnection immediately
+#endif // !USING_CONNECTION_MANAGER && CONFIG_INTERNET_RECONNECTION
         }
     }
 }
 
-#if CONFIG_WIFI_SCAN_NETWORKS
-static void wifi_scan_event_handler(struct net_mgmt_event_callback *cb, uint32_t mgmt_event, struct net_if *iface)
+static void wifi_reconnect_work_handler(struct k_work *work)
+{
+    int ret = korra_wifi_connect();
+    if (ret)
+    {
+#ifndef USING_CONNECTION_MANAGER
+        // Schedule reconnection in 30 sec (longer to skip errors)
+        k_work_schedule(&wifi_reconnect_work, K_SECONDS(30));
+#endif // USING_CONNECTION_MANAGER
+    }
+}
+
+#ifdef CONFIG_WIFI_SCAN_NETWORKS
+static uint32_t scan_result;
+static struct net_mgmt_event_callback wifi_scan_cb;
+static K_SEM_DEFINE(sem_wifi_scan, 0, 1);
+static void wifi_scan_event_handler(struct net_mgmt_event_callback *cb, uint64_t mgmt_event, struct net_if *iface);
+
+int korra_wifi_scan(k_timeout_t timeout)
+{
+    int ret;
+    struct net_if *iface;
+    struct wifi_scan_params scan_params = {0};
+
+    iface = get_wifi_iface();
+
+    net_mgmt_init_event_callback(&wifi_scan_cb,
+                                 wifi_scan_event_handler,
+                                 NET_EVENT_WIFI_SCAN_RESULT | NET_EVENT_WIFI_SCAN_DONE);
+    net_mgmt_add_event_callback(&wifi_scan_cb);
+
+    scan_result = 0U;
+    ret = net_mgmt(NET_REQUEST_WIFI_SCAN, iface, &scan_params, sizeof(scan_params));
+    if (ret)
+    {
+        LOG_WRN("Scan request failed: %d", ret);
+        return ret;
+    }
+
+    // wait for scanning to complete
+    return k_sem_take(&sem_wifi_scan, timeout);
+}
+
+static void wifi_scan_event_handler(struct net_mgmt_event_callback *cb, uint64_t mgmt_event, struct net_if *iface)
 {
     if (mgmt_event == NET_EVENT_WIFI_SCAN_RESULT)
     {
@@ -270,10 +318,10 @@ static void wifi_scan_event_handler(struct net_mgmt_event_callback *cb, uint32_t
             LOG_DBG("Scan done");
         }
 
-        scan_result = 0U;
-        k_sem_give(&sem_wifi_scan); // signal scan complete
+        k_sem_give(&sem_wifi_scan);                 // signal scan complete
+        net_mgmt_del_event_callback(&wifi_scan_cb); // unregister because we do not need it till next scan
     }
 }
 #endif // CONFIG_WIFI_SCAN_NETWORKS
 
-#endif // CONFIG_WIFI
+#endif // CONFIG_BOARD_HAS_WIFI
