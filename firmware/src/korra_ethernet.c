@@ -21,9 +21,10 @@ void korra_ethernet_init()
 
     struct net_if *iface = get_ethernet_iface();
     struct net_linkaddr *linkaddr = net_if_get_link_addr(iface);
-    if (linkaddr && linkaddr->len == NET_ETH_ADDR_LEN) {
+    if (linkaddr && linkaddr->len == NET_ETH_ADDR_LEN)
+    {
         LOG_INF("Mac Address: " FMT_LL_ADDR_6, PRINT_LL_ADDR_6(linkaddr->addr));
-	}
+    }
 
     // Initialize and add event callbacks for ethernet
     net_mgmt_init_event_callback(&ethernet_cb,
