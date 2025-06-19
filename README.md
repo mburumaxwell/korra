@@ -14,7 +14,9 @@
 After installing zephyr you may need to install relevant binaries for connectivity to work:
 
 ```bash
-cd firmware
+cd west-manifest && west init --local && cd ../ && \
+west update && \
+cd firmware && \
 pnpm blobs:fetch
 ```
 
