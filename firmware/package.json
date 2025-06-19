@@ -24,9 +24,7 @@
     "flash:pot:esp32s3_devkitc": "pnpm flash --app pot --board esp32s3_devkitc/esp32s3/procpu",
     "flash:pot:frdm_rw612": "pnpm flash --app pot --board frdm_rw612",
 
-    "clean:keeper": "rimraf build/keeper",
-    "clean:pot": "rimraf build/pot",
-    "clean": "pnpm clean:keeper && pnpm clean:pot",
+    "clean": "rimraf build binaries",
 
     "packages:version": "node scripts/firmware.mjs version"
   },
