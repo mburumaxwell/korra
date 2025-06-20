@@ -6,6 +6,7 @@ LOG_MODULE_REGISTER(main, LOG_LEVEL_DBG);
 
 #include <app_version.h>
 #include <korra_internet.h>
+#include <korra_sensors.h>
 
 #ifndef CONFIG_ARM
 #define SystemCoreClock CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC
@@ -18,6 +19,7 @@ int main(void)
 	printk("*** Running Board %s at %d MHz ***\n", CONFIG_BOARD, SystemCoreClock / MHZ(1));
 	printk("*** Hostname: %s ***\n", net_hostname_get());
 
+	korra_sensors_init();
 	korra_internet_init();
 	korra_internet_connect();
 
