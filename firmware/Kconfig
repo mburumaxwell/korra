@@ -16,6 +16,10 @@ config APP_NAME
     default "Keeper" if APP_KIND_KEEPER
     default "Pot" if APP_KIND_POT
 
+config DATA_COLLECTION_INTERVAL_SECONDS
+    int "Interval for collecting sensor data in seconds"
+    default 60
+
 config BOARD_HAS_CELLULAR
     bool "Whether to board has Cellular"
     default n

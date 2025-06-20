@@ -6,7 +6,7 @@ LOG_MODULE_REGISTER(korra_sensors, LOG_LEVEL_INF);
 
 #include "korra_sensors.h"
 
-#define DATA_COLLECTION_INTERVAL K_SECONDS(60)
+#define DATA_COLLECTION_INTERVAL K_SECONDS(CONFIG_DATA_COLLECTION_INTERVAL_SECONDS)
 
 static struct k_work_delayable collect_data_work;
 static void collect_data_work_handler(struct k_work *work);
