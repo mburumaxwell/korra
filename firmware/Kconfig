@@ -92,6 +92,8 @@ config WIFI_ENTERPRISE
     default n
     select WIFI_NM_WPA_SUPPLICANT
     select WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE
+    # TODO findout if we really need this and the wpa_supp_els_pkc_mbedtls_config.h
+    select MBEDTLS_PSA_CRYPTO_C if WIFI_NXP
 
 config WIFI_ENTERPRISE_ANON_ID
     string "Enterprise Identity (anonymous)"
