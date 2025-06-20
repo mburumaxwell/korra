@@ -27,9 +27,10 @@ config BOARD_HAS_WIFI
     default n
     select BOARD_HAS_INTERNET
     select WIFI
-    select NET_CONNECTION_MANAGER_CONNECTIVITY_WIFI_MGMT
     select WIFI_ESP32 if SOC_SERIES_ESP32S3
+    select WIFI_NRF70 if BOARD_NRF7002DK
     select WIFI_NXP if SOC_SERIES_RW6XX
+    select NET_CONNECTION_MANAGER_CONNECTIVITY_WIFI_MGMT if !WIFI_NRF70
 
 config BOARD_HAS_INTERNET # Invisible because it has no prompt (no string after bool)
     bool
@@ -51,6 +52,11 @@ config BOARD_HAS_INTERNET # Invisible because it has no prompt (no string after 
     select POSIX_API
     select ENTROPY_ESP32_RNG if SOC_SERIES_ESP32S3
     select ENTROPY_MCUX_TRNG if SOC_SERIES_RW6XX
+    # Entropy on nRF5340 is only available natively on cpunet but not cpu app
+    # In cpuapp you have to use HCI to get random data which means selecting ENTROPY_BT_HCI
+    # which requires BT_HCI_HOST or BT either of which bring in the whole Bluetooth stack!
+    select TEST_RANDOM_GENERATOR if SOC_NRF5340_CPUAPP
+    select ENTROPY_NRF5_RNG if SOC_SERIES_NRF54X
 
 if BOARD_HAS_WIFI
 config WIFI_SCAN_NETWORKS

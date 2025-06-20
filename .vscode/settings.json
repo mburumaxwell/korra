@@ -8,6 +8,7 @@
     "cmake.configureOnOpen": false,
     "cSpell.words": [
         "BSSID",
+        "cpuapp",
         "delayable",
         "eduroam",
         "esp32s3_devkitc",

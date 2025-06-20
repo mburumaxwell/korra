@@ -54,6 +54,31 @@
             }
           }
         },
+        "build/keeper/nrf7002dk": {
+          "board": "nrf7002dk/nrf5340/cpuapp",
+          "relBoardSubDir": "nordic/nrf7002dk",
+          "name": "build/keeper/nrf7002dk",
+          "westBuildArgs": "",
+          "westBuildCMakeArgs": " -DCONFIG_DEBUG_OPTIMIZATIONS=y -DCONFIG_DEBUG_THREAD_INFO=y ",
+          "confFiles": {
+            "config": [],
+            "extraConfig": [
+              "firmware/apps/keeper.conf",
+              "firmware/local.conf"
+            ],
+            "overlay": [],
+            "extraOverlay": [
+              "firmware/apps/keeper.overlay"
+            ]
+          },
+          "runnerConfigs": {
+            "default": {
+              "runner": "default",
+              "name": "default",
+              "args": ""
+            }
+          }
+        },
         "build/pot/esp32s3_devkitc": {
           "board": "esp32s3_devkitc/esp32s3/procpu",
           "relBoardSubDir": "espressif/esp32s3_devkitc",
@@ -83,6 +108,31 @@
           "board": "frdm_rw612",
           "relBoardSubDir": "nxp/frdm_rw612",
           "name": "build/pot/frdm_rw612",
+          "westBuildArgs": "",
+          "westBuildCMakeArgs": " -DCONFIG_DEBUG_OPTIMIZATIONS=y -DCONFIG_DEBUG_THREAD_INFO=y ",
+          "confFiles": {
+            "config": [],
+            "extraConfig": [
+              "firmware/apps/pot.conf",
+              "firmware/local.conf"
+            ],
+            "overlay": [],
+            "extraOverlay": [
+              "firmware/apps/pot.overlay"
+            ]
+          },
+          "runnerConfigs": {
+            "default": {
+              "runner": "default",
+              "name": "default",
+              "args": ""
+            }
+          }
+        },
+        "build/pot/nrf7002dk": {
+          "board": "nrf7002dk/nrf5340/cpuapp",
+          "relBoardSubDir": "nordic/nrf7002dk",
+          "name": "build/pot/nrf7002dk",
           "westBuildArgs": "",
           "westBuildCMakeArgs": " -DCONFIG_DEBUG_OPTIMIZATIONS=y -DCONFIG_DEBUG_THREAD_INFO=y ",
           "confFiles": {
