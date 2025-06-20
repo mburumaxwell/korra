@@ -2,6 +2,7 @@
   "name": "korra",
   "version": "0.0.0",
   "private": true,
+  "license": "AGPL-3.0-later",
   "scripts": {
     "changeset": "changeset",
     "packages:version": "changeset version && pnpm --recursive packages:version",
