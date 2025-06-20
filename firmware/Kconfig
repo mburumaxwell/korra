@@ -43,6 +43,7 @@ config BOARD_HAS_WIFI
 
 config BOARD_HAS_INTERNET # Invisible because it has no prompt (no string after bool)
     bool
+    select ENTROPY_GENERATOR
     select ENTROPY_ESP32_RNG if SOC_SERIES_ESP32S3
     select ENTROPY_MCUX_TRNG if SOC_SERIES_RW6XX
     # Entropy on nRF5340 is only available natively on cpunet but not cpu app
