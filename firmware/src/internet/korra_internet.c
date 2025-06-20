@@ -7,6 +7,10 @@ LOG_MODULE_REGISTER(korra_internet, LOG_LEVEL_INF);
 
 #include "korra_internet.h"
 
+#ifdef CONFIG_BOARD_HAS_CELLULAR
+#include "korra_cellular.h"
+#endif // CONFIG_BOARD_HAS_CELLULAR
+
 #ifdef CONFIG_BOARD_HAS_ETHERNET
 #include "korra_ethernet.h"
 #endif // CONFIG_BOARD_HAS_ETHERNET
@@ -15,8 +19,6 @@ LOG_MODULE_REGISTER(korra_internet, LOG_LEVEL_INF);
 #include "korra_wifi.h"
 #endif // CONFIG_BOARD_HAS_WIFI
 
-#define NETWORK_EVENTS (NET_EVENT_L4_CONNECTED | NET_EVENT_L4_DISCONNECTED)
-
 K_SEM_DEFINE(network_connected, 0, 1);
 
 static struct net_mgmt_event_callback network_cb;
@@ -24,11 +26,17 @@ static void network_event_handler(struct net_mgmt_event_callback *cb, uint64_t m
 
 void korra_internet_init()
 {
-	LOG_DBG("Setting up");
+    LOG_DBG("Initializing");
 
-	// Register callbacks for connection manager or IP assignment
-	net_mgmt_init_event_callback(&network_cb, network_event_handler, NETWORK_EVENTS);
+	// Register callbacks for connection manager
+	net_mgmt_init_event_callback(&network_cb,
+								 network_event_handler,
+								 NET_EVENT_L4_CONNECTED | NET_EVENT_L4_DISCONNECTED);
 	net_mgmt_add_event_callback(&network_cb);
+
+#ifdef CONFIG_BOARD_HAS_CELLULAR
+	korra_cellular_init();
+#endif // CONFIG_BOARD_HAS_CELLULAR
 
 #ifdef CONFIG_BOARD_HAS_ETHERNET
 	korra_ethernet_init();
@@ -36,12 +44,22 @@ void korra_internet_init()
 
 #ifdef CONFIG_BOARD_HAS_WIFI
 	korra_wifi_init();
+#endif // CONFIG_BOARD_HAS_WIFI
 }
 
 int korra_internet_connect()
 {
 	int ret = 0;
 
+#ifdef CONFIG_BOARD_HAS_CELLULAR
+	ret = korra_cellular_connect();
+	if (ret)
+	{
+		return ret;
+	}
+#endif // CONFIG_BOARD_HAS_CELLULAR
+
+#ifdef CONFIG_BOARD_HAS_WIFI
 #ifdef CONFIG_WIFI_SCAN_NETWORKS
 	ret = korra_wifi_scan(K_FOREVER);
 	if (ret)
@@ -78,5 +96,6 @@ static void network_event_handler(struct net_mgmt_event_callback *cb, uint64_t m
 	{
 		LOG_INF("Network connectivity lost!");
 		k_sem_take(&network_connected, K_FOREVER);
+		// for cellular we need to restart the connection?
 	}
 }

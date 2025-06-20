@@ -16,6 +16,11 @@ config APP_NAME
     default "Keeper" if APP_KIND_KEEPER
     default "Pot" if APP_KIND_POT
 
+config BOARD_HAS_CELLULAR
+    bool "Whether to board has Cellular"
+    default n
+    select BOARD_HAS_INTERNET
+
 config BOARD_HAS_ETHERNET
     bool "Whether to board has Ethernet"
     default n
