@@ -25,7 +25,7 @@ int main(void)
 	int ret = hwinfo_get_device_id((uint8_t *)dev_id, sizeof(dev_id));
 	if (ret)
 	{
-		printk("*** Device ID: 0x%08x%08x%08x%08x\n", dev_id[0], dev_id[1], dev_id[2], dev_id[3]);
+		printk("*** Device ID: %08x-%08x-%08x-%08x ***\n", dev_id[0], dev_id[1], dev_id[2], dev_id[3]);
 	}
 	else
 	{
@@ -37,10 +37,6 @@ int main(void)
 	korra_cloud_init((uint8_t *)dev_id, sizeof(dev_id));
 
 	korra_internet_connect();
-
-	LOG_INF("Waiting for internet...");
-	k_sem_take(&network_connected, K_FOREVER);
-	LOG_INF("Internet is ready");
 
 	k_sleep(K_FOREVER);
 	return 0;

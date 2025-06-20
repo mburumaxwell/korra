@@ -19,8 +19,6 @@ LOG_MODULE_REGISTER(korra_internet, LOG_LEVEL_INF);
 #include "korra_wifi.h"
 #endif // CONFIG_BOARD_HAS_WIFI
 
-K_SEM_DEFINE(network_connected, 0, 1);
-
 static struct net_mgmt_event_callback network_cb;
 static void network_event_handler(struct net_mgmt_event_callback *cb, uint64_t mgmt_event, struct net_if *iface);
 
@@ -90,12 +88,10 @@ static void network_event_handler(struct net_mgmt_event_callback *cb, uint64_t m
 	if (mgmt_event == NET_EVENT_L4_CONNECTED)
 	{
 		LOG_INF("Network connectivity gained!");
-		k_sem_give(&network_connected);
 	}
 	else if (mgmt_event == NET_EVENT_L4_DISCONNECTED)
 	{
 		LOG_INF("Network connectivity lost!");
-		k_sem_take(&network_connected, K_FOREVER);
 		// for cellular we need to restart the connection?
 	}
 }
