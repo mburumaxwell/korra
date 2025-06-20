@@ -21,10 +21,12 @@ const KNOWN_APPS = ['keeper', 'pot'];
 const KNOWN_BOARDS = [
   'esp32s3_devkitc/esp32s3/procpu',
   'frdm_rw612',
+  'nrf7002dk/nrf5340/cpuapp',
 ];
 const KNOWN_BLOBS_MODULES = [
   'hal_espressif',
   'hal_nxp',
+  'nrf_wifi',
 ];
 
 const makeBuildDir = ({ app, board }) => `build/${app}/${board}`;
