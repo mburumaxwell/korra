@@ -67,6 +67,9 @@ config BOARD_HAS_INTERNET # Invisible because it has no prompt (no string after 
     select NET_HOSTNAME_UNIQUE
     select SNTP
     select POSIX_API
+    select TLS_CREDENTIALS
+    # # TODO: set this once we have figured out PSA or other secure storage
+    # select TLS_CREDENTIALS_BACKEND_PROTECTED_STORAGE
 
 if BOARD_HAS_WIFI
 config WIFI_SCAN_NETWORKS
@@ -92,8 +95,8 @@ config WIFI_ENTERPRISE
     default n
     select WIFI_NM_WPA_SUPPLICANT
     select WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE
-    # TODO findout if we really need this and the wpa_supp_els_pkc_mbedtls_config.h
-    select MBEDTLS_PSA_CRYPTO_C if WIFI_NXP
+    # # TODO findout if we really need this and the wpa_supp_els_pkc_mbedtls_config.h
+    # select MBEDTLS_PSA_CRYPTO_C if WIFI_NXP
 
 config WIFI_ENTERPRISE_ANON_ID
     string "Enterprise Identity (anonymous)"

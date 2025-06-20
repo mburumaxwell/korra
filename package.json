@@ -6,7 +6,9 @@
   "scripts": {
     "changeset": "changeset",
     "packages:version": "changeset version && pnpm --recursive packages:version",
-    "packages:publish": "changeset publish"
+    "packages:publish": "changeset publish",
+
+    "clean": "pnpm --recursive clean"
   },
   "devDependencies": {
     "@changesets/cli": "2.29.4",

@@ -6,6 +6,7 @@ LOG_MODULE_REGISTER(main, LOG_LEVEL_DBG);
 #include <zephyr/net/hostname.h>
 
 #include <app_version.h>
+#include <korra_certs.h>
 #include <korra_internet.h>
 #include <korra_cloud.h>
 #include <korra_sensors.h>
@@ -32,6 +33,7 @@ int main(void)
 		LOG_WRN("Unable to get device ID: %d", ret);
 	}
 
+	korra_certs_init();
 	korra_sensors_init();
 	korra_internet_init();
 	korra_cloud_init((uint8_t *)dev_id, sizeof(dev_id));
