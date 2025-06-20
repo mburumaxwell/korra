@@ -243,8 +243,8 @@ const collect = new Command('collect')
         const buildDir = `build/${app}/${board}/zephyr`;
         const binSrc = join(buildDir, 'zephyr.bin');
         const elfSrc = join(buildDir, 'zephyr.elf');
-        const binDest = join(outputDir, `${app}-${board.replaceAll('/', '_')}.bin`);
-        const elfDest = join(outputDir, `${app}-${board.replaceAll('/', '_')}.elf`);
+        const binDest = join(outputDir, `${app}-${board.split('/')[0]}.bin`);
+        const elfDest = join(outputDir, `${app}-${board.split('/')[0]}.elf`);
 
         console.log(`🔹 Copying ${binSrc} → ${binDest}`);
         await copyFile(binSrc, binDest);
