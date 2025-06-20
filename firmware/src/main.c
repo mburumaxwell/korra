@@ -3,9 +3,9 @@ LOG_MODULE_REGISTER(main, LOG_LEVEL_DBG);
 
 #include <zephyr/kernel.h>
 #include <zephyr/net/hostname.h>
-#include <app_version.h>
 
-#include "korra_internet.h"
+#include <app_version.h>
+#include <korra_internet.h>
 
 #ifndef CONFIG_ARM
 #define SystemCoreClock CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC
