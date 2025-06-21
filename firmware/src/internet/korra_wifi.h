@@ -7,13 +7,12 @@
 #include <zephyr/net/wifi_mgmt.h>
 
 /** Initialize the WiFi logic */
-extern void korra_wifi_init();
+extern int korra_wifi_init();
 
 /** Connect to the configured WiFi network */
 extern int korra_wifi_connect();
 
 extern int korra_wifi_status(struct wifi_iface_status *status);
-extern int korra_wifi_scan(k_timeout_t timeout);
 
 #ifdef CONFIG_WIFI_SCAN_NETWORKS
 extern int korra_wifi_scan(k_timeout_t timeout);

@@ -58,19 +58,18 @@ int korra_internet_connect()
 #endif // CONFIG_BOARD_HAS_CELLULAR
 
 #ifdef CONFIG_BOARD_HAS_WIFI
+	// This delay is to allow some drivers/modules to initialize (e.g. WPA_SUPPLICANT)
+	// Basically waiting until we see this log ---> <inf> wifi_supplicant: wpa_supplicant initialized
+#ifdef CONFIG_WIFI_NM_WPA_SUPPLICANT
+	k_sleep(K_SECONDS(1));
+#endif // CONFIG_WIFI_NM_WPA_SUPPLICANT
+
 #ifdef CONFIG_WIFI_SCAN_NETWORKS
 	ret = korra_wifi_scan(K_FOREVER);
 	if (ret)
 	{
 		return ret;
 	}
-#else
-	// This delay is to allow some drivers/modules to initialize (e.g. WPA_SUPPLICANT)
-	// Basically waiting until we see this log ---> <inf> wifi_supplicant: wpa_supplicant initialized
-	// We only need this if we are not scanning because scanning does the delay already.
-#ifdef CONFIG_WIFI_NM_WPA_SUPPLICANT
-	k_sleep(K_SECONDS(1));
-#endif // CONFIG_WIFI_NM_WPA_SUPPLICANT
 #endif // CONFIG_WIFI_SCAN_NETWORKS
 
 	ret = korra_wifi_connect();

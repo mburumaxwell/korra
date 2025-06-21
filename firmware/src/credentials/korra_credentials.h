@@ -11,14 +11,14 @@ enum korra_credential_tag_type
 // - TLS_CREDENTIAL_PSK with TLS_CREDENTIAL_PSK_ID.
 // Such pairs of credentials must be assigned the same secure tag to be correctly handled in the system.
 
-#ifdef CONFIG_WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE
+#ifdef CONFIG_WIFI_ENTERPRISE
     /* WiFi enterprise */
     KORRA_CREDENTIAL_WIFI_CA_TAG = 0x10,
     KORRA_CREDENTIAL_WIFI_CLIENT_TAG,
     /* Phase 2 */
     KORRA_CREDENTIAL_WIFI_CA_P2_TAG,
     KORRA_CREDENTIAL_WIFI_CLIENT_P2_TAG,
-#endif // CONFIG_WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE
+#endif // CONFIG_WIFI_ENTERPRISE
 
     /* Azure */
     KORRA_CREDENTIAL_AZURE_CA_TAG = 0x20,

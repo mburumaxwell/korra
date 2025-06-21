@@ -4,6 +4,8 @@ LOG_MODULE_REGISTER(korra_wifi, LOG_LEVEL_INF);
 
 #include <errno.h>
 
+#include <korra_credentials.h>
+
 #include "korra_utils.h"
 #include "korra_wifi.h"
 
@@ -16,42 +18,43 @@ static struct net_mgmt_event_callback wifi_mgmt_cb;
 static void wifi_mgmt_event_handler(struct net_mgmt_event_callback *cb, uint64_t mgmt_event, struct net_if *iface);
 static void wifi_status_print(struct wifi_iface_status *status);
 
-#ifdef CONFIG_WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE
-static const char ca_cert_test[] = {
-#include <wifi_certs/ca.pem.inc>
-    '\0'};
+#ifdef CONFIG_WIFI_ENTERPRISE
+struct wifi_cert_data
+{
+    enum tls_credential_type type;
+    uint32_t tag;
+    uint8_t **data;
+    size_t *len;
+};
+static void set_enterprise_creds_params(struct wifi_enterprise_creds_params *params);
+static int process_certificates(struct wifi_cert_data *certs, size_t count);
+// Have own heap so that we do not steal from others.
+// Numbers: 2 CA, 2 Public, and 2 Keys. Assume @2KB = 12KB, plus 25%
+static K_HEAP_DEFINE(eap_certs_heap, KB(15));
+#endif // CONFIG_WIFI_ENTERPRISE
 
-static const char client_cert_test[] = {
-#include <wifi_certs/client.pem.inc>
-    '\0'};
-
-static const char client_key_test[] = {
-#include <wifi_certs/client-key.pem.inc>
-    '\0'};
-
-static const char ca_cert2_test[] = {
-#include <wifi_certs/ca2.pem.inc>
-    '\0'};
-
-static const char client_cert2_test[] = {
-#include <wifi_certs/client2.pem.inc>
-    '\0'};
-
-static const char client_key2_test[] = {
-#include <wifi_certs/client-key2.pem.inc>
-    '\0'};
-#endif // CONFIG_WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE
-
-void korra_wifi_init()
+int korra_wifi_init()
 {
     LOG_DBG("Initializing");
 
+    // Print mac address
     struct net_if *iface = get_wifi_iface();
     struct net_linkaddr *linkaddr = net_if_get_link_addr(iface);
     if (linkaddr && linkaddr->len == WIFI_MAC_ADDR_LEN)
     {
         LOG_INF("Mac Address: " FMT_LL_ADDR_6, PRINT_LL_ADDR_6(linkaddr->addr));
     }
+
+    // Print WiFi version
+	struct wifi_version version = {0};
+    int ret = net_mgmt(NET_REQUEST_WIFI_VERSION, iface, &version, sizeof(version));
+	if (ret)
+    {
+		LOG_WRN("Failed to get Wi-Fi versions");
+		return ret;
+	}
+	LOG_INF("Driver Version: %s", version.drv_version);
+	LOG_INF("Firmware Version: %s", version.fw_version);
 
     // Initialize and add event callbacks for management
     net_mgmt_init_event_callback(&wifi_mgmt_cb,
@@ -61,6 +64,19 @@ void korra_wifi_init()
 
     // Initialize work item for reconnection
     k_work_init_delayable(&wifi_reconnect_work, wifi_reconnect_work_handler);
+
+#ifdef CONFIG_WIFI_ENTERPRISE
+    struct wifi_enterprise_creds_params ent_params = {0};
+    set_enterprise_creds_params(&ent_params);
+    ret = net_mgmt(NET_REQUEST_WIFI_ENTERPRISE_CREDS, iface, &ent_params, sizeof(ent_params));
+    if (ret)
+    {
+        LOG_WRN("Set enterprise credentials failed: %d", ret);
+        return ret;
+    }
+#endif // CONFIG_WIFI_ENTERPRISE
+
+    return 0;
 }
 
 int korra_wifi_status(struct wifi_iface_status *status)
@@ -87,14 +103,14 @@ int korra_wifi_connect()
     con_req_params.channel = WIFI_CHANNEL_ANY;
     con_req_params.security = WIFI_SECURITY_TYPE_NONE;
     con_req_params.mfp = WIFI_MFP_OPTIONAL;
-    con_req_params.eap_ver = 1;
-    con_req_params.verify_peer_cert = false;
+    con_req_params.eap_ver = 0;
+    con_req_params.verify_peer_cert = true;
 
     con_req_params.ssid = CONFIG_WIFI_SSID;
     con_req_params.ssid_length = strlen(con_req_params.ssid);
 
 #ifdef CONFIG_WIFI_ENTERPRISE
-    con_req_params.security = WIFI_SECURITY_TYPE_EAP_TTLS_MSCHAPV2;
+    con_req_params.security = WIFI_SECURITY_TYPE_EAP_PEAP_MSCHAPV2;
     con_req_params.anon_id = CONFIG_WIFI_ENTERPRISE_ANON_ID;
     con_req_params.aid_length = strlen(con_req_params.anon_id);
     con_req_params.eap_identity = CONFIG_WIFI_ENTERPRISE_IDENTITY;
@@ -114,40 +130,6 @@ int korra_wifi_connect()
         con_req_params.psk_length = strlen(CONFIG_WIFI_PSK);
     }
 #endif
-
-    if (con_req_params.security == WIFI_SECURITY_TYPE_EAP_TLS ||
-        con_req_params.security == WIFI_SECURITY_TYPE_EAP_PEAP_MSCHAPV2 ||
-        con_req_params.security == WIFI_SECURITY_TYPE_EAP_PEAP_GTC ||
-        con_req_params.security == WIFI_SECURITY_TYPE_EAP_TTLS_MSCHAPV2 ||
-        con_req_params.security == WIFI_SECURITY_TYPE_EAP_PEAP_TLS)
-    {
-
-#ifdef CONFIG_WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE
-        struct wifi_enterprise_creds_params ent_params = {0};
-        ent_params.ca_cert = (uint8_t *)ca_cert_test;
-        ent_params.ca_cert_len = ARRAY_SIZE(ca_cert_test);
-        ent_params.client_cert = (uint8_t *)client_cert_test;
-        ent_params.client_cert_len = ARRAY_SIZE(client_cert_test);
-        ent_params.client_key = (uint8_t *)client_key_test;
-        ent_params.client_key_len = ARRAY_SIZE(client_key_test);
-        ent_params.ca_cert2 = (uint8_t *)ca_cert2_test;
-        ent_params.ca_cert2_len = ARRAY_SIZE(ca_cert2_test);
-        ent_params.client_cert2 = (uint8_t *)client_cert2_test;
-        ent_params.client_cert2_len = ARRAY_SIZE(client_cert2_test);
-        ent_params.client_key2 = (uint8_t *)client_key2_test;
-        ent_params.client_key2_len = ARRAY_SIZE(client_key2_test);
-
-        ret = net_mgmt(NET_REQUEST_WIFI_ENTERPRISE_CREDS, iface, &ent_params, sizeof(ent_params));
-        if (ret)
-        {
-            LOG_WRN("Set enterprise credentials failed: %d", ret);
-            return ret;
-        }
-#else
-        LOG_ERR("Security configured to enterprise but CONFIG_WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE is not set");
-        return -ENOTSUP;
-#endif // CONFIG_WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE
-    }
 
     // Connect to the WiFi network
     LOG_INF("Connecting to \"%s\"", con_req_params.ssid);
@@ -221,6 +203,107 @@ static void wifi_reconnect_work_handler(struct k_work *work)
     }
 }
 
+#ifdef CONFIG_WIFI_ENTERPRISE
+static void set_enterprise_creds_params(struct wifi_enterprise_creds_params *params)
+{
+    struct wifi_cert_data certs[] = {
+        {
+            .type = TLS_CREDENTIAL_CA_CERTIFICATE,
+            .tag = KORRA_CREDENTIAL_WIFI_CA_TAG,
+            .data = &params->ca_cert,
+            .len = &params->ca_cert_len,
+        },
+        {
+            .type = TLS_CREDENTIAL_PUBLIC_CERTIFICATE,
+            .tag = KORRA_CREDENTIAL_WIFI_CLIENT_TAG,
+            .data = &params->client_cert,
+            .len = &params->client_cert_len,
+        },
+        {
+            .type = TLS_CREDENTIAL_PRIVATE_KEY,
+            .tag = KORRA_CREDENTIAL_WIFI_CLIENT_TAG,
+            .data = &params->client_key,
+            .len = &params->client_key_len,
+        },
+        {
+            .type = TLS_CREDENTIAL_CA_CERTIFICATE,
+            .tag = KORRA_CREDENTIAL_WIFI_CA_P2_TAG,
+            .data = &params->ca_cert2,
+            .len = &params->ca_cert2_len,
+        },
+        {
+            .type = TLS_CREDENTIAL_PUBLIC_CERTIFICATE,
+            .tag = KORRA_CREDENTIAL_WIFI_CLIENT_P2_TAG,
+            .data = &params->client_cert2,
+            .len = &params->client_cert2_len,
+        },
+        {
+            .type = TLS_CREDENTIAL_PRIVATE_KEY,
+            .tag = KORRA_CREDENTIAL_WIFI_CLIENT_P2_TAG,
+            .data = &params->client_key2,
+            .len = &params->client_key2_len,
+        },
+    };
+
+    // process certs
+    if (process_certificates(certs, ARRAY_SIZE(certs)) != 0)
+    {
+        goto cleanup;
+    }
+
+    return;
+
+cleanup:
+    for (size_t i = 0; i < ARRAY_SIZE(certs); i++)
+    {
+        if (certs[i].data)
+        {
+            k_heap_free(&eap_certs_heap, *certs[i].data);
+        }
+    }
+}
+static int process_certificates(struct wifi_cert_data *certs, size_t count)
+{
+    for (size_t i = 0; i < count; i++)
+    {
+        int ret;
+        size_t len = 0;
+        uint8_t *cert_tmp;
+
+        ret = tls_credential_get(certs[i].tag, certs[i].type, NULL, &len);
+        if (ret != -EFBIG)
+        {
+            LOG_ERR("Failed to get credential tag: %s, err: %d", korra_credential_tag_type_txt(certs[i].tag), ret);
+            return ret;
+        }
+        LOG_DBG("Found credential type: %-18s -> tag: %-20s (len: %d)",
+                tls_credential_type_txt(certs[i].type),
+                korra_credential_tag_type_txt(certs[i].tag),
+                len);
+
+        cert_tmp = k_heap_alloc(&eap_certs_heap, len, K_FOREVER);
+        if (!cert_tmp)
+        {
+            LOG_ERR("Failed to allocate memory for credential tag: %s", korra_credential_tag_type_txt(certs[i].tag));
+            return -ENOMEM;
+        }
+
+        ret = tls_credential_get(certs[i].tag, certs[i].type, cert_tmp, &len);
+        if (ret)
+        {
+            LOG_ERR("Failed to get credential tag: %s", korra_credential_tag_type_txt(certs[i].tag));
+            k_heap_free(&eap_certs_heap, cert_tmp);
+            return ret;
+        }
+
+        *certs[i].data = cert_tmp;
+        *certs[i].len = len;
+    }
+
+    return 0;
+}
+#endif // CONFIG_WIFI_ENTERPRISE
+
 #ifdef CONFIG_WIFI_SCAN_NETWORKS
 static uint32_t scan_result;
 static struct net_mgmt_event_callback wifi_scan_cb;
@@ -246,6 +329,7 @@ int korra_wifi_scan(k_timeout_t timeout)
     }
 
     // wait for scanning to complete
+    LOG_INF("Scan requested. Waiting for completion ...");
     return k_sem_take(&sem_wifi_scan, timeout);
 }
 
