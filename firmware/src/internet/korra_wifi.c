@@ -194,7 +194,8 @@ static void wifi_mgmt_event_handler(struct net_mgmt_event_callback *cb, uint64_t
             k_work_schedule(&wifi_reconnect_work, K_SECONDS(5));
         }
     }
-#ifdef CONFIG_WIFI_ENTERPRISE // enables CONFIG_WIFI_NM_WPA_SUPPLICANT_ROAMING
+#ifdef CONFIG_WIFI_NM_WPA_SUPPLICANT_ROAMING
+    // follow https://github.com/zephyrproject-rtos/zephyr/issues/87728
     else if (mgmt_event == NET_EVENT_WIFI_SIGNAL_CHANGE)
     {
         struct net_if *iface = get_wifi_iface();
@@ -219,7 +220,7 @@ static void wifi_mgmt_event_handler(struct net_mgmt_event_callback *cb, uint64_t
 
         LOG_INF("Neighbor report complete requested");
     }
-#endif // CONFIG_WIFI_ENTERPRISE
+#endif // CONFIG_WIFI_NM_WPA_SUPPLICANT_ROAMING
 }
 
 static void wifi_reconnect_work_handler(struct k_work *work)
@@ -231,6 +232,59 @@ static void wifi_reconnect_work_handler(struct k_work *work)
         k_work_schedule(&wifi_reconnect_work, K_SECONDS(30));
     }
 }
+
+#ifdef CONFIG_WIFI_PROVISIONING_ENABLED
+int korra_wifi_provisioning()
+{
+    struct net_if *iface = get_wifi_iface();
+    struct net_linkaddr *linkaddr = net_if_get_link_addr(iface);
+    struct wifi_dpp_params params = {0};
+
+    // TODO: check if we have wifi credentials stored already
+    // https://github.com/zephyrproject-rtos/zephyr/pull/88653
+    // https://github.com/zephyrproject-rtos/zephyr/issues/91790
+
+    // Perform bootstrap gen
+    params.action = WIFI_DPP_BOOTSTRAP_GEN;
+    params.bootstrap_gen.type = WIFI_DPP_BOOTSTRAP_TYPE_QRCODE;
+    params.bootstrap_gen.chan = 1;
+    params.bootstrap_gen.op_class = 81; // for channel 1 and only for QR Code?
+    memcpy(params.bootstrap_gen.mac, linkaddr->addr, WIFI_MAC_ADDR_LEN);
+    int ret = net_mgmt(NET_REQUEST_WIFI_DPP, iface, &params, sizeof(params));
+    if (ret)
+    {
+        LOG_WRN("Failed to request DPP bootstrap gen");
+        return ret;
+    }
+
+    // Get the URI
+    memset(&params, 0, sizeof(params));
+    params.action = WIFI_DPP_BOOTSTRAP_GET_URI;
+    params.id = net_if_get_by_iface(iface); // needs to be the index of the interface
+    ret = net_mgmt(NET_REQUEST_WIFI_DPP, iface, &params, sizeof(params));
+    if (ret)
+    {
+        LOG_WRN("Failed to request DPP bootstrap get URI");
+        return ret;
+    }
+
+    LOG_INF("DPP QR Code (without quotes) \"%s\"", params.dpp_qr_code);
+
+    // Listen
+    memset(&params, 0, sizeof(params));
+    params.action = WIFI_DPP_LISTEN;
+    params.listen.role = WIFI_DPP_ROLE_ENROLLEE;
+    params.listen.freq = 2412; // center frequency for channel 1
+    ret = net_mgmt(NET_REQUEST_WIFI_DPP, iface, &params, sizeof(params));
+    if (ret)
+    {
+        LOG_WRN("Failed to request DPP listen");
+        return ret;
+    }
+
+    return ret;
+}
+#endif // CONFIG_WIFI_PROVISIONING_ENABLED
 
 #ifdef CONFIG_WIFI_ENTERPRISE
 static void set_enterprise_creds_params(struct wifi_enterprise_creds_params *params)

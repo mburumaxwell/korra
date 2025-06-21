@@ -96,6 +96,7 @@ config WIFI_ENTERPRISE
     select WIFI_NM_WPA_SUPPLICANT
     select WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE
     select WIFI_NM_WPA_SUPPLICANT_ROAMING
+    select WIFI_NM_WPA_SUPPLICANT_DPP
     # select WIFI_NM_WPA_SUPPLICANT_CRYPTO_MBEDTLS_PSA if !SOC_SERIES_ESP32S3
 
 config WIFI_ENTERPRISE_ANON_ID
@@ -110,6 +111,11 @@ config WIFI_ENTERPRISE_IDENTITY
 config WIFI_ENTERPRISE_PASSWORD
     string "Enterprise Password"
     depends on WIFI_ENTERPRISE
+
+config WIFI_PROVISIONING_ENABLED # Invisible because it has no prompt (no string after bool)
+    bool "Whether provisioning of WiFI credentials via DPP is enabled"
+    depends on WIFI_NM_WPA_SUPPLICANT_DPP
+    default n # TODO enable this once we have a way to test where the credentials go
 
 endif # BOARD_HAS_WIFI
 

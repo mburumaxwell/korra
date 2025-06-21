@@ -72,11 +72,21 @@ int korra_internet_connect()
 	}
 #endif // CONFIG_WIFI_SCAN_NETWORKS
 
+// either provisioning or static creds, if both it hangs
+#ifdef CONFIG_WIFI_PROVISIONING_ENABLED
+	ret = korra_wifi_provisioning();
+	if (ret)
+	{
+		return ret;
+	}
+#else
 	ret = korra_wifi_connect();
 	if (ret)
 	{
 		return ret;
 	}
+#endif // CONFIG_WIFI_PROVISIONING_ENABLED
+
 #endif // CONFIG_BOARD_HAS_WIFI
 
 	return ret;
