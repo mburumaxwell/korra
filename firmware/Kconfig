@@ -108,11 +108,6 @@ config WIFI_CREDENTIALS_STATIC_EAP_IDENTITY
 config WIFI_CREDENTIALS_STATIC_EAP_PASSWORD
     string "Enterprise Password"
 
-config WIFI_RUN_DPP
-    bool "Whether provisioning of WiFI credentials via DPP is enabled"
-    depends on WIFI_NM_WPA_SUPPLICANT_DPP
-    default n
-
 endif # BOARD_HAS_WIFI
 
 source "Kconfig.zephyr"

@@ -72,13 +72,14 @@ int korra_internet_connect()
 	}
 #endif // CONFIG_WIFI_SCAN_NETWORKS
 
-#ifdef CONFIG_WIFI_RUN_DPP
+// run provisioning if DPP is enabled and there are no static credentials
+#if defined(CONFIG_WIFI_NM_WPA_SUPPLICANT_DPP) && !defined(CONFIG_WIFI_CREDENTIALS_STATIC)
 	ret = korra_wifi_provisioning();
 	if (ret)
 	{
 		return ret;
 	}
-#endif // CONFIG_WIFI_RUN_DPP
+#endif // CONFIG_WIFI_NM_WPA_SUPPLICANT_DPP && !CONFIG_WIFI_CREDENTIALS_STATIC
 
 	ret = korra_wifi_connect();
 	if (ret)

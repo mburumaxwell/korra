@@ -3,6 +3,8 @@
 LOG_MODULE_REGISTER(korra_wifi, LOG_LEVEL_INF);
 
 #include <errno.h>
+#include <zephyr/kernel.h>
+#include <zephyr/net/wifi_credentials.h>
 
 #include <korra_credentials.h>
 
@@ -98,13 +100,16 @@ int korra_wifi_status(struct wifi_iface_status *status)
 #ifdef WIFI_NM_WPA_SUPPLICANT_DPP
 int korra_wifi_provisioning()
 {
+    // check if we have wifi credentials stored already
+    if (!wifi_credentials_is_empty())
+    {
+        LOG_DBG("Skipping provisioning via DPP because WiFi credentials are present");
+        return 0;
+    }
+
     struct net_if *iface = get_wifi_iface();
     struct net_linkaddr *linkaddr = net_if_get_link_addr(iface);
     struct wifi_dpp_params params = {0};
-
-    // TODO: check if we have wifi credentials stored already
-    // https://github.com/zephyrproject-rtos/zephyr/pull/88653
-    // https://github.com/zephyrproject-rtos/zephyr/issues/91790
 
     // Perform bootstrap gen
     params.action = WIFI_DPP_BOOTSTRAP_GEN;
@@ -115,7 +120,7 @@ int korra_wifi_provisioning()
     int ret = net_mgmt(NET_REQUEST_WIFI_DPP, iface, &params, sizeof(params));
     if (ret)
     {
-        LOG_WRN("Failed to request DPP bootstrap gen");
+        LOG_WRN("Failed to request DPP bootstrap gen: %d", ret);
         return ret;
     }
 
@@ -126,11 +131,23 @@ int korra_wifi_provisioning()
     ret = net_mgmt(NET_REQUEST_WIFI_DPP, iface, &params, sizeof(params));
     if (ret)
     {
-        LOG_WRN("Failed to request DPP bootstrap get URI");
+        LOG_WRN("Failed to request DPP bootstrap get URI: %d", ret);
         return ret;
     }
 
     LOG_INF("DPP QR Code (without quotes) \"%s\"", params.dpp_qr_code);
+
+    // TODO: confirm if we need to set this
+    // // Set response time
+    // memset(&params, 0, sizeof(params));
+    // params.action = WIFI_DPP_SET_WAIT_RESP_TIME;
+    // params.dpp_resp_wait_time = 30*1000;
+    // ret = net_mgmt(NET_REQUEST_WIFI_DPP, iface, &params, sizeof(params));
+    // if (ret)
+    // {
+    //     LOG_WRN("Failed to request DPP wait response time: %d", ret);
+    //     return ret;
+    // }
 
     // Listen
     memset(&params, 0, sizeof(params));
@@ -140,7 +157,7 @@ int korra_wifi_provisioning()
     ret = net_mgmt(NET_REQUEST_WIFI_DPP, iface, &params, sizeof(params));
     if (ret)
     {
-        LOG_WRN("Failed to request DPP listen");
+        LOG_WRN("Failed to request DPP listen: %d", ret);
         return ret;
     }
 
