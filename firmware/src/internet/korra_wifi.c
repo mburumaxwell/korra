@@ -10,6 +10,11 @@ LOG_MODULE_REGISTER(korra_wifi, LOG_LEVEL_INF);
 #include "korra_wifi.h"
 
 #define get_wifi_iface net_if_get_wifi_sta
+#define WIFI_MGMT_EVENTS (             \
+    NET_EVENT_WIFI_CONNECT_RESULT |    \
+    NET_EVENT_WIFI_DISCONNECT_RESULT | \
+    NET_EVENT_WIFI_SIGNAL_CHANGE |     \
+    NET_EVENT_WIFI_NEIGHBOR_REP_COMP)
 
 static struct k_work_delayable wifi_reconnect_work;
 static void wifi_reconnect_work_handler(struct k_work *work);
@@ -46,20 +51,18 @@ int korra_wifi_init()
     }
 
     // Print WiFi version
-	struct wifi_version version = {0};
+    struct wifi_version version = {0};
     int ret = net_mgmt(NET_REQUEST_WIFI_VERSION, iface, &version, sizeof(version));
-	if (ret)
+    if (ret)
     {
-		LOG_WRN("Failed to get Wi-Fi versions");
-		return ret;
-	}
-	LOG_INF("Driver Version: %s", version.drv_version);
-	LOG_INF("Firmware Version: %s", version.fw_version);
+        LOG_WRN("Failed to get Wi-Fi versions");
+        return ret;
+    }
+    LOG_INF("Driver Version: %s", version.drv_version);
+    LOG_INF("Firmware Version: %s", version.fw_version);
 
     // Initialize and add event callbacks for management
-    net_mgmt_init_event_callback(&wifi_mgmt_cb,
-                                 wifi_mgmt_event_handler,
-                                 NET_EVENT_WIFI_CONNECT_RESULT | NET_EVENT_WIFI_DISCONNECT_RESULT);
+    net_mgmt_init_event_callback(&wifi_mgmt_cb, wifi_mgmt_event_handler, WIFI_MGMT_EVENTS);
     net_mgmt_add_event_callback(&wifi_mgmt_cb);
 
     // Initialize work item for reconnection
@@ -191,6 +194,32 @@ static void wifi_mgmt_event_handler(struct net_mgmt_event_callback *cb, uint64_t
             k_work_schedule(&wifi_reconnect_work, K_SECONDS(5));
         }
     }
+#ifdef CONFIG_WIFI_ENTERPRISE // enables CONFIG_WIFI_NM_WPA_SUPPLICANT_ROAMING
+    else if (mgmt_event == NET_EVENT_WIFI_SIGNAL_CHANGE)
+    {
+        struct net_if *iface = get_wifi_iface();
+        int ret = net_mgmt(NET_REQUEST_WIFI_START_ROAMING, iface, NULL, 0);
+        if (ret)
+        {
+            LOG_WRN("Start roaming failed");
+            return;
+        }
+
+        LOG_INF("Start roaming requested\n");
+    }
+    else if (mgmt_event == NET_EVENT_WIFI_NEIGHBOR_REP_COMP)
+    {
+        struct net_if *iface = get_wifi_iface();
+        int ret = net_mgmt(NET_REQUEST_WIFI_NEIGHBOR_REP_COMPLETE, iface, NULL, 0);
+        if (ret)
+        {
+            LOG_WRN("Neighbor report complete failed");
+            return;
+        }
+
+        LOG_INF("Neighbor report complete requested");
+    }
+#endif // CONFIG_WIFI_ENTERPRISE
 }
 
 static void wifi_reconnect_work_handler(struct k_work *work)
