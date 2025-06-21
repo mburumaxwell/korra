@@ -67,55 +67,45 @@ config BOARD_HAS_INTERNET # Invisible because it has no prompt (no string after 
     select NET_HOSTNAME_UNIQUE
     select SNTP
     select POSIX_API
-    select TLS_CREDENTIALS
-    # # TODO: change this once we have figured out PSA or other secure storage
-    # select TLS_CREDENTIALS_BACKEND_PROTECTED_STORAGE if !SOC_SERIES_ESP32S3
+
+    # # TODO: remove these conditions once WPS_SUPPLICANT for ESP32 has been fixed
+    # https://github.com/zephyrproject-rtos/zephyr/issues/91757
+    select WIFI_NM_WPA_SUPPLICANT if !SOC_SERIES_ESP32S3
+    select WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE if !SOC_SERIES_ESP32S3
+    select WIFI_NM_WPA_SUPPLICANT_ROAMING if !SOC_SERIES_ESP32S3
+    select WIFI_NM_WPA_SUPPLICANT_DPP if !SOC_SERIES_ESP32S3
+    # # TODO: change this once we have figured out PSA storage
+    # select WIFI_NM_WPA_SUPPLICANT_CRYPTO_MBEDTLS_PSA
 
 if BOARD_HAS_WIFI
 config WIFI_SCAN_NETWORKS
     bool "Whether to scan WiFi networks"
     default n
 
-# TODO: find a way to not have WIFI credentials hard coded otherwise what is the point og OTAs
-
-config WIFI_SSID
-    string "Wi-Fi SSID"
-    help
-      "The SSID of the Wi-Fi network to connect to."
-    default "eduroam"
-
-config WIFI_PSK
-    string "Wi-Fi PSK"
-    depends on !WIFI_ENTERPRISE
-    help
-      "Pre-shared key (a.k.a. Passphrase) for Personal networks."
-
-config WIFI_ENTERPRISE
-    bool "Enable WPA Enterprise Authentication"
+config WIFI_CREDENTIALS_STATIC_TYPE_EAP_PEAP_MSCHAPV2
+    bool "EAP-PEAP-MSCHAPV2"
+    # depends on !WIFI_CREDENTIALS_STATIC
+    depends on !WIFI_CREDENTIALS_STATIC_TYPE_OPEN
+    depends on !WIFI_CREDENTIALS_STATIC_TYPE_PSK
+    depends on !WIFI_CREDENTIALS_STATIC_TYPE_PSK_SHA256
+    depends on !WIFI_CREDENTIALS_STATIC_TYPE_SAE
+    depends on !WIFI_CREDENTIALS_STATIC_TYPE_WPA_PSK
     default n
-    select WIFI_NM_WPA_SUPPLICANT
-    select WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE
-    select WIFI_NM_WPA_SUPPLICANT_ROAMING
-    select WIFI_NM_WPA_SUPPLICANT_DPP
-    # select WIFI_NM_WPA_SUPPLICANT_CRYPTO_MBEDTLS_PSA if !SOC_SERIES_ESP32S3
 
-config WIFI_ENTERPRISE_ANON_ID
+config WIFI_CREDENTIALS_STATIC_EAP_ANON_ID
     string "Enterprise Identity (anonymous)"
-    depends on WIFI_ENTERPRISE
     default "anonymous"
 
-config WIFI_ENTERPRISE_IDENTITY
+config WIFI_CREDENTIALS_STATIC_EAP_IDENTITY
     string "Enterprise Identity (Username)"
-    depends on WIFI_ENTERPRISE
 
-config WIFI_ENTERPRISE_PASSWORD
+config WIFI_CREDENTIALS_STATIC_EAP_PASSWORD
     string "Enterprise Password"
-    depends on WIFI_ENTERPRISE
 
-config WIFI_PROVISIONING_ENABLED # Invisible because it has no prompt (no string after bool)
+config WIFI_RUN_DPP
     bool "Whether provisioning of WiFI credentials via DPP is enabled"
     depends on WIFI_NM_WPA_SUPPLICANT_DPP
-    default n # TODO enable this once we have a way to test where the credentials go
+    default n
 
 endif # BOARD_HAS_WIFI
 

@@ -24,7 +24,7 @@ static void network_event_handler(struct net_mgmt_event_callback *cb, uint64_t m
 
 void korra_internet_init()
 {
-    LOG_DBG("Initializing");
+	LOG_DBG("Initializing");
 
 	// Register callbacks for connection manager
 	net_mgmt_init_event_callback(&network_cb,
@@ -72,20 +72,19 @@ int korra_internet_connect()
 	}
 #endif // CONFIG_WIFI_SCAN_NETWORKS
 
-// either provisioning or static creds, if both it hangs
-#ifdef CONFIG_WIFI_PROVISIONING_ENABLED
+#ifdef CONFIG_WIFI_RUN_DPP
 	ret = korra_wifi_provisioning();
 	if (ret)
 	{
 		return ret;
 	}
-#else
+#endif // CONFIG_WIFI_RUN_DPP
+
 	ret = korra_wifi_connect();
 	if (ret)
 	{
 		return ret;
 	}
-#endif // CONFIG_WIFI_PROVISIONING_ENABLED
 
 #endif // CONFIG_BOARD_HAS_WIFI
 

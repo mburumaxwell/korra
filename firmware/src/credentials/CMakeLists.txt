@@ -5,13 +5,12 @@ target_include_directories(app PRIVATE .)
 file(GLOB CERTS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.c)
 target_sources(app PRIVATE ${CERTS_SOURCES})
 
+# CONFIG_WIFI_CREDENTIALS still does not support enterprise as per
+# https://github.com/zephyrproject-rtos/zephyr/pull/88653
+# https://github.com/zephyrproject-rtos/zephyr/issues/91790
+# external/zephyr/include/zephyr/net/wifi_credentials.h#L115
 # Copied from external/zephyr/subsys/net/lib/wifi_credentials/CMakeLists.txt
-# These are test ones and production ones should ideally be provided during provisioning.
-# Could be through the shell depending on the security available on the target.
-# When CONFIG_WIFI_CREDENTIALS is enabled, these are added automatically as per CMakeLists referenced above
-# The only reason we are not using CONFIG_WIFI_CREDENTIALS is it does not yet support enterprise
-# as per external/zephyr/include/zephyr/net/wifi_credentials.h#L115
-if(DEFINED CONFIG_WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE AND NOT DEFINED CONFIG_WIFI_CREDENTIALS)
+if(DEFINED CONFIG_WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE)
   # Wi-Fi Enterprise test certificates handling
   set(gen_inc_dir ${ZEPHYR_BINARY_DIR}/misc/generated)
   set(gen_dir ${gen_inc_dir}/wifi_certs)

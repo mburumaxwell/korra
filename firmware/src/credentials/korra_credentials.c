@@ -19,7 +19,7 @@ static struct korra_credential credentials[] = {
 // - TLS_CREDENTIAL_PSK with TLS_CREDENTIAL_PSK_ID.
 // Such pairs of credentials must be assigned the same secure tag to be correctly handled in the system.
 
-#ifdef CONFIG_WIFI_ENTERPRISE
+#ifdef CONFIG_WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE
     /* WiFi enterprise */
     {
         .type = TLS_CREDENTIAL_CA_CERTIFICATE,
@@ -58,7 +58,7 @@ static struct korra_credential credentials[] = {
         .cred = wifi_client_key2,
         .credlen = ARRAY_SIZE(wifi_client_key2),
     },
-#endif // CONFIG_WIFI_ENTERPRISE
+#endif // CONFIG_WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE
 
     /* Azure */
     {
@@ -96,7 +96,7 @@ const char *korra_credential_tag_type_txt(enum korra_credential_tag_type type)
 {
     switch (type)
     {
-#ifdef CONFIG_WIFI_ENTERPRISE
+#ifdef CONFIG_WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE
     /* WiFi enterprise */
     case KORRA_CREDENTIAL_WIFI_CA_TAG:
         return "wifi-ca";
@@ -106,7 +106,7 @@ const char *korra_credential_tag_type_txt(enum korra_credential_tag_type type)
         return "wifi-ca-phase-2";
     case KORRA_CREDENTIAL_WIFI_CLIENT_P2_TAG:
         return "wifi-client-phase-2";
-#endif // CONFIG_WIFI_ENTERPRISE
+#endif // CONFIG_WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE
 
     /* Azure */
     case KORRA_CREDENTIAL_AZURE_CA_TAG:

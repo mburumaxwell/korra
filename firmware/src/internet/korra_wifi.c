@@ -23,7 +23,7 @@ static struct net_mgmt_event_callback wifi_mgmt_cb;
 static void wifi_mgmt_event_handler(struct net_mgmt_event_callback *cb, uint64_t mgmt_event, struct net_if *iface);
 static void wifi_status_print(struct wifi_iface_status *status);
 
-#ifdef CONFIG_WIFI_ENTERPRISE
+#ifdef CONFIG_WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE
 struct wifi_cert_data
 {
     enum tls_credential_type type;
@@ -36,7 +36,7 @@ static int process_certificates(struct wifi_cert_data *certs, size_t count);
 // Have own heap so that we do not steal from others.
 // Numbers: 2 CA, 2 Public, and 2 Keys. Assume @2KB = 12KB, plus 25%
 static K_HEAP_DEFINE(eap_certs_heap, KB(15));
-#endif // CONFIG_WIFI_ENTERPRISE
+#endif // CONFIG_WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE
 
 int korra_wifi_init()
 {
@@ -68,7 +68,7 @@ int korra_wifi_init()
     // Initialize work item for reconnection
     k_work_init_delayable(&wifi_reconnect_work, wifi_reconnect_work_handler);
 
-#ifdef CONFIG_WIFI_ENTERPRISE
+#ifdef CONFIG_WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE
     struct wifi_enterprise_creds_params ent_params = {0};
     set_enterprise_creds_params(&ent_params);
     ret = net_mgmt(NET_REQUEST_WIFI_ENTERPRISE_CREDS, iface, &ent_params, sizeof(ent_params));
@@ -77,7 +77,7 @@ int korra_wifi_init()
         LOG_WRN("Set enterprise credentials failed: %d", ret);
         return ret;
     }
-#endif // CONFIG_WIFI_ENTERPRISE
+#endif // CONFIG_WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE
 
     return 0;
 }
@@ -95,55 +95,108 @@ int korra_wifi_status(struct wifi_iface_status *status)
     return 0;
 }
 
+#ifdef WIFI_NM_WPA_SUPPLICANT_DPP
+int korra_wifi_provisioning()
+{
+    struct net_if *iface = get_wifi_iface();
+    struct net_linkaddr *linkaddr = net_if_get_link_addr(iface);
+    struct wifi_dpp_params params = {0};
+
+    // TODO: check if we have wifi credentials stored already
+    // https://github.com/zephyrproject-rtos/zephyr/pull/88653
+    // https://github.com/zephyrproject-rtos/zephyr/issues/91790
+
+    // Perform bootstrap gen
+    params.action = WIFI_DPP_BOOTSTRAP_GEN;
+    params.bootstrap_gen.type = WIFI_DPP_BOOTSTRAP_TYPE_QRCODE;
+    params.bootstrap_gen.chan = 1;
+    params.bootstrap_gen.op_class = 81; // for channel 1 and only for QR Code?
+    memcpy(params.bootstrap_gen.mac, linkaddr->addr, WIFI_MAC_ADDR_LEN);
+    int ret = net_mgmt(NET_REQUEST_WIFI_DPP, iface, &params, sizeof(params));
+    if (ret)
+    {
+        LOG_WRN("Failed to request DPP bootstrap gen");
+        return ret;
+    }
+
+    // Get the URI
+    memset(&params, 0, sizeof(params));
+    params.action = WIFI_DPP_BOOTSTRAP_GET_URI;
+    params.id = net_if_get_by_iface(iface); // needs to be the index of the interface
+    ret = net_mgmt(NET_REQUEST_WIFI_DPP, iface, &params, sizeof(params));
+    if (ret)
+    {
+        LOG_WRN("Failed to request DPP bootstrap get URI");
+        return ret;
+    }
+
+    LOG_INF("DPP QR Code (without quotes) \"%s\"", params.dpp_qr_code);
+
+    // Listen
+    memset(&params, 0, sizeof(params));
+    params.action = WIFI_DPP_LISTEN;
+    params.listen.role = WIFI_DPP_ROLE_ENROLLEE;
+    params.listen.freq = 2412; // center frequency for channel 1
+    ret = net_mgmt(NET_REQUEST_WIFI_DPP, iface, &params, sizeof(params));
+    if (ret)
+    {
+        LOG_WRN("Failed to request DPP listen");
+        return ret;
+    }
+
+    return ret;
+}
+#endif // WIFI_NM_WPA_SUPPLICANT_DPP
+
 int korra_wifi_connect()
 {
-    int ret;
-    struct net_if *iface = get_wifi_iface();
+#ifdef CONFIG_WIFI_CREDENTIALS_STATIC_TYPE_EAP_PEAP_MSCHAPV2
     struct wifi_connect_req_params con_req_params = {0};
 
     /* Defaults */
     con_req_params.band = WIFI_FREQ_BAND_UNKNOWN;
     con_req_params.channel = WIFI_CHANNEL_ANY;
-    con_req_params.security = WIFI_SECURITY_TYPE_NONE;
     con_req_params.mfp = WIFI_MFP_OPTIONAL;
     con_req_params.eap_ver = 0;
     con_req_params.verify_peer_cert = true;
 
-    con_req_params.ssid = CONFIG_WIFI_SSID;
+    con_req_params.ssid = CONFIG_WIFI_CREDENTIALS_STATIC_SSID;
     con_req_params.ssid_length = strlen(con_req_params.ssid);
 
-#ifdef CONFIG_WIFI_ENTERPRISE
     con_req_params.security = WIFI_SECURITY_TYPE_EAP_PEAP_MSCHAPV2;
-    con_req_params.anon_id = CONFIG_WIFI_ENTERPRISE_ANON_ID;
+    con_req_params.anon_id = CONFIG_WIFI_CREDENTIALS_STATIC_EAP_ANON_ID;
     con_req_params.aid_length = strlen(con_req_params.anon_id);
-    con_req_params.eap_identity = CONFIG_WIFI_ENTERPRISE_IDENTITY;
+    con_req_params.eap_identity = CONFIG_WIFI_CREDENTIALS_STATIC_EAP_IDENTITY;
     con_req_params.eap_id_length = strlen(con_req_params.eap_identity);
-    con_req_params.eap_password = CONFIG_WIFI_ENTERPRISE_PASSWORD;
+    con_req_params.eap_password = CONFIG_WIFI_CREDENTIALS_STATIC_EAP_PASSWORD;
     con_req_params.eap_passwd_length = strlen(con_req_params.eap_password);
 
     con_req_params.identities[0] = con_req_params.eap_identity;
     con_req_params.nusers = 1;
     con_req_params.passwords[0] = con_req_params.eap_password;
     con_req_params.passwds = 1;
-#else
-    if (strlen(CONFIG_WIFI_PSK) > 0)
-    {
-        con_req_params.security = WIFI_SECURITY_TYPE_PSK;
-        con_req_params.psk = CONFIG_WIFI_PSK;
-        con_req_params.psk_length = strlen(CONFIG_WIFI_PSK);
-    }
-#endif
 
     // Connect to the WiFi network
     LOG_INF("Connecting to \"%s\"", con_req_params.ssid);
-    ret = net_mgmt(NET_REQUEST_WIFI_CONNECT, iface, &con_req_params, sizeof(con_req_params));
+    struct net_if *iface = get_wifi_iface();
+    int ret = net_mgmt(NET_REQUEST_WIFI_CONNECT, iface, &con_req_params, sizeof(con_req_params));
     ret = ret == -EALREADY ? 0 : ret; // skip if already connected
     if (ret)
     {
         LOG_ERR("Connect command failed: %d", ret);
     }
-
     return ret;
+#else
+    struct net_if *iface = get_wifi_iface();
+	// struct net_if *iface = net_if_get_first_by_type(&NET_L2_GET_NAME(ETHERNET));
+    LOG_INF("Connecting to stored networks");
+    int ret = net_mgmt(NET_REQUEST_WIFI_CONNECT_STORED, iface, NULL, 0);
+    if (ret)
+    {
+        LOG_ERR("Connect command failed: %d", ret);
+    }
+    return ret;
+#endif
 }
 
 static void wifi_status_print(struct wifi_iface_status *status)
@@ -233,60 +286,7 @@ static void wifi_reconnect_work_handler(struct k_work *work)
     }
 }
 
-#ifdef CONFIG_WIFI_PROVISIONING_ENABLED
-int korra_wifi_provisioning()
-{
-    struct net_if *iface = get_wifi_iface();
-    struct net_linkaddr *linkaddr = net_if_get_link_addr(iface);
-    struct wifi_dpp_params params = {0};
-
-    // TODO: check if we have wifi credentials stored already
-    // https://github.com/zephyrproject-rtos/zephyr/pull/88653
-    // https://github.com/zephyrproject-rtos/zephyr/issues/91790
-
-    // Perform bootstrap gen
-    params.action = WIFI_DPP_BOOTSTRAP_GEN;
-    params.bootstrap_gen.type = WIFI_DPP_BOOTSTRAP_TYPE_QRCODE;
-    params.bootstrap_gen.chan = 1;
-    params.bootstrap_gen.op_class = 81; // for channel 1 and only for QR Code?
-    memcpy(params.bootstrap_gen.mac, linkaddr->addr, WIFI_MAC_ADDR_LEN);
-    int ret = net_mgmt(NET_REQUEST_WIFI_DPP, iface, &params, sizeof(params));
-    if (ret)
-    {
-        LOG_WRN("Failed to request DPP bootstrap gen");
-        return ret;
-    }
-
-    // Get the URI
-    memset(&params, 0, sizeof(params));
-    params.action = WIFI_DPP_BOOTSTRAP_GET_URI;
-    params.id = net_if_get_by_iface(iface); // needs to be the index of the interface
-    ret = net_mgmt(NET_REQUEST_WIFI_DPP, iface, &params, sizeof(params));
-    if (ret)
-    {
-        LOG_WRN("Failed to request DPP bootstrap get URI");
-        return ret;
-    }
-
-    LOG_INF("DPP QR Code (without quotes) \"%s\"", params.dpp_qr_code);
-
-    // Listen
-    memset(&params, 0, sizeof(params));
-    params.action = WIFI_DPP_LISTEN;
-    params.listen.role = WIFI_DPP_ROLE_ENROLLEE;
-    params.listen.freq = 2412; // center frequency for channel 1
-    ret = net_mgmt(NET_REQUEST_WIFI_DPP, iface, &params, sizeof(params));
-    if (ret)
-    {
-        LOG_WRN("Failed to request DPP listen");
-        return ret;
-    }
-
-    return ret;
-}
-#endif // CONFIG_WIFI_PROVISIONING_ENABLED
-
-#ifdef CONFIG_WIFI_ENTERPRISE
+#ifdef CONFIG_WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE
 static void set_enterprise_creds_params(struct wifi_enterprise_creds_params *params)
 {
     struct wifi_cert_data certs[] = {
@@ -385,7 +385,7 @@ static int process_certificates(struct wifi_cert_data *certs, size_t count)
 
     return 0;
 }
-#endif // CONFIG_WIFI_ENTERPRISE
+#endif // CONFIG_WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE
 
 #ifdef CONFIG_WIFI_SCAN_NETWORKS
 static uint32_t scan_result;

@@ -3,7 +3,7 @@
 #ifndef KORRA_TEST_CERTS_H
 #define KORRA_TEST_CERTS_H
 
-#ifdef CONFIG_WIFI_ENTERPRISE
+#ifdef CONFIG_WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE
 static const uint8_t wifi_client_cert[] = {
 #include <wifi_certs/client.pem.inc>
     '\0'};
@@ -23,6 +23,6 @@ static const uint8_t wifi_client_cert2[] = {
 static const uint8_t wifi_client_key2[] = {
 #include <wifi_certs/client-key2.pem.inc>
     '\0'};
-#endif // CONFIG_WIFI_ENTERPRISE
+#endif // CONFIG_WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE
 
 #endif /* KORRA_TEST_CERTS_H */
