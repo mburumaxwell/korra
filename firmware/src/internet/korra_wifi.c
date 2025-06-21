@@ -18,27 +18,27 @@ static void wifi_status_print(struct wifi_iface_status *status);
 
 #ifdef CONFIG_WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE
 static const char ca_cert_test[] = {
-#include <wifi_enterprise_test_certs/ca.pem.inc>
+#include <wifi_certs/ca.pem.inc>
     '\0'};
 
 static const char client_cert_test[] = {
-#include <wifi_enterprise_test_certs/client.pem.inc>
+#include <wifi_certs/client.pem.inc>
     '\0'};
 
 static const char client_key_test[] = {
-#include <wifi_enterprise_test_certs/client-key.pem.inc>
+#include <wifi_certs/client-key.pem.inc>
     '\0'};
 
 static const char ca_cert2_test[] = {
-#include <wifi_enterprise_test_certs/ca2.pem.inc>
+#include <wifi_certs/ca2.pem.inc>
     '\0'};
 
 static const char client_cert2_test[] = {
-#include <wifi_enterprise_test_certs/client2.pem.inc>
+#include <wifi_certs/client2.pem.inc>
     '\0'};
 
 static const char client_key2_test[] = {
-#include <wifi_enterprise_test_certs/client-key2.pem.inc>
+#include <wifi_certs/client-key2.pem.inc>
     '\0'};
 #endif // CONFIG_WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE
 

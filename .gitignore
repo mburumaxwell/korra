@@ -7,3 +7,5 @@ external
 binaries
 
 node_modules/
+
+.DS_Store

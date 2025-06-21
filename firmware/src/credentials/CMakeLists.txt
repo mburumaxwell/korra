@@ -14,7 +14,7 @@ target_sources(app PRIVATE ${CERTS_SOURCES})
 if(DEFINED CONFIG_WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE AND NOT DEFINED CONFIG_WIFI_CREDENTIALS)
   # Wi-Fi Enterprise test certificates handling
   set(gen_inc_dir ${ZEPHYR_BINARY_DIR}/misc/generated)
-  set(gen_dir ${gen_inc_dir}/wifi_enterprise_test_certs)
+  set(gen_dir ${gen_inc_dir}/wifi_certs)
   if(NOT DEFINED WIFI_TEST_CERTS_DIR)
     set(WIFI_TEST_CERTS_DIR ${ZEPHYR_BASE}/samples/net/wifi/test_certs/rsa3k)
   endif()
