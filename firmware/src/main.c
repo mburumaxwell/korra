@@ -23,22 +23,27 @@ int main(void)
 	printk("*** Running Board %s at %d MHz ***\n", CONFIG_BOARD, SystemCoreClock / MHZ(1));
 	printk("*** Hostname: %s ***\n", net_hostname_get());
 
-	uint32_t dev_id[4] = {0};
-	int ret = hwinfo_get_device_id((uint8_t *)dev_id, sizeof(dev_id));
-	if (ret)
+	// Most ARM devices have 96bit or 128bit ones but ESP32 has 64bit or less (when it is the Mac)
+	// We allocate 16 byte buffer to accommodate for 128bit (128/8=16)
+	uint8_t devid[16] = {0};
+	ssize_t devid_len = hwinfo_get_device_id(devid, sizeof(devid));
+	if (devid_len > 0)
 	{
-		printk("*** Device ID: %08x-%08x-%08x-%08x ***\n", dev_id[0], dev_id[1], dev_id[2], dev_id[3]);
+		// print just the length assigned, no dashes so that it is easy to copy from terminal
+		printk("*** Device ID: ");
+		for (uint8_t i = 0; i < (devid_len); i++) printk("%02x", devid[i]);
+		printk(" (%d bytes) ***\n", devid_len);
 	}
 	else
 	{
-		LOG_WRN("Unable to get device ID: %d", ret);
+		LOG_WRN("Unable to get device ID: %d", devid_len);
 	}
 
 	korra_time_init();
 	korra_credentials_init();
 	korra_sensors_init();
 	korra_internet_init();
-	korra_cloud_init((uint8_t *)dev_id, sizeof(dev_id));
+	korra_cloud_init((uint8_t *)devid, sizeof(devid));
 
 	korra_internet_connect();
 
