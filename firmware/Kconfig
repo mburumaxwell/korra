@@ -16,7 +16,7 @@ config APP_NAME
     default "Keeper" if APP_KIND_KEEPER
     default "Pot" if APP_KIND_POT
 
-config DATA_COLLECTION_INTERVAL_SECONDS
+config SENSORS_READ_INTERVAL_SECONDS
     int "Interval for collecting sensor data in seconds"
     default 60
 
