@@ -9,9 +9,12 @@ LOG_MODULE_REGISTER(korra_time, LOG_LEVEL_INF);
 
 #include "korra_time.h"
 
-#define CONFIG_KORRA_TIME_SYNC_INITIAL_DELAY K_SECONDS(5)
-#define CONFIG_KORRA_TIME_SYNC_PERIOD K_HOURS(6)
-#define CONFIG_KORRA_TIME_SYNC_RESCHEDULE_DELAY K_SECONDS(30)
+#define SYNC_SERVER_ADDRESS     CONFIG_SNTP_SERVER_ADDRESS
+#define SYNC_SERVER_PORT        CONFIG_SNTP_SERVER_PORT
+#define SYNC_SERVER_TIMEOUT     CONFIG_SNTP_SERVER_TIMEOUT_SECONDS * MSEC_PER_SEC
+#define SYNC_INITIAL_DELAY      K_SECONDS(5)
+#define SYNC_PERIOD             K_HOURS(6)
+#define SYNC_RESCHEDULE_DELAY   K_SECONDS(30)
 
 // Time sync is done using the configured time servers
 // Some logic is pulled from
@@ -59,8 +62,8 @@ static int sync_time()
     };
 
     struct addrinfo *res = NULL;
-    LOG_DBG("Fetching IPv4 for %s", CONFIG_SNTP_SERVER_ADDRESS);
-    int ret = getaddrinfo(CONFIG_SNTP_SERVER_ADDRESS, NULL, &hints, &res);
+    LOG_DBG("Fetching IPv4 for %s", SYNC_SERVER_ADDRESS);
+    int ret = getaddrinfo(SYNC_SERVER_ADDRESS, NULL, &hints, &res);
     if (ret)
     {
         LOG_INF("getaddrinfo failed (%d, errno %d)", ret, errno);
@@ -72,12 +75,12 @@ static int sync_time()
     struct sockaddr addr = *(res->ai_addr);
     socklen_t addrlen = res->ai_addrlen;
     freeaddrinfo(res);                                         // free the allocated memory
-    net_sin(&addr)->sin_port = htons(CONFIG_SNTP_SERVER_PORT); // store the port
+    net_sin(&addr)->sin_port = htons(SYNC_SERVER_PORT); // store the port
 
     // print out the resolved address
     char addr_str[INET6_ADDRSTRLEN] = {0};
     inet_ntop(addr.sa_family, &net_sin(&addr)->sin_addr, addr_str, sizeof(addr_str));
-    LOG_DBG("%s -> %s", CONFIG_SNTP_SERVER_ADDRESS, addr_str);
+    LOG_DBG("%s -> %s", SYNC_SERVER_ADDRESS, addr_str);
 
     struct sntp_ctx ctx;
     ret = sntp_init(&ctx, &addr, addrlen);
@@ -90,7 +93,7 @@ static int sync_time()
 
     struct sntp_time s_time;
     LOG_DBG("Sending SNTP request...");
-    ret = sntp_query(&ctx, 4 * MSEC_PER_SEC, &s_time);
+    ret = sntp_query(&ctx, SYNC_SERVER_TIMEOUT, &s_time);
     if (ret)
     {
         LOG_ERR("SNTP request failed: %d", ret);
@@ -135,7 +138,7 @@ static void sync_time_work_handler(struct k_work *work)
     int ret = sync_time();
     if (ret)
     {
-        k_work_reschedule(&sync_time_work, CONFIG_KORRA_TIME_SYNC_RESCHEDULE_DELAY);
+        k_work_reschedule(&sync_time_work, SYNC_RESCHEDULE_DELAY);
     }
 }
 
@@ -149,7 +152,7 @@ static void l4_event_handler(struct net_mgmt_event_callback *cb, uint64_t mgmt_e
     if (mgmt_event == NET_EVENT_L4_CONNECTED)
     {
         LOG_INF("Yay! We have internet!");
-        k_timer_start(&sync_timer, CONFIG_KORRA_TIME_SYNC_INITIAL_DELAY, CONFIG_KORRA_TIME_SYNC_PERIOD);
+        k_timer_start(&sync_timer, SYNC_INITIAL_DELAY, SYNC_PERIOD);
     }
     else if (mgmt_event == NET_EVENT_L4_DISCONNECTED)
     {

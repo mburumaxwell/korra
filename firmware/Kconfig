@@ -16,7 +16,7 @@ config APP_NAME
     default "Keeper" if APP_KIND_KEEPER
     default "Pot" if APP_KIND_POT
 
-config SENSORS_READ_INTERVAL_SECONDS
+config SENSORS_READ_PERIOD_SECONDS
     int "Interval for collecting sensor data in seconds"
     default 60
 
@@ -32,7 +32,7 @@ config SNTP_SERVER_PORT
 
 config SNTP_SERVER_TIMEOUT_SECONDS
 	int "Duration to wait for response in seconds"
-	default 2000
+	default 4
     depends on SNTP
 
 config BOARD_HAS_CELLULAR

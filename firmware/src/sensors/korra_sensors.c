@@ -6,7 +6,7 @@ LOG_MODULE_REGISTER(korra_sensors, LOG_LEVEL_INF);
 
 #include "korra_sensors.h"
 
-#define READ_INTERVAL K_SECONDS(CONFIG_SENSORS_READ_INTERVAL_SECONDS)
+#define READ_PERIOD K_SECONDS(CONFIG_SENSORS_READ_PERIOD_SECONDS)
 
 static struct k_timer collect_data_timer;
 static struct k_work_delayable collect_data_work;
@@ -24,7 +24,7 @@ void korra_sensors_init()
     k_work_init_delayable(&collect_data_work, collect_data_work_handler);
 
     // Start the timer
-    k_timer_start(&collect_data_timer, READ_INTERVAL, READ_INTERVAL); // should we start with K_NO_WAIT instead?
+    k_timer_start(&collect_data_timer, READ_PERIOD, READ_PERIOD); // should we start with K_NO_WAIT instead?
 }
 
 static void collect_data_work_handler(struct k_work *work)
