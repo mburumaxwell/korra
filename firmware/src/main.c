@@ -10,6 +10,7 @@ LOG_MODULE_REGISTER(main, LOG_LEVEL_DBG);
 #include <korra_internet.h>
 #include <korra_cloud.h>
 #include <korra_sensors.h>
+#include <korra_time.h>
 
 #ifndef CONFIG_ARM
 #define SystemCoreClock CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC
@@ -33,6 +34,7 @@ int main(void)
 		LOG_WRN("Unable to get device ID: %d", ret);
 	}
 
+	korra_time_init();
 	korra_credentials_init();
 	korra_sensors_init();
 	korra_internet_init();

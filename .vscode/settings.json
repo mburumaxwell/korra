@@ -18,6 +18,7 @@
         "LJMU",
         "printk",
         "procpu",
-        "RSSI"
+        "RSSI",
+        "SNTP"
     ]
 }

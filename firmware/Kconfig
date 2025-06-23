@@ -20,6 +20,21 @@ config DATA_COLLECTION_INTERVAL_SECONDS
     int "Interval for collecting sensor data in seconds"
     default 60
 
+config SNTP_SERVER_ADDRESS
+    string "SNTP server address"
+    default "pool.ntp.org"
+    depends on SNTP
+
+config SNTP_SERVER_PORT
+	int "SNTP server port"
+	default 123
+    depends on SNTP
+
+config SNTP_SERVER_TIMEOUT_SECONDS
+	int "Duration to wait for response in seconds"
+	default 2000
+    depends on SNTP
+
 config BOARD_HAS_CELLULAR
     bool "Whether to board has Cellular"
     default n

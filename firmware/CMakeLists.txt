@@ -7,6 +7,7 @@ add_subdirectory(src/credentials)
 add_subdirectory(src/cloud)
 add_subdirectory(src/internet)
 add_subdirectory(src/sensors)
+add_subdirectory(src/time)
 
 FILE(GLOB app_sources src/*.c)
 target_sources(app PRIVATE ${app_sources})
