@@ -55,13 +55,21 @@ int korra_wifi_init()
     // Print WiFi version
     struct wifi_version version = {0};
     int ret = net_mgmt(NET_REQUEST_WIFI_VERSION, iface, &version, sizeof(version));
-    if (ret)
+    if (ret == 0)
     {
-        LOG_WRN("Failed to get Wi-Fi versions");
-        return ret;
+        LOG_INF("Driver Version: %s", version.drv_version);
+        LOG_INF("Firmware Version: %s", version.fw_version);
     }
-    LOG_INF("Driver Version: %s", version.drv_version);
-    LOG_INF("Firmware Version: %s", version.fw_version);
+    else
+    {
+        // not all drivers support having a version (if added, we need not change this)
+        // as of 2025-June-23, none of the ESP drivers do
+        if (ret != -ENOTSUP)
+        {
+            LOG_WRN("Failed to get Wi-Fi versions: %d", ret);
+            return ret;
+        }
+    }
 
     // Initialize and add event callbacks for management
     net_mgmt_init_event_callback(&wifi_mgmt_cb, wifi_mgmt_event_handler, WIFI_MGMT_EVENTS);
