@@ -63,10 +63,14 @@ static void network_event_handler(struct net_mgmt_event_callback *cb, uint64_t m
 	{
 		k_sem_give(&network_connected);
 		// TODO: setup client stuff
+
+		return;
 	}
 	else if (mgmt_event == NET_EVENT_L4_DISCONNECTED)
 	{
 		k_sem_take(&network_connected, K_FOREVER);
 		// TODO: reset client stuff
+
+		return;
 	}
 }

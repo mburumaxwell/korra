@@ -97,10 +97,14 @@ static void network_event_handler(struct net_mgmt_event_callback *cb, uint64_t m
 	if (mgmt_event == NET_EVENT_L4_CONNECTED)
 	{
 		LOG_INF("Network connectivity gained!");
+
+		return;
 	}
 	else if (mgmt_event == NET_EVENT_L4_DISCONNECTED)
 	{
 		LOG_INF("Network connectivity lost!");
 		// for cellular we need to restart the connection?
+
+		return;
 	}
 }

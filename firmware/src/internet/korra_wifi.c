@@ -257,6 +257,8 @@ static void wifi_mgmt_event_handler(struct net_mgmt_event_callback *cb, uint64_t
             korra_wifi_status(&wstatus);
             wifi_status_print(&wstatus);
         }
+
+		return;
     }
     else if (mgmt_event == NET_EVENT_WIFI_DISCONNECT_RESULT)
     {
@@ -270,12 +272,13 @@ static void wifi_mgmt_event_handler(struct net_mgmt_event_callback *cb, uint64_t
             LOG_INF("Disconnected! disconn_reason: %d. Retrying in 5 sec ...", status->disconn_reason);
             k_work_schedule(&wifi_reconnect_work, K_SECONDS(5));
         }
+
+		return;
     }
 #ifdef CONFIG_WIFI_NM_WPA_SUPPLICANT_ROAMING
     // follow https://github.com/zephyrproject-rtos/zephyr/issues/87728
     else if (mgmt_event == NET_EVENT_WIFI_SIGNAL_CHANGE)
     {
-        struct net_if *iface = get_wifi_iface();
         int ret = net_mgmt(NET_REQUEST_WIFI_START_ROAMING, iface, NULL, 0);
         if (ret)
         {
@@ -287,7 +290,6 @@ static void wifi_mgmt_event_handler(struct net_mgmt_event_callback *cb, uint64_t
     }
     else if (mgmt_event == NET_EVENT_WIFI_NEIGHBOR_REP_COMP)
     {
-        struct net_if *iface = get_wifi_iface();
         int ret = net_mgmt(NET_REQUEST_WIFI_NEIGHBOR_REP_COMPLETE, iface, NULL, 0);
         if (ret)
         {
@@ -296,6 +298,8 @@ static void wifi_mgmt_event_handler(struct net_mgmt_event_callback *cb, uint64_t
         }
 
         LOG_INF("Neighbor report complete requested");
+
+		return;
     }
 #endif // CONFIG_WIFI_NM_WPA_SUPPLICANT_ROAMING
 }
@@ -471,6 +475,8 @@ static void wifi_scan_event_handler(struct net_mgmt_event_callback *cb, uint64_t
                ((entry->wpa3_ent_type) ? wifi_wpa3_enterprise_txt(entry->wpa3_ent_type) : wifi_security_txt(entry->security)),
                ((entry->mac_length) ? mac_string_buf : (const uint8_t *)""),
                wifi_mfp_txt(entry->mfp));
+
+		return;
     }
     else if (mgmt_event == NET_EVENT_WIFI_SCAN_DONE)
     {
@@ -486,6 +492,8 @@ static void wifi_scan_event_handler(struct net_mgmt_event_callback *cb, uint64_t
 
         k_sem_give(&sem_wifi_scan);                 // signal scan complete
         net_mgmt_del_event_callback(&wifi_scan_cb); // unregister because we do not need it till next scan
+
+		return;
     }
 }
 #endif // CONFIG_WIFI_SCAN_NETWORKS
