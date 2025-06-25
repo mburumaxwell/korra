@@ -86,8 +86,6 @@ config BOARD_HAS_INTERNET # Invisible because it has no prompt (no string after 
     select NET_DHCPV4 # Get IPv4 address from DHCP
     select NET_DHCPV6 # Get IPv6 address from DHCP
     select DNS_RESOLVER # Enable DNS resolver
-    select NET_HOSTNAME_ENABLE
-    select NET_HOSTNAME_UNIQUE
     select SNTP
     select POSIX_API
     # support for TLSv1.3
