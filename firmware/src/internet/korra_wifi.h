@@ -22,7 +22,6 @@ extern int korra_wifi_status(struct wifi_iface_status *status);
 extern int korra_wifi_scan(k_timeout_t timeout);
 #endif // CONFIG_WIFI_SCAN_NETWORKS
 
-
 #endif // KORRA_WIFI_H_
 
 #endif // CONFIG_BOARD_HAS_WIFI

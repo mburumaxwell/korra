@@ -22,7 +22,7 @@ static void network_event_handler(struct net_mgmt_event_callback *cb, uint64_t m
 
 void korra_cloud_init(uint8_t *id, size_t id_len)
 {
-    LOG_DBG("Initializing");
+	LOG_DBG("Initializing");
 
 	// Register callbacks for connection manager
 	net_mgmt_init_event_callback(&network_cb,
@@ -31,21 +31,21 @@ void korra_cloud_init(uint8_t *id, size_t id_len)
 	net_mgmt_add_event_callback(&network_cb);
 
 	// Start the thread
-    cloud_tid = k_thread_create(&cloud_thread,          // Thread struct
-                                cloud_stack,            // Stack
-                                K_THREAD_STACK_SIZEOF(cloud_stack),
-                                cloud_thread_start,     // Entry point
-                                NULL,                   // arg_1
-                                NULL,                   // arg_2
-                                NULL,                   // arg_3
-                                7,                      // Priority
-                                0,                      // Options
-                                K_NO_WAIT);             // Delay
+	cloud_tid = k_thread_create(&cloud_thread,						// Thread struct
+								cloud_stack,						// Stack
+								K_THREAD_STACK_SIZEOF(cloud_stack), // Stack size
+								cloud_thread_start,					// Entry point
+								NULL,								// arg_1
+								NULL,								// arg_2
+								NULL,								// arg_3
+								7,									// Priority
+								0,									// Options
+								K_NO_WAIT);							// Delay
 }
 
 static void cloud_thread_start(void *arg_1, void *arg_2, void *arg_3)
 {
-    LOG_INF("Waiting for internet...");
+	LOG_INF("Waiting for internet...");
 	k_sem_take(&network_connected, K_FOREVER);
 	LOG_INF("Internet is ready");
 
@@ -62,11 +62,11 @@ static void network_event_handler(struct net_mgmt_event_callback *cb, uint64_t m
 	if (mgmt_event == NET_EVENT_L4_CONNECTED)
 	{
 		k_sem_give(&network_connected);
-        // TODO: setup client stuff
+		// TODO: setup client stuff
 	}
 	else if (mgmt_event == NET_EVENT_L4_DISCONNECTED)
 	{
 		k_sem_take(&network_connected, K_FOREVER);
-        // TODO: reset client stuff
+		// TODO: reset client stuff
 	}
 }

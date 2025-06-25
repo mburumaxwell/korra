@@ -74,7 +74,7 @@ static int sync_time()
     // change type to one we can use then free up what was given
     struct sockaddr addr = *(res->ai_addr);
     socklen_t addrlen = res->ai_addrlen;
-    freeaddrinfo(res);                                         // free the allocated memory
+    freeaddrinfo(res);                                  // free the allocated memory
     net_sin(&addr)->sin_port = htons(SYNC_SERVER_PORT); // store the port
 
     // print out the resolved address

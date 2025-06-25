@@ -213,7 +213,6 @@ int korra_wifi_connect()
     return ret;
 #else
     struct net_if *iface = get_wifi_iface();
-	// struct net_if *iface = net_if_get_first_by_type(&NET_L2_GET_NAME(ETHERNET));
     LOG_INF("Connecting to stored networks");
     int ret = net_mgmt(NET_REQUEST_WIFI_CONNECT_STORED, iface, NULL, 0);
     if (ret)

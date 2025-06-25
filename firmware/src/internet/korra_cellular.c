@@ -8,7 +8,7 @@ LOG_MODULE_REGISTER(korra_cellular, LOG_LEVEL_INF);
 #include "korra_utils.h"
 #include "korra_cellular.h"
 
-# TODO: find better interface here
+#TODO : find better interface here
 #define get_cellular_iface net_if_get_default
 
 static struct net_mgmt_event_callback cellular_cb;

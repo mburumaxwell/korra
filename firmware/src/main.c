@@ -31,7 +31,10 @@ int main(void)
 	{
 		// print just the length assigned, no dashes so that it is easy to copy from terminal
 		printk("*** Device ID: ");
-		for (uint8_t i = 0; i < (devid_len); i++) printk("%02x", devid[i]);
+		for (uint8_t i = 0; i < (devid_len); i++)
+		{
+			printk("%02x", devid[i]);
+		}
 		printk(" (%d bytes) ***\n", devid_len);
 	}
 	else
