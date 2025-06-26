@@ -3,7 +3,7 @@ name: Firmware
 on:
   push:
     # branches: [main]
-    tags: ['firmware*']
+    tags: ['firmware@*']
     paths:
       - firmware/**
       - west-manifest/**
