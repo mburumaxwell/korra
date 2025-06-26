@@ -40,6 +40,8 @@ static size_t clientid_len, username_len, resource_uri_len;
 // static int dps_provision(void);
 // static int iot_hub_connect(void);
 
+static struct korra_cloud_provisioning_info *info;
+
 static int provisioning_info_save();
 static void provisioning_info_print();
 static int client_init();

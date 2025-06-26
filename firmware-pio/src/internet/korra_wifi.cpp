@@ -198,7 +198,7 @@ void KorraWifi::connect(bool initial)
   // The WiFi stack needs to have been activated by scanning or connecting hence why this is done last. Otherwise just zeros.
   if (initial)
   {
-    snprintf(_hostname, sizeof(_hostname), "korra-%02X%02X%02X", _macAddress[3], _macAddress[4], _macAddress[5]);
+    snprintf(_hostname, sizeof(_hostname), "korra-%02x%02x%02x", _macAddress[3], _macAddress[4], _macAddress[5]);
     WiFi.setHostname(_hostname);
     Serial.print("Set hostname to ");
     Serial.println(_hostname);

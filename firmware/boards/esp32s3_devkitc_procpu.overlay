@@ -42,3 +42,22 @@ i2s_led: &i2s0 {
 &psram0 {
   size = <DT_SIZE_M(8)>;
 };
+
+// &soc-nv-flash {
+//     size = <DT_SIZE_M(32)>;
+//     partitions {
+//         compatible = "fixed-partitions";
+//         #address-cells = <1>;
+//         #size-cells    = <1>;
+
+//         mcuboot: partition@0 {
+//             label = "mcuboot";
+//             reg   = <0x0000 0x1000>;
+//         };
+//         app: partition@1000 {
+//             label = "application";
+//             reg   = <0x1000 0x400000>;
+//         };
+//         /* …more partitions… */
+//     };
+// };
