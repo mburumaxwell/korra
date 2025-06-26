@@ -4,30 +4,30 @@
 #include <stdint.h>
 #include "korra_config.h"
 
-#ifdef APP_KIND_KEEPER
+#ifdef CONFIG_APP_KIND_KEEPER
 #include <DHTesp.h>
-#endif // APP_KIND_KEEPER
+#endif // CONFIG_APP_KIND_KEEPER
 
-#ifdef APP_KIND_POT
+#ifdef CONFIG_APP_KIND_POT
 // #include <DFRobot_PH.h>
-#endif // APP_KIND_POT
+#endif // CONFIG_APP_KIND_POT
 
 struct KorraSensorsData
 {
-#ifdef APP_KIND_KEEPER
+#ifdef CONFIG_APP_KIND_KEEPER
   // measured in °C
   float temperature;
 
   // relative humidity (%)
   float humidity;
-#endif // APP_KIND_KEEPER
+#endif // CONFIG_APP_KIND_KEEPER
 
-#ifdef APP_KIND_POT
+#ifdef CONFIG_APP_KIND_POT
   // percentage (%) of water in a substance
   int32_t moisture;
 
   float ph;
-#endif // APP_KIND_POT
+#endif // CONFIG_APP_KIND_POT
 };
 
 /**
@@ -63,19 +63,19 @@ public:
   void read(KorraSensorsData *dest);
 
 private:
-#ifdef APP_KIND_KEEPER
+#ifdef CONFIG_APP_KIND_KEEPER
   DHTesp dht;
-#endif // APP_KIND_KEEPER
+#endif // CONFIG_APP_KIND_KEEPER
 
-#ifdef APP_KIND_POT
+#ifdef CONFIG_APP_KIND_POT
   // DFRobot_PH phProbe; // pH probe
-#endif // APP_KIND_POT
+#endif // CONFIG_APP_KIND_POT
 
 private:
-#ifdef APP_KIND_POT
+#ifdef CONFIG_APP_KIND_POT
   float readPH();
   int32_t readMoisture();
-#endif // APP_KIND_POT
+#endif // CONFIG_APP_KIND_POT
 };
 
 #endif // KORRA_SENSORS_H

@@ -11,27 +11,27 @@ KorraSensors::~KorraSensors()
 
 void KorraSensors::begin()
 {
-#ifdef APP_KIND_KEEPER
+#ifdef CONFIG_APP_KIND_KEEPER
   // TODO: set correct pin
   // dht.setup(SENSORS_DHT22_PIN, DHTesp::DHT22);
-#endif // APP_KIND_KEEPER
+#endif // CONFIG_APP_KIND_KEEPER
 }
 
 void KorraSensors::read(KorraSensorsData *dest)
 {
-#if APP_KIND_KEEPER
+#if CONFIG_APP_KIND_KEEPER
   TempAndHumidity th = dht.getTempAndHumidity();
   dest->temperature = th.temperature;
   dest->humidity = th.humidity;
-#endif // APP_KIND_KEEPER
+#endif // CONFIG_APP_KIND_KEEPER
 
-#if APP_KIND_POT
+#if CONFIG_APP_KIND_POT
   dest->moisture = readMoisture();
   dest->ph = readPH();
-#endif // APP_KIND_POT
+#endif // CONFIG_APP_KIND_POT
 }
 
-#if APP_KIND_POT
+#if CONFIG_APP_KIND_POT
 float KorraSensors::readPH()
 {
   return -1;
@@ -48,4 +48,4 @@ int32_t KorraSensors::readMoisture()
   // return (int32_t)(100.0 * (dry - reading) / (dry - wet));
   return -1;
 }
-#endif // APP_KIND_KEEPER
+#endif // CONFIG_APP_KIND_KEEPER

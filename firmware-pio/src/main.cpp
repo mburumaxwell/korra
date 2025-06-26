@@ -1,3 +1,5 @@
+#include <app_version.h>
+
 #include "internet/korra_internet.h"
 #include "mdns/korra_mdns.h"
 #include "sensors/korra_sensors.h"
@@ -12,6 +14,7 @@ KorraMdns mdns(udpClient);
 void setup()
 {
   Serial.begin(9600);
+	Serial.println("Booting Korra " CONFIG_APP_NAME " build v" APP_VERSION_STRING " (" APP_BUILD_VERSION ")");
 
   // https://www.arduino.cc/reference/en/language/functions/analog-io/analogreference/
   // no need to set the reference voltage on ESP32-S3 because it offers reads in millivolts
