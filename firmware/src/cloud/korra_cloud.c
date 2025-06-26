@@ -74,7 +74,9 @@ static void cloud_thread_start(void *arg_1, void *arg_2, void *arg_3)
 	k_sem_take(&network_connected, K_FOREVER);
 	LOG_INF("Internet is ready");
 
+	LOG_INF("Waiting for time sync ...");
 	korra_wait_for_event(KORRA_EVENT_TIME_SYNCED, K_FOREVER);
+	LOG_INF("Time synced");
 
 	while (1)
 	{
