@@ -3,9 +3,10 @@ LOG_MODULE_REGISTER(korra_time, LOG_LEVEL_INF);
 
 #include <zephyr/net/socket.h>
 #include <zephyr/net/sntp.h>
-#include <zephyr/sys/timeutil.h>
-#include <zephyr/posix/time.h>
-#include <arpa/inet.h>
+#include <zephyr/sys/clock.h>
+
+#include <korra_events.h>
+#include <korra_net_utils.h>
 
 #include "korra_time.h"
 
@@ -56,32 +57,18 @@ void korra_time_init()
 static int sync_time()
 {
     LOG_INF("Syncing ...");
-    struct addrinfo hints = {
-        .ai_family = AF_INET,
-        .ai_socktype = SOCK_DGRAM,
-    };
 
-    struct addrinfo *res = NULL;
-    LOG_DBG("Fetching IPv4 for %s", SYNC_SERVER_ADDRESS);
-    int ret = getaddrinfo(SYNC_SERVER_ADDRESS, NULL, &hints, &res);
+    // resolve IP address
+    struct sockaddr addr;
+    socklen_t addrlen;
+    int ret = korra_resolve_address(SYNC_SERVER_ADDRESS, SYNC_SERVER_PORT, AF_INET, SOCK_DGRAM, &addr, &addrlen);
     if (ret)
     {
-        LOG_INF("getaddrinfo failed (%d, errno %d)", ret, errno);
+        LOG_ERR("Failed to resolve address: %d", ret);
         return ret;
     }
 
-    // only interested in the first result
-    // change type to one we can use then free up what was given
-    struct sockaddr addr = *(res->ai_addr);
-    socklen_t addrlen = res->ai_addrlen;
-    freeaddrinfo(res);                                  // free the allocated memory
-    net_sin(&addr)->sin_port = htons(SYNC_SERVER_PORT); // store the port
-
-    // print out the resolved address
-    char addr_str[INET6_ADDRSTRLEN] = {0};
-    inet_ntop(addr.sa_family, &net_sin(&addr)->sin_addr, addr_str, sizeof(addr_str));
-    LOG_DBG("%s -> %s", SYNC_SERVER_ADDRESS, addr_str);
-
+    // initialize the context with the address
     struct sntp_ctx ctx;
     ret = sntp_init(&ctx, &addr, addrlen);
     if (ret)
@@ -91,6 +78,7 @@ static int sync_time()
         return ret;
     }
 
+    // query for the time
     struct sntp_time s_time;
     LOG_DBG("Sending SNTP request...");
     ret = sntp_query(&ctx, SYNC_SERVER_TIMEOUT, &s_time);
@@ -101,36 +89,33 @@ static int sync_time()
         return ret;
     }
 
+    // at this point we have received time
     LOG_INF("SNTP Time: %llu", s_time.seconds);
     sntp_close(&ctx);
 
+    // update the system clock so that everyone can get what they need
     struct timespec ts = {
         .tv_sec = s_time.seconds,
-        .tv_nsec = s_time.fraction,
+        .tv_nsec = 0, // do not set to s_time.fraction, it tends to cause errors
     };
-    ret = clock_settime(CLOCK_REALTIME, &ts);
-    if (ret == -1) // on first time, this is likely transient
-    {
-        k_sleep(K_SECONDS(2));
-        ret = clock_settime(CLOCK_REALTIME, &ts);
-    }
+    ret = sys_clock_settime(SYS_CLOCK_REALTIME, &ts);
     if (ret)
     {
         LOG_ERR("Could not set time %d", ret);
         return -EINVAL;
     }
 
+    // print the time
     struct tm tm;
     gmtime_r(&ts.tv_sec, &tm);
-    LOG_INF("Time is now %d-%02u-%02u %02u:%02u:%02u UTC",
-            tm.tm_year + 1900,
-            tm.tm_mon + 1,
-            tm.tm_mday,
-            tm.tm_hour,
-            tm.tm_min,
-            tm.tm_sec);
+    char time_str[sizeof("1970-01-01T00:00:00")];
+    strftime(time_str, sizeof(time_str), "%FT%T", &tm);
+    LOG_INF("Time is now %s", time_str);
 
-    return ret;
+    // notify those waiting
+    korra_emit_event(KORRA_EVENT_TIME_SYNCED);
+
+    return 0;
 }
 
 static void sync_time_work_handler(struct k_work *work)

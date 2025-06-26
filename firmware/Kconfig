@@ -16,6 +16,16 @@ config APP_NAME
     default "Keeper" if APP_KIND_KEEPER
     default "Pot" if APP_KIND_POT
 
+config AZURE_IOT_DPS_HOSTNAME
+    string "Azure IoT DPS Global device endpoint"
+    default "global.azure-devices-provisioning.net"
+    depends on BOARD_HAS_INTERNET
+
+config AZURE_IOT_DPS_ID_SCOPE
+    string "Azure IoT DPS ID Scope"
+    default "0ne00F7ADA0"
+    depends on BOARD_HAS_INTERNET
+
 config SENSORS_READ_PERIOD_SECONDS
     int "Interval for collecting sensor data in seconds"
     default 60
@@ -61,7 +71,7 @@ config BOARD_HAS_WIFI
     select WIFI_NM_WPA_SUPPLICANT if !SOC_SERIES_ESP32S3
     select WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE if !SOC_SERIES_ESP32S3
     select WIFI_NM_WPA_SUPPLICANT_ROAMING if !SOC_SERIES_ESP32S3
-    select WIFI_NM_WPA_SUPPLICANT_DPP if !SOC_SERIES_ESP32S3
+    select WIFI_NM_WPA_SUPPLICANT_DPP if !SOC_SERIES_ESP32S3 && !BOARD_NRF7002DK
     select WIFI_NM_WPA_SUPPLICANT_CRYPTO_MBEDTLS_PSA if !SOC_SERIES_ESP32S3 && !BOARD_NRF7002DK
 
 config BOARD_HAS_INTERNET # Invisible because it has no prompt (no string after bool)
@@ -81,6 +91,7 @@ config BOARD_HAS_INTERNET # Invisible because it has no prompt (no string after 
     select NET_IPV4
     select NET_IPV6
     select NET_SOCKETS
+    select NET_SOCKETS_TLS
     select NET_TCP
     select NET_UDP
     select NET_DHCPV4 # Get IPv4 address from DHCP
@@ -88,13 +99,6 @@ config BOARD_HAS_INTERNET # Invisible because it has no prompt (no string after 
     select DNS_RESOLVER # Enable DNS resolver
     select SNTP
     select POSIX_API
-    # support for TLSv1.3
-    select MBEDTLS_TLS_VERSION_1_3 if !BOARD_NRF7002DK
-    select MBEDTLS_PSA_CRYPTO_CLIENT if !BOARD_NRF7002DK
-    select PSA_WANT_ALG_HKDF_EXTRACT if !BOARD_NRF7002DK
-    select PSA_WANT_ALG_HKDF_EXPAND if !BOARD_NRF7002DK
-    select PSA_WANT_ALG_SHA_256 if !BOARD_NRF7002DK
-    select PSA_WANT_ALG_SHA_384 if !BOARD_NRF7002DK
 
 if BOARD_HAS_WIFI
 config WIFI_SCAN_NETWORKS
@@ -103,12 +107,7 @@ config WIFI_SCAN_NETWORKS
 
 config WIFI_CREDENTIALS_STATIC_TYPE_EAP_PEAP_MSCHAPV2
     bool "EAP-PEAP-MSCHAPV2"
-    # depends on !WIFI_CREDENTIALS_STATIC
-    depends on !WIFI_CREDENTIALS_STATIC_TYPE_OPEN
-    depends on !WIFI_CREDENTIALS_STATIC_TYPE_PSK
-    depends on !WIFI_CREDENTIALS_STATIC_TYPE_PSK_SHA256
-    depends on !WIFI_CREDENTIALS_STATIC_TYPE_SAE
-    depends on !WIFI_CREDENTIALS_STATIC_TYPE_WPA_PSK
+    depends on WIFI_NM_WPA_SUPPLICANT
     default n
 
 config WIFI_CREDENTIALS_STATIC_EAP_ANON_ID

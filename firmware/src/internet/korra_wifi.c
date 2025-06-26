@@ -7,8 +7,8 @@ LOG_MODULE_REGISTER(korra_wifi, LOG_LEVEL_INF);
 #include <zephyr/net/wifi_credentials.h>
 
 #include <korra_credentials.h>
+#include <korra_net_utils.h>
 
-#include "korra_utils.h"
 #include "korra_wifi.h"
 
 #define get_wifi_iface net_if_get_wifi_sta
@@ -28,8 +28,8 @@ static void wifi_status_print(struct wifi_iface_status *status);
 #ifdef CONFIG_WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE
 struct wifi_cert_data
 {
-    enum tls_credential_type type;
-    uint32_t tag;
+    const enum korra_credential_tag_type tag;
+    const enum tls_credential_type type;
     uint8_t **data;
     size_t *len;
 };
@@ -226,7 +226,7 @@ int korra_wifi_connect()
 static void wifi_status_print(struct wifi_iface_status *status)
 {
     LOG_DBG("Link Mode: %s", wifi_link_mode_txt(status->link_mode));
-    LOG_DBG("SSID: %.32s", status->ssid);
+    LOG_DBG("SSID: %s", status->ssid);
     LOG_DBG("BSSID: " FMT_LL_ADDR_6, PRINT_LL_ADDR_6(status->bssid));
     LOG_DBG("Band: %s", wifi_band_txt(status->band));
     LOG_DBG("Channel: %d", status->channel);
@@ -258,7 +258,7 @@ static void wifi_mgmt_event_handler(struct net_mgmt_event_callback *cb, uint64_t
             wifi_status_print(&wstatus);
         }
 
-		return;
+        return;
     }
     else if (mgmt_event == NET_EVENT_WIFI_DISCONNECT_RESULT)
     {
@@ -273,7 +273,7 @@ static void wifi_mgmt_event_handler(struct net_mgmt_event_callback *cb, uint64_t
             k_work_schedule(&wifi_reconnect_work, K_SECONDS(5));
         }
 
-		return;
+        return;
     }
 #ifdef CONFIG_WIFI_NM_WPA_SUPPLICANT_ROAMING
     // follow https://github.com/zephyrproject-rtos/zephyr/issues/87728
@@ -299,7 +299,7 @@ static void wifi_mgmt_event_handler(struct net_mgmt_event_callback *cb, uint64_t
 
         LOG_INF("Neighbor report complete requested");
 
-		return;
+        return;
     }
 #endif // CONFIG_WIFI_NM_WPA_SUPPLICANT_ROAMING
 }
@@ -319,38 +319,38 @@ static void set_enterprise_creds_params(struct wifi_enterprise_creds_params *par
 {
     struct wifi_cert_data certs[] = {
         {
-            .type = TLS_CREDENTIAL_CA_CERTIFICATE,
             .tag = KORRA_CREDENTIAL_WIFI_CA_TAG,
+            .type = TLS_CREDENTIAL_CA_CERTIFICATE,
             .data = &params->ca_cert,
             .len = &params->ca_cert_len,
         },
         {
-            .type = TLS_CREDENTIAL_PUBLIC_CERTIFICATE,
             .tag = KORRA_CREDENTIAL_WIFI_CLIENT_TAG,
+            .type = TLS_CREDENTIAL_PUBLIC_CERTIFICATE,
             .data = &params->client_cert,
             .len = &params->client_cert_len,
         },
         {
+            .tag = KORRA_CREDENTIAL_WIFI_CLIENT_KEY_TAG,
             .type = TLS_CREDENTIAL_PRIVATE_KEY,
-            .tag = KORRA_CREDENTIAL_WIFI_CLIENT_TAG,
             .data = &params->client_key,
             .len = &params->client_key_len,
         },
         {
-            .type = TLS_CREDENTIAL_CA_CERTIFICATE,
             .tag = KORRA_CREDENTIAL_WIFI_CA_P2_TAG,
+            .type = TLS_CREDENTIAL_CA_CERTIFICATE,
             .data = &params->ca_cert2,
             .len = &params->ca_cert2_len,
         },
         {
-            .type = TLS_CREDENTIAL_PUBLIC_CERTIFICATE,
             .tag = KORRA_CREDENTIAL_WIFI_CLIENT_P2_TAG,
+            .type = TLS_CREDENTIAL_PUBLIC_CERTIFICATE,
             .data = &params->client_cert2,
             .len = &params->client_cert2_len,
         },
         {
+            .tag = KORRA_CREDENTIAL_WIFI_CLIENT_KEY_P2_TAG,
             .type = TLS_CREDENTIAL_PRIVATE_KEY,
-            .tag = KORRA_CREDENTIAL_WIFI_CLIENT_P2_TAG,
             .data = &params->client_key2,
             .len = &params->client_key2_len,
         },
@@ -387,7 +387,7 @@ static int process_certificates(struct wifi_cert_data *certs, size_t count)
             LOG_ERR("Failed to get credential tag: %s, err: %d", korra_credential_tag_type_txt(certs[i].tag), ret);
             return ret;
         }
-        LOG_DBG("Found credential type: %-18s -> tag: %-20s (len: %d)",
+        LOG_DBG("Found credential type: %-18s -> tag: %-23s (len: %d)",
                 tls_credential_type_txt(certs[i].type),
                 korra_credential_tag_type_txt(certs[i].tag),
                 len);
@@ -476,7 +476,7 @@ static void wifi_scan_event_handler(struct net_mgmt_event_callback *cb, uint64_t
                ((entry->mac_length) ? mac_string_buf : (const uint8_t *)""),
                wifi_mfp_txt(entry->mfp));
 
-		return;
+        return;
     }
     else if (mgmt_event == NET_EVENT_WIFI_SCAN_DONE)
     {
@@ -493,7 +493,7 @@ static void wifi_scan_event_handler(struct net_mgmt_event_callback *cb, uint64_t
         k_sem_give(&sem_wifi_scan);                 // signal scan complete
         net_mgmt_del_event_callback(&wifi_scan_cb); // unregister because we do not need it till next scan
 
-		return;
+        return;
     }
 }
 #endif // CONFIG_WIFI_SCAN_NETWORKS

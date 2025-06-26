@@ -16,6 +16,8 @@
         "frdm_rw612",
         "korra",
         "LJMU",
+        "MBEDTLS",
+        "MQTT",
         "printk",
         "procpu",
         "RSSI",

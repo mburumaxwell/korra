@@ -6,7 +6,8 @@ LOG_MODULE_REGISTER(korra_ethernet, LOG_LEVEL_INF);
 #include <zephyr/kernel.h>
 #include <zephyr/net/ethernet_mgmt.h>
 
-#include "korra_utils.h"
+#include <korra_net_utils.h>
+
 #include "korra_ethernet.h"
 
 #define get_ethernet_iface net_if_get_default

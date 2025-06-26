@@ -25,28 +25,46 @@ int main(void)
 
 	// Most ARM devices have 96bit or 128bit ones but ESP32 has 64bit or less (when it is the Mac)
 	// We allocate 16 byte buffer to accommodate for 128bit (128/8=16)
-	uint8_t devid[16] = {0};
-	ssize_t devid_len = hwinfo_get_device_id(devid, sizeof(devid));
-	if (devid_len > 0)
+	uint8_t raw_devid[16] = {0};
+	ssize_t raw_devid_len = hwinfo_get_device_id(raw_devid, sizeof(raw_devid));
+	if (raw_devid_len <= 0)
 	{
-		// print just the length assigned, no dashes so that it is easy to copy from terminal
-		printk("*** Device ID: ");
-		for (uint8_t i = 0; i < (devid_len); i++)
-		{
-			printk("%02x", devid[i]);
-		}
-		printk(" (%d bytes) ***\n", devid_len);
+		LOG_WRN("Unable to get device ID: %d", raw_devid_len);
+		return raw_devid_len;
+	}
+
+	// Generate the string version of the device id, no dashes so that it is easy to copy from terminal
+	size_t devid_len = (raw_devid_len * 2) + 1;
+	char devid[devid_len];
+	for (size_t i = 0; i < raw_devid_len; ++i)
+	{
+		sprintf(devid + (i * 2), "%02x", raw_devid[i]);
+	}
+	devid_len--;
+	printk("*** Device ID: %s (%d raw bytes) ***\n", devid, raw_devid_len);
+
+	// Prepare credentials used in the system
+	// korra_credentials_clear();
+	korra_credentials_init(devid, (size_t)devid_len);
+
+	// Print the device certificate for ease with provisioning
+	size_t devcert_len = korra_credentials_get_device_cert(NULL, 0) + 1;
+	if (devcert_len > 1)
+	{
+		char *devcert = k_malloc(devcert_len);
+		devcert_len = korra_credentials_get_device_cert(devcert, devcert_len);
+		printk("Device certificate to use for provisioning:\n%s\n", devcert);
+		k_free(devcert);
 	}
 	else
 	{
-		LOG_WRN("Unable to get device ID: %d", devid_len);
+		LOG_WRN("Seems the device certificate for provisioning does not exist. Did you forget to call korra_credentials_init(...)?");
 	}
 
 	korra_time_init();
-	korra_credentials_init();
 	korra_sensors_init();
 	korra_internet_init();
-	korra_cloud_init((uint8_t *)devid, sizeof(devid));
+	korra_cloud_init(devid, (size_t)devid_len);
 
 	korra_internet_connect();
 

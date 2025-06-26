@@ -5,7 +5,8 @@ LOG_MODULE_REGISTER(korra_cellular, LOG_LEVEL_INF);
 #include <errno.h>
 #include <zephyr/kernel.h>
 
-#include "korra_utils.h"
+#include <korra_net_utils.h>
+
 #include "korra_cellular.h"
 
 #TODO : find better interface here
