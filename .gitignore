@@ -9,3 +9,9 @@ binaries
 node_modules/
 
 .DS_Store
+
+# PlatformIO
+.vscode/c_cpp_properties.json
+.vscode/launch.json
+.pio
+app_version.h

@@ -1,17 +1,17 @@
 {
-  // See https://go.microsoft.com/fwlink/?LinkId=827846 to learn about workspace recommendations.
-  // Extension identifier format: ${publisher}.${name}. Example: vscode.csharp
-
-  // List of extensions which should be recommended for users of this workspace.
-  "recommendations": [
-    "davidanson.vscode-markdownlint",
-    "gruntfuggly.todo-tree",
-    "ms-azuretools.vscode-bicep",
-    "mylonics.zephyr-ide-extension-pack",
-    "nordic-semiconductor.nrf-connect-extension-pack",
-    "shardulm94.trailing-spaces",
-    "streetsidesoftware.code-spell-checker"
-  ],
-  // List of extensions recommended by VS Code that should not be recommended for users of this workspace.
-  "unwantedRecommendations": []
+    // See http://go.microsoft.com/fwlink/?LinkId=827846
+    // for the documentation about the extensions.json format
+    "recommendations": [
+        "davidanson.vscode-markdownlint",
+        "gruntfuggly.todo-tree",
+        "ms-azuretools.vscode-bicep",
+        "mylonics.zephyr-ide-extension-pack",
+        "nordic-semiconductor.nrf-terminal",
+        "platformio.platformio-ide",
+        "shardulm94.trailing-spaces",
+        "streetsidesoftware.code-spell-checker"
+    ],
+    "unwantedRecommendations": [
+        "ms-vscode.cpptools-extension-pack"
+    ]
 }

@@ -1,0 +1,102 @@
+# Reference https://docs.platformio.org/en/stable/integration/ci/github-actions.html
+
+name: Build
+
+on:
+  push:
+    # branches: [main]
+    tags: ['firmware-pio@*']
+    paths:
+      - firmware-pio/**
+      - platformio.ini
+      - .github/workflows/firmware-pio.yml
+  pull_request:
+    branches: [main]
+    paths:
+      - firmware-pio/**
+      - platformio.ini
+      - .github/workflows/firmware-pio.yml
+
+permissions:
+  contents: write # write required for ncipollo/release-action to create a release
+  attestations: write # required for actions/attest-build-provenance
+  id-token: write # required for actions/attest-build-provenance
+
+env:
+  CI: 1 # Needed for PlatformIO? https://docs.platformio.org/en/stable/envvars.html#envvar-CI
+
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Required for GitVersion
+          fetch-tags: true # Required for GitVersion
+
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v3
+        with:
+          versionSpec: '6.0.x'
+
+      - name: Determine Version
+        uses: gittools/actions/gitversion/execute@v3
+        id: gitversion
+        with:
+          useConfigFile: true
+
+      - name: Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.platformio/.cache
+          key: ${{ runner.os }}-pio
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          # cache: 'pip' # cache works when there is a requirements.txt, pyproject.toml, poetry.lock or pipfile.lock
+
+      - name: Install PlatformIO
+        run: pip install --upgrade platformio
+
+      - name: Build Project
+        run: pio run
+
+      - name: Collect binaries
+        run: |
+          mkdir -p binaries
+          cp ${{ github.workspace }}/firmware-pio/.pio/build/keeper-esp32-s3-devkitc1/firmware.elf ${{ github.workspace }}/firmware-pio/binaries/arduino-keeper-esp32-s3-devkitc1.elf
+          cp ${{ github.workspace }}/firmware-pio/.pio/build/keeper-esp32-s3-devkitc1/firmware.bin ${{ github.workspace }}/firmware-pio/binaries/arduino-keeper-esp32-s3-devkitc1.bin
+          cp ${{ github.workspace }}/firmware-pio/.pio/build/pot-esp32-s3-devkitc1/firmware.elf ${{ github.workspace }}/firmware-pio/binaries/arduino-pot-esp32-s3-devkitc1.elf
+          cp ${{ github.workspace }}/firmware-pio/.pio/build/pot-esp32-s3-devkitc1/firmware.bin ${{ github.workspace }}/firmware-pio/binaries/arduino-pot-esp32-s3-devkitc1.bin
+
+      - name: Upload Artifact (binaries)
+        uses: actions/upload-artifact@v4
+        with:
+          path: ${{ github.workspace }}/firmware-pio/binaries
+          name: binaries
+          retention-days: 1
+
+      - name: Provenance Attestation
+        if: ${{ startsWith(github.ref, 'refs/tags/') && github.event.repository.public }}
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: ${{ github.workspace }}/firmware-pio/binaries/*.bin
+
+      - name: Upload Release Artifact
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: '${{ github.workspace }}/firmware-pio/binaries/*.bin'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          allowUpdates: true
+          omitBodyDuringUpdate: true
+          omitDraftDuringUpdate: true
+          omitNameDuringUpdate: true
+          tag: ${{ github.ref_name }}
+
+      # a web endpoint can be triggered at this point to push to devices
