@@ -58,7 +58,6 @@ private:
   uint8_t _macAddress[MAC_ADDRESS_LENGTH];
 
 private:
-  void printMacAddress(uint8_t mac[]);
 #if !WIFI_SKIP_LIST_NETWORKS
   void listNetworks();
 #endif

@@ -5,6 +5,9 @@
 
 #include "esp_eap_client.h"
 
+#define FMT_LL_ADDR_6 "%02X:%02X:%02X:%02X:%02X:%02X"
+#define PRINT_LL_ADDR_6(addr) addr[0], addr[1], addr[2], addr[3], addr[4], addr[5]
+
 KorraWifi::KorraWifi() : _status(WL_IDLE_STATUS)
 {
 }
@@ -30,22 +33,6 @@ void KorraWifi::begin()
 void KorraWifi::maintain()
 {
   connect(false);
-}
-
-void KorraWifi::printMacAddress(uint8_t mac[])
-{
-  for (int i = 5; i >= 0; i--)
-  {
-    if (mac[i] < 16)
-    {
-      Serial.print(F("0"));
-    }
-    Serial.print(mac[i], HEX);
-    if (i > 0)
-    {
-      Serial.print(F(":"));
-    }
-  }
 }
 
 const __FlashStringHelper *encryptionTypeToString(wifi_auth_mode_t mode)
@@ -88,8 +75,8 @@ void KorraWifi::listNetworks()
 
   // 1) Print header
   Serial.println();
-  Serial.println(F("Id  | SSID                             | Signal (dBm) | Ch | Encryption"));
-  Serial.println(F("----+----------------------------------+--------------+----+------------"));
+  Serial.println(F("Id  | SSID                             | Ch | RSSI | Security   | BSSID             "));
+  Serial.println(F("----+----------------------------------+----+------+------------+-------------------"));
 
   // 2) For each network, build a fixed-width line
   for (int8_t i = 0; i < count; i++)
@@ -97,23 +84,22 @@ void KorraWifi::listNetworks()
     // Build into a buffer with fixed column widths:
     //   • Index:      width  3, right-aligned
     //   • SSID:       width 32, left-aligned (crop or pad with spaces if shorter)
-    //   • Signal:     width  5, right-aligned (the "(dBm)" is in header)
+    //   • RSSI:       width  4, right-aligned
     //   • Channel:    width  2, right-aligned
-    //   • Encryption: width 10, left-aligned
-    // 3 + 32 + 5 + spaces + 2 + 10 + (4 * 3 separators) + 1 EOF byte ≈ 64 – 72 bytes total
-    char lineBuf[80];
-    snprintf(
-        lineBuf, sizeof(lineBuf),
-        "%3d | %-32.32s | %5d        | %2d | %-10.10s",
+    //   • Security:   width 10, left-aligned (crop or pad with spaces if shorter)
+    //   • BSSID:      width 17, left-aligned
+
+    Serial.printf(
+        "%3d | %-32.32s | %2d | %4d | %-10.10s | %-17s \n",
         i,
         WiFi.SSID(i).c_str(), // Use c_str() to get a const char* from String
-        WiFi.RSSI(i),
         WiFi.channel(i),
+        WiFi.RSSI(i),
         // Use reinterpret_cast to convert from __FlashStringHelper* to const char*
         reinterpret_cast<const char *>(
-            encryptionTypeToString(WiFi.encryptionType(i))));
-
-    Serial.println(lineBuf);
+            encryptionTypeToString(WiFi.encryptionType(i))),
+        // Use c_str() to get a const char* from String
+        WiFi.BSSIDstr(i).c_str());
   }
   Serial.println();
 
@@ -137,8 +123,7 @@ void KorraWifi::connect(bool initial)
     Serial.println(F("WiFi disconnected"));
   }
 
-  Serial.print(F("Attempting to connect to WiFi SSID: "));
-  Serial.println(CONFIG_WIFI_SSID);
+  Serial.printf("Attempting to connect to WiFi SSID: %s\n", CONFIG_WIFI_SSID);
 
 #ifdef CONFIG_WIFI_PASSPHRASE
   status = WiFi.begin(CONFIG_WIFI_SSID, CONFIG_WIFI_PASSPHRASE);
@@ -172,26 +157,15 @@ void KorraWifi::connect(bool initial)
 
   Serial.println();
   Serial.println(F("WiFi connected successfully!"));
-  Serial.print(F("SSID: "));
-  Serial.println(WiFi.SSID());
-
-  uint8_t mac[MAC_ADDRESS_LENGTH];
-  WiFi.BSSID(mac);
-  Serial.print(F("BSSID: "));
-  printMacAddress(mac);
-  Serial.println();
-
-  Serial.print(F("Signal strength (RSSI): "));
-  Serial.print(WiFi.RSSI());
-  Serial.println(F(" dBm"));
-
-  Serial.print(F("IP Address: "));
-  Serial.println(WiFi.localIP());
+  Serial.printf("SSID: %s\n", WiFi.SSID());
+  Serial.printf("BSSID: %s\n", WiFi.BSSIDstr());
+  Serial.printf("Channel: %d\n", WiFi.channel());
+  // Serial.printf("Security: %s\n", encryptionTypeToString(WiFi.encryptionType()));
+  Serial.printf("RSSI: %d\n", WiFi.RSSI());
+  Serial.printf("IP Address: %s\n", WiFi.localIP().toString());
 
   WiFi.macAddress(_macAddress);
-  Serial.print(F("MAC address: "));
-  printMacAddress(_macAddress);
-  Serial.println();
+  Serial.printf("MAC address: " FMT_LL_ADDR_6 "\n", PRINT_LL_ADDR_6(_macAddress));
 
   // For the first time, set the hostname using the mac address.
   // Change the hostname to a more useful name. E.g. a default value like "esp32s3-594E40" changes to "korra-594E40"
@@ -200,8 +174,7 @@ void KorraWifi::connect(bool initial)
   {
     snprintf(_hostname, sizeof(_hostname), "korra-%02x%02x%02x", _macAddress[3], _macAddress[4], _macAddress[5]);
     WiFi.setHostname(_hostname);
-    Serial.print("Set hostname to ");
-    Serial.println(_hostname);
+    Serial.printf("Set hostname to %s\n", _hostname);
   }
 }
 
