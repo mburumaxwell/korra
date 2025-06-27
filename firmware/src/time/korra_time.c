@@ -28,7 +28,7 @@ LOG_MODULE_REGISTER(korra_time, LOG_LEVEL_INF);
 // - Should it fail, the work item reschedules work in 30 seconds until it works instead of waiting for 6 hours.
 // - When it works, the timer schedule is then maintained.
 //
-// Time sync requires internet so we rely on L4 callbacks from connectivity manager whish works irrespective of the network in use.
+// Time sync requires internet so we rely on L4 callbacks from connectivity manager which works irrespective of the network in use.
 // Should internet fail, the timer is stopped then restarted when internet resumes.
 
 static struct net_mgmt_event_callback l4_cb;

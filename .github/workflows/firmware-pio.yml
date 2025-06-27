@@ -1,6 +1,6 @@
 # Reference https://docs.platformio.org/en/stable/integration/ci/github-actions.html
 
-name: Build
+name: Firmware - PlatformIO
 
 on:
   push:
