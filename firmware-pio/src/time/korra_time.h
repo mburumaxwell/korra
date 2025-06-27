@@ -38,19 +38,7 @@ public:
    * This method should be called periodically inside the main loop of the firmware.
    * It's safe to call this method in some interval (like 5ms).
    */
-  void maintain();
-
-  /**
-   * Get the current time in seconds since the epoch.
-   */
-  time_t now();
-
-  /**
-   * Get the current time in seconds since the epoch.
-   *
-   * @param tm The struct to store the time in.
-   */
-  void now(struct tm *tm);
+  void sync();
 
 private:
   NTPClient client;

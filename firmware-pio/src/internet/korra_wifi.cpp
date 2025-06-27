@@ -24,9 +24,10 @@ void KorraWifi::begin()
   // Clear network stack https://forum.arduino.cc/t/mqtt-with-esp32-gives-timeout-exceeded-disconnecting/688723/5
   WiFi.disconnect();
 
-#if !WIFI_SKIP_LIST_NETWORKS
+#ifdef CONFIG_WIFI_SCAN_NETWORKS
   listNetworks();
-#endif
+#endif // CONFIG_WIFI_SCAN_NETWORKS
+
   connect(true);
 }
 

@@ -58,9 +58,10 @@ private:
   uint8_t _macAddress[MAC_ADDRESS_LENGTH];
 
 private:
-#if !WIFI_SKIP_LIST_NETWORKS
+#ifdef CONFIG_WIFI_SCAN_NETWORKS
   void listNetworks();
-#endif
+#endif // CONFIG_WIFI_SCAN_NETWORKS
+
   void connect(bool initial);
 };
 
