@@ -44,9 +44,6 @@ public:
 
 private:
   MDNS mdns;
-
-  /// Living instance of the KorraMdns class. It can be nullptr.
-  static KorraMdns *_instance;
 };
 
 #endif // BOARD_HAS_NETWORK

@@ -158,7 +158,7 @@ void KorraWifi::connect(bool initial)
   Serial.println();
   Serial.println(F("WiFi connected successfully!"));
   Serial.printf("SSID: %s\n", WiFi.SSID());
-  Serial.printf("BSSID: %s\n", WiFi.BSSIDstr());
+  Serial.printf("BSSID: %s\n", WiFi.BSSIDstr().c_str());
   Serial.printf("Channel: %d\n", WiFi.channel());
   // Serial.printf("Security: %s\n", encryptionTypeToString(WiFi.encryptionType()));
   Serial.printf("RSSI: %d\n", WiFi.RSSI());
