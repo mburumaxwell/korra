@@ -20,12 +20,18 @@ permissions:
   attestations: write # required for actions/attest-build-provenance
   id-token: write # required for actions/attest-build-provenance
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   CI: 1 # Needed for PlatformIO? https://docs.platformio.org/en/stable/envvars.html#envvar-CI
 
 jobs:
   Build:
-    runs-on: ubuntu-latest
+    # using macos-latest because it tends to be faster and closely mirrors dev environment
+    runs-on: macos-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout
@@ -52,11 +58,14 @@ jobs:
 
       - name: Collect binaries
         run: |
-          mkdir -p binaries
-          cp ${{ github.workspace }}/firmware-pio/.pio/build/keeper-esp32-s3-devkitc1/firmware.elf ${{ github.workspace }}/firmware-pio/binaries/arduino-keeper-esp32-s3-devkitc1.elf
-          cp ${{ github.workspace }}/firmware-pio/.pio/build/keeper-esp32-s3-devkitc1/firmware.bin ${{ github.workspace }}/firmware-pio/binaries/arduino-keeper-esp32-s3-devkitc1.bin
-          cp ${{ github.workspace }}/firmware-pio/.pio/build/pot-esp32-s3-devkitc1/firmware.elf ${{ github.workspace }}/firmware-pio/binaries/arduino-pot-esp32-s3-devkitc1.elf
-          cp ${{ github.workspace }}/firmware-pio/.pio/build/pot-esp32-s3-devkitc1/firmware.bin ${{ github.workspace }}/firmware-pio/binaries/arduino-pot-esp32-s3-devkitc1.bin
+          mkdir -p ${{ env.DEST }}
+          cp ${{ env.SRC }}/keeper-esp32-s3-devkitc1/firmware.elf ${{ env.DEST }}/arduino-keeper-esp32-s3-devkitc1.elf
+          cp ${{ env.SRC }}/keeper-esp32-s3-devkitc1/firmware.bin ${{ env.DEST }}/arduino-keeper-esp32-s3-devkitc1.bin
+          cp ${{ env.SRC }}/pot-esp32-s3-devkitc1/firmware.elf ${{ env.DEST }}/arduino-pot-esp32-s3-devkitc1.elf
+          cp ${{ env.SRC }}/pot-esp32-s3-devkitc1/firmware.bin ${{ env.DEST }}/arduino-pot-esp32-s3-devkitc1.bin
+        env:
+          SRC: ${{ github.workspace }}/firmware-pio/.pio/build
+          DEST: ${{ github.workspace }}/firmware-pio/binaries
 
       - name: Upload Artifact (binaries)
         uses: actions/upload-artifact@v4
