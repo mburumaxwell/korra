@@ -3,7 +3,7 @@
 
 #if BOARD_HAS_NETWORK
 
-KorraMdns::KorraMdns(UDP &udpClient) : mdns(udpClient)
+KorraMdns::KorraMdns(UDP &client) : mdns(client)
 {
 }
 

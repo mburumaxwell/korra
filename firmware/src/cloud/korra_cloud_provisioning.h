@@ -5,11 +5,20 @@
 
 struct korra_cloud_provisioning_info
 {
-    bool valid;
-    char hostname[64];
-    size_t hostname_len;
-    char id[128];
-    size_t id_len;
+  /** Whether the provisioning info is valid. */
+  bool valid;
+
+  /** The hostname of the device. */
+  char hostname[64];
+
+  /** The length of the hostname. */
+  size_t hostname_len;
+
+  /** The length of the hostname. */
+  char id[128];
+
+  /** The length of the ID. */
+  size_t id_len;
 };
 
 extern int korra_cloud_provisioning_init(const char *regid, const size_t regid_len, struct korra_cloud_provisioning_info *result);

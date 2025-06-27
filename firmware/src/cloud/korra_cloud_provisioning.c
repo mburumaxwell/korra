@@ -11,7 +11,6 @@ LOG_MODULE_REGISTER(korra_cloud_provisioning, LOG_LEVEL_INF);
 #include <korra_net_utils.h>
 
 #include "korra_cloud_provisioning.h"
-#include "url_encode.h"
 
 // official/ref docs
 // - https://learn.microsoft.com/en-us/azure/iot/iot-mqtt-connect-to-iot-dps
@@ -74,7 +73,6 @@ int korra_cloud_provisioning_init(const char *regid, const size_t regid_len, str
 	result->id_len = ret_or_len;
 
 	result->valid = result->hostname_len > 0 && result->id_len > 0;
-
 	provisioning_info_print(result);
 
 	// prepare username as per spec
@@ -86,16 +84,6 @@ int korra_cloud_provisioning_init(const char *regid, const size_t regid_len, str
 		return -ENOMEM;
 	}
 	username_len = snprintf(username, username_len, USERNAME_FORMAT, DPS_ID_SCOPE, regid);
-
-	// prepare resource as per spec
-	resource_uri_len = url_encode(NULL, 0, username, username_len) + 1; // plus NULL
-	resource_uri = k_malloc(resource_uri_len);
-	if (resource_uri == NULL)
-	{
-		LOG_ERR("Unable to allocate %d bytes for resource_uri", resource_uri_len);
-		return -ENOMEM;
-	}
-	resource_uri_len = url_encode(resource_uri, resource_uri_len, username, username_len);
 
 	return 0;
 }
@@ -190,8 +178,10 @@ static int provisioning_info_save()
 static void provisioning_info_print()
 {
 	LOG_DBG("Valid: %s", info->valid ? "yes" : "no");
-	LOG_DBG("Hostname: %s", info->hostname ? info->hostname : "<unset>");
-	LOG_DBG("Hostname Length: %d", info->hostname_len);
-	LOG_DBG("Id: %s", info->id ? info->id : "<unset>");
-	LOG_DBG("Id Length: %d", info->id_len);
+	LOG_DBG("Hostname: %s (%d bytes)",
+			info->hostname_len > 0 ? info->hostname : "[unset]",
+			info->hostname_len);
+	LOG_DBG("Id: %s (%d bytes)",
+			info->id_len > 0 ? info->id : "[unset]",
+			info->id_len);
 }

@@ -1,6 +1,6 @@
 #include "korra_time.h"
 
-KorraTime::KorraTime(UDP &udpClient) : client(udpClient, CONFIG_SNTP_SERVER_ADDRESS)
+KorraTime::KorraTime(UDP &client) : client(client, CONFIG_SNTP_SERVER_ADDRESS)
 {
 }
 
@@ -32,4 +32,9 @@ void KorraTime::sync()
         strftime(time_str, sizeof(time_str), "%FT%T", &tm);
         Serial.printf("Time is now %s\n", time_str);
     }
+}
+
+void KorraTime::maintain()
+{
+    sync();
 }

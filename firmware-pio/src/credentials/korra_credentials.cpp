@@ -87,10 +87,18 @@ KorraCredentials::KorraCredentials(Preferences &prefs) : prefs(prefs)
 
 KorraCredentials::~KorraCredentials()
 {
-    free(devcert);
+    if (devcert)
+    {
+        free(devcert);
+        devcert = NULL;
+    }
     devcert_len = 0;
 
-    free(devkey);
+    if (devkey)
+    {
+        free(devkey);
+        devkey = NULL;
+    }
     devkey_len = 0;
 }
 

@@ -1,8 +1,7 @@
 #ifndef KORRA_CREDENTIALS_H
 #define KORRA_CREDENTIALS_H
 
-#include <stddef.h>
-#include "Preferences.h"
+#include <Preferences.h>
 
 class KorraCredentials
 {
@@ -23,6 +22,9 @@ public:
   /**
    * Initializes the credentials logic.
    * This should be called once at the beginning of the program.
+   *
+   * @param devid The device ID.
+   * @param devid_len The length of the device ID.
    */
   void begin(const char *devid, const size_t devid_len);
 

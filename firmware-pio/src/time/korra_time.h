@@ -19,9 +19,9 @@ public:
    * Creates a new instance of the KorraTime class.
    * Please note that only one instance of the class can be initialized at the same time.
    *
-   * @param udpClient The UDP client to use for the service discovery.
+   * @param client The UDP client to use.
    */
-  KorraTime(UDP &udpClient);
+  KorraTime(UDP &client);
 
   /**
    * Cleanup resources created and managed by the KorraTime class.
@@ -35,10 +35,16 @@ public:
   void begin();
 
   /**
+   * Sync time once.
+   * Call this if you need to ensure sync early such as in main.
+   */
+  void sync();
+
+  /**
    * This method should be called periodically inside the main loop of the firmware.
    * It's safe to call this method in some interval (like 5ms).
    */
-  void sync();
+  void maintain();
 
 private:
   NTPClient client;

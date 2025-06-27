@@ -18,9 +18,9 @@ public:
    * Creates a new instance of the KorraMdns class.
    * Please note that only one instance of the class can be initialized at the same time.
    *
-   * @param udpClient The UDP client to use for the service discovery.
+   * @param client The UDP client.
    */
-  KorraMdns(UDP &udpClient);
+  KorraMdns(UDP &client);
 
   /**
    * Cleanup resources created and managed by the KorraMdns class.
