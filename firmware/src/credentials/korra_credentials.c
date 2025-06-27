@@ -8,17 +8,12 @@ LOG_MODULE_REGISTER(korra_credentials, LOG_LEVEL_INF);
 #include <mbedtls/x509_csr.h>
 #include <mbedtls/x509.h>
 
+#include <time.h>
 #include <zephyr/settings/settings.h>
 
 #include "korra_credentials.h"
 #include "korra_rot.h"
 #include "korra_test_certs.h"
-
-// format: YYYYMMDDhhmmss e.g. 20131231235959 for December 31st 2013 at 23:59:59
-// this can be made dynamic using sys_clock_gettime (valid for 3 years) but may require change in workflow
-// time sync takes time and fails sometimes
-#define MBEDTLS_VALIDITY_NOT_BEFORE "20241231235959"
-#define MBEDTLS_VALIDITY_NOT_AFTER "20351231235959"
 
 struct korra_credential
 {
@@ -292,12 +287,12 @@ int settings_exists_one(const char *name, bool *exists)
 
 static int generate_cert(enum korra_credential_tag_type tag,
                          const char *devid, const size_t devid_len,
-                         char *cert_pem, size_t cert_pem_len,
-                         char *key_pem, size_t key_pem_len)
+                         const char *not_before, const char *not_after,
+                         uint8_t *cert_pem, size_t cert_pem_len,
+                         uint8_t *key_pem, size_t key_pem_len)
 {
     mbedtls_pk_context key;
     mbedtls_x509write_cert crt;
-    mbedtls_mpi serial;
     mbedtls_entropy_context entropy;
     mbedtls_ctr_drbg_context ctr_drbg;
     int ret;
@@ -308,7 +303,6 @@ static int generate_cert(enum korra_credential_tag_type tag,
 
     mbedtls_pk_init(&key);
     mbedtls_x509write_crt_init(&crt);
-    mbedtls_mpi_init(&serial);
     mbedtls_ctr_drbg_init(&ctr_drbg);
     mbedtls_entropy_init(&entropy);
 
@@ -324,11 +318,13 @@ static int generate_cert(enum korra_credential_tag_type tag,
     mbedtls_pk_write_key_pem(&key, key_pem, key_pem_len);
 
     // Set certificate parameters
-    mbedtls_mpi_read_string(&serial, 10, "1");
+    unsigned char serial[MBEDTLS_X509_RFC5280_MAX_SERIAL_LEN] = {0};
+    size_t serial_len = 1;
+    serial[0] = 1; /* your previous serial “1” */
     mbedtls_x509write_crt_set_version(&crt, MBEDTLS_X509_CRT_VERSION_3);
     mbedtls_x509write_crt_set_md_alg(&crt, MBEDTLS_MD_SHA256);
-    mbedtls_x509write_crt_set_serial(&crt, &serial);
-    mbedtls_x509write_crt_set_validity(&crt, MBEDTLS_VALIDITY_NOT_BEFORE, MBEDTLS_VALIDITY_NOT_AFTER);
+    mbedtls_x509write_crt_set_serial_raw(&crt, serial, serial_len);
+    mbedtls_x509write_crt_set_validity(&crt, not_before, not_after);
     mbedtls_x509write_crt_set_subject_key(&crt, &key);
     mbedtls_x509write_crt_set_issuer_key(&crt, &key); // Self-signed
 
@@ -351,7 +347,6 @@ static int generate_cert(enum korra_credential_tag_type tag,
 
     // Clean up
     mbedtls_pk_free(&key);
-    mbedtls_mpi_free(&serial);
     mbedtls_x509write_crt_free(&crt);
     mbedtls_ctr_drbg_free(&ctr_drbg);
     mbedtls_entropy_free(&entropy);
@@ -360,6 +355,27 @@ static int generate_cert(enum korra_credential_tag_type tag,
 
 static int generate_credentials(const char *devid, const size_t devid_len)
 {
+    // Check if time has been set (assuming anything before 2024-12-31 23:59:59 means time not set)
+    time_t now = time(NULL);
+    time_t min_valid_time = 1735689599; // 2024-12-31 23:59:59 UTC as Unix timestamp
+    if (now < min_valid_time)
+    {
+        now = min_valid_time; // Default to 2024-12-31 23:59:59
+        LOG_DBG("Time not set, using default time (2024-12-31 23:59:59)\n");
+    }
+
+    // Generate not_before (current time)
+    struct tm tm;
+    gmtime_r(&now, &tm);
+    char not_before[sizeof("20241231235959")]; // format: YYYYMMDDhhmmss e.g. 20241231235959 for December 31st 2024 at 23:59:59
+    strftime(not_before, sizeof(not_before), "%Y%m%d%H%M%S", &tm);
+
+    // Generate not_after (couple of years ahead, approximate)
+    time_t future = now + (CONFIG_DEVICE_CERTIFICATE_VALIDITY_YEARS * 365 * 24 * 3600);
+    gmtime_r(&future, &tm);
+    char not_after[sizeof("20241231235959")]; // format: YYYYMMDDhhmmss e.g. 20241231235959 for December 31st 2024 at 23:59:59
+    strftime(not_after, sizeof(not_after), "%Y%m%d%H%M%S", &tm);
+
     LOG_INF("Checking %d credentials that need generation", ARRAY_SIZE(generateble_credentials));
     for (size_t i = 0; i < ARRAY_SIZE(generateble_credentials); i++)
     {
@@ -382,8 +398,8 @@ static int generate_credentials(const char *devid, const size_t devid_len)
 
         // generally elliptic curves occupy very little memory and are better than RSA
         size_t cert_pem_len = 1024, key_pem_len = 384;
-        char *cert_pem = k_malloc(cert_pem_len);
-        char *key_pem = k_malloc(key_pem_len);
+        uint8_t *cert_pem = (uint8_t *)k_malloc(cert_pem_len);
+        uint8_t *key_pem = (uint8_t *)k_malloc(key_pem_len);
         if (cert_pem == NULL || key_pem == NULL)
         {
             LOG_ERR("Unable to allocate memory to store generated cert and key for tag: %-20s",
@@ -422,7 +438,7 @@ static int generate_credentials(const char *devid, const size_t devid_len)
 
         if (generate)
         {
-            ret = generate_cert(generateble_credentials[i].tag, devid, devid_len,
+            ret = generate_cert(generateble_credentials[i].tag, devid, devid_len, not_before, not_after,
                                 cert_pem, cert_pem_len, key_pem, key_pem_len);
             if (ret)
             {

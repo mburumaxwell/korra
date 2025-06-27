@@ -16,6 +16,10 @@ config APP_NAME
     default "Keeper" if APP_KIND_KEEPER
     default "Pot" if APP_KIND_POT
 
+config DEVICE_CERTIFICATE_VALIDITY_YEARS
+    int "Number of years the device certificate generated will be valid for"
+    default 3
+
 config AZURE_IOT_DPS_HOSTNAME
     string "Azure IoT DPS Global device endpoint"
     default "global.azure-devices-provisioning.net"

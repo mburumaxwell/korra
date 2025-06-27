@@ -96,7 +96,7 @@ static int sync_time()
     // update the system clock so that everyone can get what they need
     struct timespec ts = {
         .tv_sec = s_time.seconds,
-        .tv_nsec = 0, // do not set to s_time.fraction, it tends to cause errors
+        .tv_nsec = 0, // do not set, it tends to cause errors
     };
     ret = sys_clock_settime(SYS_CLOCK_REALTIME, &ts);
     if (ret)
