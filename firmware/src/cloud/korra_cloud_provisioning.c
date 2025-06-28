@@ -18,8 +18,8 @@ LOG_MODULE_REGISTER(korra_cloud_provisioning, LOG_LEVEL_INF);
 // Username format -> {idScope}/registrations/{registration_id}/api-version=2019-03-31
 #define USERNAME_FORMAT "%s/registrations/%s/api-version=2019-03-31"
 
-#define SETTINGS_NAME_HOSTNAME "azure/hub"
-#define SETTINGS_NAME_DEVICEID "azure/deviceid"
+#define SETTINGS_NAME_HOSTNAME "azure-hub"
+#define SETTINGS_NAME_DEVICEID "azure-deviceid"
 #define DPS_ID_SCOPE CONFIG_AZURE_IOT_DPS_ID_SCOPE
 #define DPS_HOSTNAME CONFIG_AZURE_IOT_DPS_HOSTNAME
 #define DPS_MQTT_PORT 8883
