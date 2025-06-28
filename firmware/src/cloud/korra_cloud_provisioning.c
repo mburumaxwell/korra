@@ -122,8 +122,8 @@ static int client_init()
 	client.rx_buf_size = sizeof(rx_buffer);
 	client.tx_buf = tx_buffer;
 	client.tx_buf_size = sizeof(tx_buffer);
-	client.clean_session = 1;
-	client.keepalive = 30; // 30 seconds
+	client.clean_session = 1; // must be true (1) for DPS
+	client.keepalive = 30; // 30 seconds (default 60 seconds)
 
 	client.transport.type = MQTT_TRANSPORT_SECURE;
 	client.transport.tls.config.peer_verify = TLS_PEER_VERIFY_REQUIRED;

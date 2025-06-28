@@ -66,7 +66,7 @@ void KorraCloudProvisioning::begin(const char *regid, const size_t regid_len)
 
     // setup the MQTT client
     mqtt.setId(regid);
-    mqtt.setCleanSession(true);
+    mqtt.setCleanSession(true); // must be true (1) for DPS
     mqtt.setUsernamePassword(username, "" /* password (library throws when NULL) */);
     mqtt.setKeepAliveInterval(30 * 1000); // 30 seconds (default 60 seconds)
     mqtt.onMessage(on_mqtt_message_callback);

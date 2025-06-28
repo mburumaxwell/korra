@@ -47,8 +47,8 @@ void KorraCloudHub::maintain(struct korra_cloud_provisioning_info *info)
         username_len = snprintf(username, username_len, USERNAME_FORMAT, info->hostname, info->id);
 
         mqtt.setId(info->id);
-        mqtt.setCleanSession(true);
         mqtt.setTxPayloadSize(1024);
+        mqtt.setCleanSession(false); // want to received any messages we missed
         mqtt.setUsernamePassword(username, "" /* password (library throws when NULL) */);
         mqtt.setKeepAliveInterval(240 * 1000); // 240 seconds (default 60 seconds)
         mqtt.onMessage(on_mqtt_message_callback);
