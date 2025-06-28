@@ -123,6 +123,7 @@ static int client_init()
 	client.tx_buf = tx_buffer;
 	client.tx_buf_size = sizeof(tx_buffer);
 	client.clean_session = 1;
+	client.keepalive = 30; // 30 seconds
 
 	client.transport.type = MQTT_TRANSPORT_SECURE;
 	client.transport.tls.config.peer_verify = TLS_PEER_VERIFY_REQUIRED;
