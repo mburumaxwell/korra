@@ -1,31 +1,31 @@
-#ifndef KORRA_WIFI_H
-#define KORRA_WIFI_H
+#ifndef KORRA_CELLULAR_H
+#define KORRA_CELLULAR_H
 
 #include "korra_config.h"
 #include "korra_network_shared.h"
 
-#ifdef CONFIG_BOARD_HAS_WIFI
+#ifdef CONFIG_BOARD_HAS_CELLULAR
 
-#include <WiFi.h>
-#include <WiFiClientSecure.h>
+// #include <Cellular.h>
+// #include <CellularUdp.h>
 
 /**
- * This class is a wrapper for the WiFi logic.
- * It is where all the WiFi related code is located.
+ * This class is a wrapper for the Cellular logic.
+ * It is where all the Cellular related code is located.
  */
-class KorraWifi
+class KorraCellular
 {
 public:
   /**
-   * Creates a new instance of the KorraWifi class.
+   * Creates a new instance of the KorraCellular class.
    * Please note that only one instance of the class can be initialized at the same time.
    */
-  KorraWifi();
+  KorraCellular();
 
   /**
-   * Cleanup resources created and managed by the KorraWifi class.
+   * Cleanup resources created and managed by the KorraCellular class.
    */
-  ~KorraWifi();
+  ~KorraCellular();
 
   /**
    * Scan for networks and connect to the one configured.
@@ -46,15 +46,8 @@ public:
 private:
   uint8_t _status;
   korra_network_props net_props;
-
-private:
-#ifdef CONFIG_WIFI_SCAN_NETWORKS
-  void listNetworks();
-#endif // CONFIG_WIFI_SCAN_NETWORKS
-
-  void connect(bool initial);
 };
 
-#endif // BOARD_HAS_WIFI
+#endif // CONFIG_BOARD_HAS_CELLULAR
 
-#endif // KORRA_WIFI_H
+#endif // KORRA_CELLULAR_H
