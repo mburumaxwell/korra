@@ -110,13 +110,27 @@ void KorraCloudHub::push(const struct korra_sensors_data *source, const struct k
     doc["network"]["network"] = net_props->network;
     doc["network"]["local_ip"] = net_props->local_ip;
 
+    // set timestamp (though it exists in the properties of the message, this ensures it is also in the body)
+    time_t now = time(NULL);
+    doc["timestamp"] = now;
+
+    // set the IOS8601 version of the timestamp
+    struct tm tm;
+    gmtime_r(&now, &tm);
+    char time_str[sizeof("1970-01-01T00:00:00")];
+    strftime(time_str, sizeof(time_str), "%FT%T", &tm);
+    doc["created"] = time_str;
+
 #ifdef CONFIG_APP_KIND_KEEPER
-    doc["temperature"] = source->temperature;
-    doc["humidity"] = source->humidity;
+    doc["temperature"]["unit"] = "C";
+    doc["temperature"]["value"] = source->temperature;
+    doc["humidity"]["unit"] = "%";
+    doc["humidity"]["value"] = source->humidity;
 #endif // CONFIG_APP_KIND_KEEPER
 #ifdef CONFIG_APP_KIND_POT
-    doc["moisture"] = source->moisture;
-    doc["ph"] = source->ph;
+    doc["moisture"]["unit"] = "%";
+    doc["moisture"]["value"] = source->moisture;
+    doc["ph"]["value"] = source->ph;
 #endif // CONFIG_APP_KIND_POT
 
     // prepare topic
