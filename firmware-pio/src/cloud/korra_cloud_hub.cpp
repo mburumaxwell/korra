@@ -1,7 +1,7 @@
 #include "korra_cloud_hub.h"
 
-// Username format -> {broker}/{device_id}/api-version=2018-06-30
-#define USERNAME_FORMAT "%s/%s/api-version=2018-06-30"
+// Username format -> {iotHub-hostname}/{device_id}/api-version=2021-04-12
+#define USERNAME_FORMAT "%s/%s/api-version=2021-04-12"
 
 KorraCloudHub *KorraCloudHub::_instance = nullptr;
 

@@ -9,8 +9,8 @@
 // Username format -> {idScope}/registrations/{registration_id}/api-version=2019-03-31
 #define USERNAME_FORMAT "%s/registrations/%s/api-version=2019-03-31"
 
-#define TOPIC_REGISTER_FORMAT "$dps/registrations/PUT/iotdps-register/?$rid=%d"
-#define TOPIC_GET_STATUS_FORMAT "$dps/registrations/GET/iotdps-get-operationstatus/?$rid=%d&operationId=%s"
+#define TOPIC_FORMAT_REGISTER "$dps/registrations/PUT/iotdps-register/?$rid=%d"
+#define TOPIC_FORMAT_GET_STATUS "$dps/registrations/GET/iotdps-get-operationstatus/?$rid=%d&operationId=%s"
 
 KorraCloudProvisioning *KorraCloudProvisioning::_instance = nullptr;
 
@@ -104,11 +104,11 @@ void KorraCloudProvisioning::maintain()
     if (!registration_requested)
     {
         Serial.printf("Requesting DPS registration with rid: %d\n", request_id);
-        size_t topic_len = snprintf(NULL, 0, TOPIC_REGISTER_FORMAT, request_id);
-        char topic[topic_len + 1];
-        topic_len = snprintf(topic, sizeof(topic), TOPIC_REGISTER_FORMAT, request_id);
+        size_t topic_len = snprintf(NULL, 0, TOPIC_FORMAT_REGISTER, request_id);
+        char topic[topic_len + 1] = {0};
+        topic_len = snprintf(topic, sizeof(topic), TOPIC_FORMAT_REGISTER, request_id);
         mqtt.beginMessage(topic, /* retain */ false, /* qos */ 0, /* dup */ false);
-        mqtt.print("{}"); // must be an empty json otherwise it wont work
+        mqtt.print("{}"); // must be an empty json otherwise it won't work
         mqtt.endMessage();
         registration_requested = true;
     }
@@ -180,11 +180,11 @@ void KorraCloudProvisioning::connect(int retries, int delay_ms)
 void KorraCloudProvisioning::query_registration_result()
 {
     Serial.printf("Requesting DPS registration result for operationId='%s' and rid: %d\n", status.operation_id, request_id);
-    size_t topic_len = snprintf(NULL, 0, TOPIC_GET_STATUS_FORMAT, request_id, status.operation_id);
-    char topic[topic_len + 1];
-    snprintf(topic, sizeof(topic), TOPIC_GET_STATUS_FORMAT, request_id, status.operation_id);
+    size_t topic_len = snprintf(NULL, 0, TOPIC_FORMAT_GET_STATUS, request_id, status.operation_id);
+    char topic[topic_len + 1] = {0};
+    snprintf(topic, sizeof(topic), TOPIC_FORMAT_GET_STATUS, request_id, status.operation_id);
     mqtt.beginMessage(topic, /* retain */ false, /* qos */ 0, /* dup */ false);
-    mqtt.print("{}"); // must be an empty json otherwise it wont work
+    mqtt.print("{}"); // must be an empty json otherwise it won't work
     mqtt.endMessage();
 }
 
@@ -304,7 +304,7 @@ void KorraCloudProvisioning::on_mqtt_message(int size)
     else
     {
         // assume a transient error and reboot (should actually parse the error)
-        Serial.println("Unkown status code. Rebooting in 5 seconds ...");
+        Serial.println("Unknown status code. Rebooting in 5 seconds ...");
         delay(5000);
         reboot();
     }
