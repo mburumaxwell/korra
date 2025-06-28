@@ -1,12 +1,10 @@
-#include "korra_reboot.h"
+#include <sys/reboot.h>
+
 #include "korra_wifi.h"
 
-#if BOARD_HAS_WIFI
+#ifdef CONFIG_BOARD_HAS_WIFI
 
 #include "esp_eap_client.h"
-
-#define FMT_LL_ADDR_6 "%02X:%02X:%02X:%02X:%02X:%02X"
-#define PRINT_LL_ADDR_6(addr) addr[0], addr[1], addr[2], addr[3], addr[4], addr[5]
 
 KorraWifi::KorraWifi() : _status(WL_IDLE_STATUS)
 {
@@ -63,7 +61,7 @@ const __FlashStringHelper *encryptionTypeToString(wifi_auth_mode_t mode)
   }
 }
 
-#if CONFIG_WIFI_SCAN_NETWORKS
+#ifdef CONFIG_WIFI_SCAN_NETWORKS
 void KorraWifi::listNetworks()
 {
   Serial.println(F("** Scan Networks **"));
@@ -144,10 +142,11 @@ void KorraWifi::connect(bool initial)
   while (status != WL_CONNECTED)
   {
     // Timeout reached – perform a reset
-    if ((millis() - started) > CONFIG_WIFI_CONNECTION_REBOOT_TIMEOUT_MILLIS)
+    if ((millis() - started) > (CONFIG_WIFI_CONNECTION_REBOOT_TIMEOUT_SEC * 1000))
     {
-      Serial.println(F(" taken too long. Rebooting ...."));
-      reboot();
+      Serial.printf(" taken too long (%d sec). Rebooting in 5 sec ....\n", CONFIG_WIFI_CONNECTION_REBOOT_TIMEOUT_SEC);
+      delay(5000);
+      sys_reboot();
     }
 
     delay(500);
@@ -158,24 +157,29 @@ void KorraWifi::connect(bool initial)
 
   Serial.println();
   Serial.println(F("WiFi connected successfully!"));
-  Serial.printf("SSID: %s\n", WiFi.SSID());
+  Serial.printf("SSID: %s\n", WiFi.SSID().c_str());
   Serial.printf("BSSID: %s\n", WiFi.BSSIDstr().c_str());
   Serial.printf("Channel: %d\n", WiFi.channel());
   // Serial.printf("Security: %s\n", encryptionTypeToString(WiFi.encryptionType()));
   Serial.printf("RSSI: %d\n", WiFi.RSSI());
   Serial.printf("IP Address: %s\n", WiFi.localIP().toString());
 
-  WiFi.macAddress(_macAddress);
-  Serial.printf("MAC address: " FMT_LL_ADDR_6 "\n", PRINT_LL_ADDR_6(_macAddress));
+  // populate net_props
+  snprintf(net_props.kind, sizeof(net_props.kind), KORRA_NETWORK_KIND_WIFI);
+  WiFi.macAddress(net_props.mac_addr);
+  snprintf(net_props.mac, sizeof(net_props.mac), WiFi.macAddress().c_str());
+  snprintf(net_props.network, sizeof(net_props.network), WiFi.SSID().c_str());
+  net_props.local_ipaddr = WiFi.localIP();
+  snprintf(net_props.local_ip, sizeof(net_props.local_ip), WiFi.localIP().toString().c_str());
 
   // For the first time, set the hostname using the mac address.
   // Change the hostname to a more useful name. E.g. a default value like "esp32s3-594E40" changes to "korra-594E40"
   // The WiFi stack needs to have been activated by scanning or connecting hence why this is done last. Otherwise just zeros.
   if (initial)
   {
-    snprintf(_hostname, sizeof(_hostname), "korra-%02x%02x%02x", _macAddress[3], _macAddress[4], _macAddress[5]);
-    WiFi.setHostname(_hostname);
-    Serial.printf("Set hostname to %s\n", _hostname);
+    snprintf(net_props.hostname, sizeof(net_props.hostname), "korra-" FMT_LL_ADDR_6_LOWER_NO_COLONS, PRINT_LL_ADDR_6(net_props.mac_addr));
+    WiFi.setHostname(net_props.hostname);
+    Serial.printf("Set hostname to %s\n", net_props.hostname);
   }
 }
 

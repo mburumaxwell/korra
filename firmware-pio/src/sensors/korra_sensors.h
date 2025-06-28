@@ -12,7 +12,7 @@
 // #include <DFRobot_PH.h>
 #endif // CONFIG_APP_KIND_POT
 
-struct KorraSensorsData
+struct korra_sensors_data
 {
 #ifdef CONFIG_APP_KIND_KEEPER
   // measured in °C
@@ -56,11 +56,11 @@ public:
   void begin();
 
   /**
-   * Reads all sensor data and stores it in the provided KorraSensorsData structure.
+   * Reads all sensor data and stores it in the provided korra_sensors_data structure.
    *
    * @param dest The destination structure to store the sensor data.
    */
-  void read(KorraSensorsData *dest);
+  void read(struct korra_sensors_data *dest);
 
 private:
 #ifdef CONFIG_APP_KIND_KEEPER

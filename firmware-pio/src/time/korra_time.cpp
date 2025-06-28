@@ -8,10 +8,10 @@ KorraTime::~KorraTime()
 {
 }
 
-void KorraTime::begin()
+void KorraTime::begin(uint32_t update_interval_sec)
 {
     client.begin(CONFIG_SNTP_SERVER_PORT);
-    // client.setUpdateInterval(60 * 60 * 1000); // 60 min (default is 60 seconds)
+    client.setUpdateInterval(update_interval_sec * 1000);
 }
 
 void KorraTime::sync()

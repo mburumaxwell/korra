@@ -1,6 +1,6 @@
+#include <sys/reboot.h>
 #include <ArduinoJson.h>
 
-#include "korra_reboot.h"
 #include "korra_cloud_provisioning.h"
 
 #define PREFERENCES_KEY_HOSTNAME "azure-hub"
@@ -11,6 +11,10 @@
 
 #define TOPIC_FORMAT_REGISTER "$dps/registrations/PUT/iotdps-register/?$rid=%d"
 #define TOPIC_FORMAT_GET_STATUS "$dps/registrations/GET/iotdps-get-operationstatus/?$rid=%d&operationId=%s"
+
+#define TOPIC_REGISTRATION_RESULT_PREFIX "$dps/registrations/res/"
+#define TOPIC_REGISTRATION_RESULT_FILTER TOPIC_REGISTRATION_RESULT_PREFIX "#"
+#define TOPIC_REGISTRATION_RESULT_RETRY_AFTER_KEY "retry-after="
 
 KorraCloudProvisioning *KorraCloudProvisioning::_instance = nullptr;
 
@@ -66,9 +70,9 @@ void KorraCloudProvisioning::begin(const char *regid, const size_t regid_len)
 
     // setup the MQTT client
     mqtt.setId(regid);
-    mqtt.setCleanSession(true); // must be true (1) for DPS
-    mqtt.setUsernamePassword(username, "" /* password (library throws when NULL) */);
+    mqtt.setCleanSession(true);           // must be true (1) for DPS
     mqtt.setKeepAliveInterval(30 * 1000); // 30 seconds (default 60 seconds)
+    mqtt.setUsernamePassword(username, "" /* password (library throws when NULL) */);
     mqtt.onMessage(on_mqtt_message_callback);
 }
 
@@ -89,7 +93,7 @@ void KorraCloudProvisioning::maintain()
         if (connected())
         {
             // subscribe to topic for registration results
-            mqtt.subscribe("$dps/registrations/res/#", /* qos */ 0);
+            mqtt.subscribe(TOPIC_REGISTRATION_RESULT_FILTER, /* qos */ 0);
         }
     }
 
@@ -205,24 +209,22 @@ void KorraCloudProvisioning::on_mqtt_message(int size)
     // 1 (first      ) -> $dps/registrations/res/202/?$rid=1&retry-after=3
     // 2 (after query) -> $dps/registrations/res/200/?$rid={request_id}
 
-#define TOPIC_RESPONSE_PREFIX "$dps/registrations/res/"
     // find the prefix
-    const char *prefix_pos = strstr(topic, TOPIC_RESPONSE_PREFIX);
+    const char *prefix_pos = strstr(topic, TOPIC_REGISTRATION_RESULT_PREFIX);
     if (prefix_pos == NULL)
     {
-        Serial.printf("Unknown topic. Expected prefix: %s\n", TOPIC_RESPONSE_PREFIX);
+        Serial.printf("Unknown topic. Expected prefix: %s\n", TOPIC_REGISTRATION_RESULT_PREFIX);
         return;
     }
     int status_code = 0;
-    sscanf(prefix_pos + strlen(TOPIC_RESPONSE_PREFIX), "%d", &status_code);
+    sscanf(prefix_pos + strlen(TOPIC_REGISTRATION_RESULT_PREFIX), "%d", &status_code);
 
-#define TOPIC_RESPONSE_RETRY_AFTER_KEY "retry-after="
     // find the query key
-    const char *retry_pos = strstr(topic, TOPIC_RESPONSE_RETRY_AFTER_KEY);
+    const char *retry_pos = strstr(topic, TOPIC_REGISTRATION_RESULT_RETRY_AFTER_KEY);
     int retry_after = 0;
     if (retry_pos)
     {
-        sscanf(retry_pos + strlen(TOPIC_RESPONSE_RETRY_AFTER_KEY), "%d", &retry_after);
+        sscanf(retry_pos + strlen(TOPIC_REGISTRATION_RESULT_RETRY_AFTER_KEY), "%d", &retry_after);
     }
 
     // parse the json payload
@@ -306,7 +308,7 @@ void KorraCloudProvisioning::on_mqtt_message(int size)
         // assume a transient error and reboot (should actually parse the error)
         Serial.println("Unknown status code. Rebooting in 5 seconds ...");
         delay(5000);
-        reboot();
+        sys_reboot();
     }
 }
 

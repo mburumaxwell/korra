@@ -3,10 +3,12 @@
 
 #include "korra_config.h"
 
-#if BOARD_HAS_NETWORK
+#ifdef CONFIG_BOARD_HAS_INTERNET
 
 #include <Arduino.h>
 #include <ArduinoMDNS.h>
+
+#include "internet/korra_network_shared.h"
 
 /**
  * This class is a wrapper for the service discovery via mDNS/Bonjour.
@@ -30,11 +32,9 @@ public:
   /**
    * Initiate mDNS
    *
-   * @param ip IP address of the network interface (WiFi, Ethernet, etc).
-   * @param hostname Hostname set on the network interface.
-   * @param mac MAC address of the network interface.
+   * @param props Properties of the network interface.
    */
-  void begin(IPAddress ip, const char *hostname, uint8_t *mac);
+  void begin(const struct korra_network_props *props);
 
   /**
    * This method should be called periodically inside the main loop of the firmware.
@@ -46,6 +46,6 @@ private:
   MDNS mdns;
 };
 
-#endif // BOARD_HAS_NETWORK
+#endif // BOARD_HAS_INTERNET
 
 #endif // KORRA_MDNS_H

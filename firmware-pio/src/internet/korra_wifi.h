@@ -2,8 +2,9 @@
 #define WIFI_MANAGER_H
 
 #include "korra_config.h"
+#include "korra_network_shared.h"
 
-#if BOARD_HAS_WIFI
+#ifdef CONFIG_BOARD_HAS_WIFI
 
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
@@ -38,24 +39,13 @@ public:
   void maintain();
 
   /**
-   * Get the station interface IP address.
+   * Get the props of the network.
    */
-  inline IPAddress localIP() { return WiFi.localIP(); }
-
-  /**
-   * Get the station interface IP address.
-   */
-  inline uint8_t *macAddress() { return _macAddress; }
-
-  /**
-   * Get the station interface IP address.
-   */
-  inline const char *hostname() { return _hostname; }
+  inline const struct korra_network_props *props() { return &net_props; }
 
 private:
   uint8_t _status;
-  char _hostname[19]; // e.g. "korra-012345678901" plus EOF
-  uint8_t _macAddress[MAC_ADDRESS_LENGTH];
+  korra_network_props net_props;
 
 private:
 #ifdef CONFIG_WIFI_SCAN_NETWORKS

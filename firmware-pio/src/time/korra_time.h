@@ -3,7 +3,7 @@
 
 #include "korra_config.h"
 
-#if BOARD_HAS_NETWORK
+#ifdef CONFIG_BOARD_HAS_INTERNET
 
 #include <Arduino.h>
 #include <NTPClient.h>
@@ -31,8 +31,10 @@ public:
   /**
    * Initializes the time logic.
    * This should be called once at the beginning of the program.
+   *
+   * @param update_interval_sec The interval in seconds to update the time.
    */
-  void begin();
+  void begin(uint32_t update_interval_sec = 60);
 
   /**
    * Sync time once.
@@ -50,6 +52,6 @@ private:
   NTPClient client;
 };
 
-#endif // BOARD_HAS_NETWORK
+#endif // BOARD_HAS_INTERNET
 
 #endif // KORRA_TIME_H

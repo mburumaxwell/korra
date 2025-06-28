@@ -3,7 +3,7 @@
 
 #include "korra_config.h"
 
-#if BOARD_HAS_NETWORK
+#ifdef CONFIG_BOARD_HAS_INTERNET
 
 #include <Preferences.h>
 #include <ArduinoMqttClient.h>
@@ -204,6 +204,6 @@ private:
   void schedule_query_registration_result(int delay_sec);
 };
 
-#endif // BOARD_HAS_NETWORK
+#endif // BOARD_HAS_INTERNET
 
 #endif // KORRA_CLOUD_PROVISIONING_H_

@@ -8,30 +8,29 @@
 #include "time/korra_time.h"
 #include "cloud/korra_cloud.h"
 
-struct KorraSensorsData sensors_data;
+static Preferences prefs;
 
-Preferences prefs;
+static KorraSensors sensors;
+static KorraCredentials credentials(prefs);
+static KorraWifi wifi;
 
-Timer<> timer;
+static WiFiUDP udp_client;
+static KorraMdns mdns(udp_client);
+static KorraTime timing(udp_client);
+
+static Timer<> timer;
+static WiFiClientSecure tcp_client_provisioning;
+static KorraCloudProvisioning provisioning(tcp_client_provisioning, prefs, timer);
+
+static WiFiClientSecure tcp_client_hub; // each client can only open one socket so we cannot share
+static KorraCloudHub hub(tcp_client_hub);
+
+static struct korra_sensors_data sensors_data;
+static char devid[(sizeof(uint64_t) * 2) + 1]; // the efuse is a 64-bit integer (64 bit -> 8 bytes -> 16 hex chars)
+static size_t devid_len;
+
 static bool maintain(void *);
 static bool collect_data(void *);
-
-KorraSensors sensors;
-KorraCredentials credentials(prefs);
-KorraWifi wifi;
-
-WiFiUDP udp_client;
-KorraMdns mdns(udp_client);
-KorraTime timing(udp_client);
-
-WiFiClientSecure tcp_client_provisioning;
-KorraCloudProvisioning provisioning(tcp_client_provisioning, prefs, timer);
-
-WiFiClientSecure tcp_client_hub; // each client can only open one socket so we cannot share
-KorraCloudHub hub(tcp_client_hub);
-
-char devid[(sizeof(uint64_t) * 2) + 1]; // the efuse is a 64-bit integer (64 bit -> 8 bytes -> 16 hex chars)
-size_t devid_len;
 
 void setup()
 {
@@ -59,34 +58,36 @@ void setup()
 
   // setup networking
   wifi.begin();
-  mdns.begin(wifi.localIP(), wifi.hostname(), wifi.macAddress());
-  timing.begin();
+  mdns.begin(wifi.props());
+  timing.begin(6 * 3600 /* 6 hours, in seconds */);
 
   // force early sync so that credentials and everything else in the system works easy
   timing.sync();
 
   // prepare credentials
   credentials.begin(devid, devid_len);
+  const char *root_ca_certs = credentials.root_ca_certs();
   const char *devcert = credentials.device_cert();
+  const char *devkey = credentials.device_key();
   Serial.printf("Device certificate to use for provisioning:\n%s\n", devcert);
 
   // setup cloud (provisioning)
-  provisioning.begin(devid, devid_len);
-  tcp_client_provisioning.setCACert(credentials.root_ca_certs());
+  tcp_client_provisioning.setCACert(root_ca_certs);
   tcp_client_provisioning.setCertificate(devcert);
-  tcp_client_provisioning.setPrivateKey(credentials.device_key());
+  tcp_client_provisioning.setPrivateKey(devkey);
+  provisioning.begin(devid, devid_len);
 
   // setup cloud (hub)
-  tcp_client_hub.setCACert(credentials.root_ca_certs());
+  tcp_client_hub.setCACert(root_ca_certs);
   tcp_client_hub.setCertificate(devcert);
-  tcp_client_hub.setPrivateKey(credentials.device_key());
+  tcp_client_hub.setPrivateKey(devkey);
   hub.begin();
 
   // setup timers
   timer.every(500, maintain);
   timer.every((CONFIG_SENSORS_READ_PERIOD_SECONDS * 1000), collect_data);
 
-  // clear credentials and/or provisioning info (only during test)
+  // // clear credentials and/or provisioning info (only during test)
   // credentials.clear();
   // provisioning.clear();
 }
@@ -111,27 +112,21 @@ static bool maintain(void *)
 
 static bool collect_data(void *)
 {
-  // TODO: restore this
-  // sensors.read(&sensors_data);
+  // read sensors data
+  sensors.read(&sensors_data);
 
-  struct korra_cloud_provisioning_info *pi = provisioning.info();
-  if (!pi->valid)
+  // check if hubs is connected
+  if (!hub.connected())
   {
-    Serial.println("Provisioning info is not valid. Skipping push.");
+    Serial.println("Hub is not connected. Skipping push.");
     return true; // true to repeat the action, false to stop
   }
 
-  // TODO: restore this
-  hub.push(&sensors_data);
+  hub.push(&sensors_data, wifi.props());
   return true; // true to repeat the action, false to stop
 }
 
 void loop()
 {
   timer.tick();
-}
-
-void beforeReset()
-{
-  // save configuration and/or state so that we can resume after reboot
 }

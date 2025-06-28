@@ -17,23 +17,24 @@ void KorraSensors::begin()
 #endif // CONFIG_APP_KIND_KEEPER
 }
 
-void KorraSensors::read(KorraSensorsData *dest)
+void KorraSensors::read(struct korra_sensors_data *dest)
 {
-#if CONFIG_APP_KIND_KEEPER
+#ifdef CONFIG_APP_KIND_KEEPER
   TempAndHumidity th = dht.getTempAndHumidity();
   dest->temperature = th.temperature;
   dest->humidity = th.humidity;
 #endif // CONFIG_APP_KIND_KEEPER
 
-#if CONFIG_APP_KIND_POT
+#ifdef CONFIG_APP_KIND_POT
   dest->moisture = readMoisture();
   dest->ph = readPH();
 #endif // CONFIG_APP_KIND_POT
 }
 
-#if CONFIG_APP_KIND_POT
+#ifdef CONFIG_APP_KIND_POT
 float KorraSensors::readPH()
 {
+  // TODO: implement this once we have the soil sensor selected
   return -1;
 }
 

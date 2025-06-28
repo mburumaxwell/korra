@@ -4,10 +4,11 @@
 #include "korra_config.h"
 #include "sensors/korra_sensors.h"
 
-#if BOARD_HAS_NETWORK
+#ifdef CONFIG_BOARD_HAS_INTERNET
 
 #include <ArduinoMqttClient.h>
 
+#include "internet/korra_network_shared.h"
 #include "korra_cloud_shared.h"
 
 /**
@@ -48,8 +49,9 @@ public:
    * If the connection has not been established, nothing is published.
    *
    * @param source All values for configured sensors.
+   * @param net_props Properties of the current network.
    */
-  void push(KorraSensorsData *source);
+  void push(const struct korra_sensors_data *source, const struct korra_network_props *net_props);
 
   /**
    * Check if the connection to the cloud is established.
@@ -74,15 +76,15 @@ private:
   static KorraCloudHub *_instance;
 
 private:
-  void connect(const char *hostname, int retries = 3, int delay_ms = 5000);
+  void connect(int retries = 3, int delay_ms = 5000);
 
 private:
   MqttClient mqtt;
   bool client_setup = false;
-  char *username = NULL;
-  size_t username_len = 0;
+  char *username = NULL, *hostname = NULL, *deviceid = NULL;
+  size_t username_len = 0, hostname_len = 0, deviceid_len = 0;
 };
 
-#endif // BOARD_HAS_NETWORK
+#endif // BOARD_HAS_INTERNET
 
 #endif // KORRA_CLOUD_HUB_H_
