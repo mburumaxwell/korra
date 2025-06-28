@@ -12,8 +12,7 @@ KorraSensors::~KorraSensors()
 void KorraSensors::begin()
 {
 #ifdef CONFIG_APP_KIND_KEEPER
-  // TODO: set correct pin
-  // dht.setup(SENSORS_DHT22_PIN, DHTesp::DHT22);
+  dht.setup(CONFIG_SENSORS_DHT21_PIN, DHTesp::DHT21);
 #endif // CONFIG_APP_KIND_KEEPER
 }
 
@@ -40,13 +39,10 @@ float KorraSensors::readPH()
 
 int32_t KorraSensors::readMoisture()
 {
-  // TODO; restore this after pin assignment
-
-  // // Need to calibrate this
-  // int dry = 587;
-  // int wet = 84;
-  // int reading = analogRead(SENSORS_MOISTURE_PIN);
-  // return (int32_t)(100.0 * (dry - reading) / (dry - wet));
-  return -1;
+  // TODO: Need to calibrate this
+  int dry = 587;
+  int wet = 84;
+  int reading = analogRead(CONFIG_SENSORS_MOISTURE_PIN);
+  return (int32_t)(100.0 * (dry - reading) / (dry - wet));
 }
-#endif // CONFIG_APP_KIND_KEEPER
+#endif // CONFIG_APP_KIND_POT
