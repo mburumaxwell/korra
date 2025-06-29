@@ -43,6 +43,11 @@ public:
    */
   inline const struct korra_network_props *props() { return &net_props; }
 
+  /**
+   * Whether connected to the network.
+   */
+  bool connected();
+
 private:
   uint8_t _status;
   korra_network_props net_props;

@@ -9,6 +9,32 @@
 <!-- TODO: add description of the project -->
 > An explanation will soon be here for the project. Please bear with me.
 
+## Adding Wi‑Fi Credentials
+
+You can configure the device’s Wi‑Fi settings directly from the serial shell using the following commands:
+
+```bash
+wifi-cred-set-open <ssid>
+wifi-cred-set-personal <ssid> <passphrase>
+wifi-cred-set-ent <ssid> <identity> <username> <password>
+```
+
+### Examples of Adding Wi‑Fi Credentials
+
+```bash
+# Open (no encryption) network
+wifi-cred-set-open "Home Network"
+
+# Personal (WPA2) network
+wifi-cred-set-personal OfficeNetwork mySecretPass
+
+# Enterprise network (EAP)
+wifi-cred-set-ent "EnterpriseNet" "user@example.com" alice s3cr3t
+
+# Clear credentials
+internet-cred-clear
+```
+
 ## Installation
 
 <!-- TODO: add instructions for installing zephyr -->

@@ -25,102 +25,142 @@
 class KorraInternet
 {
 public:
-    /**
-     * Creates a new instance of the KorraInternet class.
-     * Please note that only one instance of the class can be initialized at the same time.
-     *
-     * @param prefs The preferences instance to use for storing the network credentials.
-     */
-    KorraInternet(Preferences &prefs)
+  /**
+   * Creates a new instance of the KorraInternet class.
+   * Please note that only one instance of the class can be initialized at the same time.
+   *
+   * @param prefs The preferences instance to use for storing the network credentials.
+   */
+  KorraInternet(Preferences &prefs)
 #ifdef CONFIG_BOARD_HAS_CELLULAR
-        : cellular(prefs)
+      : cellular(prefs)
 #endif // CONFIG_BOARD_HAS_CELLULAR
 
 #ifdef CONFIG_BOARD_HAS_ETHERNET
-        : ethernet()
+      : ethernet()
 #endif // CONFIG_BOARD_HAS_ETHERNET
 
 #ifdef CONFIG_BOARD_HAS_WIFI
-        : wifi(prefs)
+      : wifi(prefs)
 #endif // CONFIG_BOARD_HAS_WIFI
-    {
-    }
+  {
+  }
 
-    /**
-     * Cleanup resources created and managed by the KorraInternet class.
-     */
-    ~KorraInternet() {}
+  /**
+   * Cleanup resources created and managed by the KorraInternet class.
+   */
+  ~KorraInternet() {}
 
-    /**
-     * Initialize the Internet connection.
-     *
-     * @note This method should be called once during the initialization of the firmware.
-     */
-    inline void begin()
-    {
+  /**
+   * Initialize the Internet connection.
+   *
+   * @note This method should be called once during the initialization of the firmware.
+   */
+  inline void begin()
+  {
 #ifdef CONFIG_BOARD_HAS_CELLULAR
-        cellular.begin();
+    cellular.begin();
 #endif // CONFIG_BOARD_HAS_CELLULAR
 
 #ifdef CONFIG_BOARD_HAS_ETHERNET
-        ethernet.begin();
+    ethernet.begin();
 #endif // CONFIG_BOARD_HAS_ETHERNET
 
 #ifdef CONFIG_BOARD_HAS_WIFI
-        wifi.begin();
+    wifi.begin();
 #endif // CONFIG_BOARD_HAS_WIFI
-    }
+  }
 
-    /**
-     * Maintain the Internet connection.
-     *
-     * @note This method should be called periodically inside the main loop of the firmware.
-     * @note It's safe to call this method in some interval (like 5ms).
-     */
-    inline void maintain()
-    {
+  /**
+   * Maintain the Internet connection.
+   *
+   * @note This method should be called periodically inside the main loop of the firmware.
+   * @note It's safe to call this method in some interval (like 5ms).
+   */
+  inline void maintain()
+  {
 #ifdef CONFIG_BOARD_HAS_CELLULAR
-        cellular.maintain();
+    cellular.maintain();
 #endif // CONFIG_BOARD_HAS_CELLULAR
 
 #ifdef CONFIG_BOARD_HAS_ETHERNET
-        ethernet.maintain();
+    ethernet.maintain();
 #endif // CONFIG_BOARD_HAS_ETHERNET
 
 #ifdef CONFIG_BOARD_HAS_WIFI
-        wifi.maintain();
+    wifi.maintain();
 #endif // CONFIG_BOARD_HAS_WIFI
-    }
+  }
 
-    /**
-     * Get the props of the currently connected network.
-     */
-    inline const struct korra_network_props *props()
-    {
+#ifdef CONFIG_BOARD_HAS_WIFI
+  /**
+   * Save the WiFi credentials.
+   *
+   * @param credentials The credentials.
+   */
+  inline bool credentials_save_wifi(const struct wifi_credentials *credentials)
+  {
+    return wifi.credentials_save(credentials);
+  }
+#endif // CONFIG_BOARD_HAS_WIFI
+
+  /**
+   * Clear the internet credentials.
+   */
+  inline bool credentials_clear()
+  {
+#ifdef CONFIG_BOARD_HAS_WIFI
+    return wifi.credentials_clear();
+#endif // CONFIG_BOARD_HAS_WIFI
+  }
+
+  /**
+   * Get the props of the currently connected network.
+   */
+  inline const struct korra_network_props *props()
+  {
 #ifdef CONFIG_BOARD_HAS_CELLULAR
-        return cellular.props();
+    return cellular.props();
 #endif // CONFIG_BOARD_HAS_CELLULAR
 
 #ifdef CONFIG_BOARD_HAS_ETHERNET
-        return ethernet.props();
+    return ethernet.props();
 #endif // CONFIG_BOARD_HAS_ETHERNET
 
 #ifdef CONFIG_BOARD_HAS_WIFI
-        return wifi.props();
+    return wifi.props();
 #endif // CONFIG_BOARD_HAS_WIFI
-    }
+  }
+
+  /**
+   * Whether connected to the network.
+   */
+  inline bool connected()
+  {
+#ifdef CONFIG_BOARD_HAS_CELLULAR
+    return cellular.connected();
+#endif // CONFIG_BOARD_HAS_CELLULAR
+
+#ifdef CONFIG_BOARD_HAS_ETHERNET
+    return ethernet.connected();
+#endif // CONFIG_BOARD_HAS_ETHERNET
+
+#ifdef CONFIG_BOARD_HAS_WIFI
+    return wifi.connected();
+#endif // CONFIG_BOARD_HAS_WIFI
+  }
 
 private:
 #ifdef CONFIG_BOARD_HAS_CELLULAR
-    KorraCellular cellular;
+  KorraCellular cellular;
 #endif // CONFIG_BOARD_HAS_CELLULAR
 
 #ifdef CONFIG_BOARD_HAS_ETHERNET
-    KorraEthernet ethernet;
+  KorraEthernet ethernet;
 #endif // CONFIG_BOARD_HAS_ETHERNET
 
 #ifdef CONFIG_BOARD_HAS_WIFI
-    KorraWiFi wifi;
+  KorraWiFi wifi;
 #endif // CONFIG_BOARD_HAS_WIFI
 };
 

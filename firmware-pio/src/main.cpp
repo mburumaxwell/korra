@@ -1,5 +1,7 @@
 #include <app_version.h>
 
+#include <SimpleSerialShell.h>
+
 #include "sensors/korra_sensors.h"
 
 #include "credentials/korra_credentials.h"
@@ -32,6 +34,12 @@ static size_t devid_len;
 static bool maintain(void *);
 static bool collect_data(void *);
 
+static int shell_command_info(int argc, char **argv);
+static int shell_command_internet_cred_clear(int argc, char **argv);
+static int shell_command_wifi_cred_set_open(int argc, char **argv);
+static int shell_command_wifi_cred_set_personal(int argc, char **argv);
+static int shell_command_wifi_cred_set_ent(int argc, char **argv);
+
 void setup()
 {
   delay(min(1, CONFIG_INITIAL_BOOT_DELAY_SECONDS) * 1000);
@@ -62,7 +70,10 @@ void setup()
   timing.begin(6 * 3600 /* 6 hours, in seconds */);
 
   // force early sync so that credentials and everything else in the system works easy
-  timing.sync();
+  if (internet.connected())
+  {
+    timing.sync();
+  }
 
   // prepare credentials
   credentials.begin(devid, devid_len);
@@ -90,11 +101,31 @@ void setup()
   // // clear credentials and/or provisioning info (only during test)
   // credentials.clear();
   // provisioning.clear();
+  // internet.credentials_clear();
+  // while (1) ;
+
+  shell.attach(Serial);
+  shell.addCommand(F("info"), shell_command_info);
+  shell.addCommand(F("internet-cred-clear"), shell_command_internet_cred_clear);
+  shell.addCommand(F("wifi-cred-set-open <ssid>"), shell_command_wifi_cred_set_open);
+  shell.addCommand(F("wifi-cred-set-personal <ssid> <passphrase>"), shell_command_wifi_cred_set_personal);
+  shell.addCommand(F("wifi-cred-set-ent <ssid> <identity> <username> <password>"), shell_command_wifi_cred_set_ent);
+}
+
+void loop()
+{
+  timer.tick();
+  shell.executeIfInput();
 }
 
 static bool maintain(void *)
 {
   internet.maintain();
+  if (!internet.connected())
+  {
+    return true; // true to repeat the action, false to stop
+  }
+
   mdns.maintain();
   timing.maintain();
 
@@ -126,7 +157,47 @@ static bool collect_data(void *)
   return true; // true to repeat the action, false to stop
 }
 
-void loop()
+static int shell_command_info(int argc, char **argv) // info
 {
-  timer.tick();
+  Serial.printf("Korra %s build v%s (%s)\n", CONFIG_APP_NAME, APP_VERSION_STRING, APP_BUILD_VERSION);
+  Serial.printf("Device ID: %s\n", devid);
+  Serial.printf("Arduino Stack: %d of %d bytes free\n",
+                uxTaskGetStackHighWaterMark(NULL),
+                getArduinoLoopTaskStackSize());
+
+  return EXIT_SUCCESS;
+}
+
+static int shell_command_internet_cred_clear(int argc, char **argv) // internet-cred-clear
+{
+  Serial.println("Clearing internet credentials");
+  return internet.credentials_clear() ? EXIT_SUCCESS : -1;
+}
+
+static int shell_command_wifi_cred_set_open(int argc, char **argv) // wifi-cred-set-open <ssid>
+{
+  struct wifi_credentials credentials;
+  snprintf(credentials.ssid, sizeof(credentials.ssid), (char *)argv[1]);
+  Serial.printf("Setting internet credentials (open network). SSID: '%s'\n", credentials.ssid);
+  return internet.credentials_save_wifi(&credentials) ? EXIT_SUCCESS : -1;
+}
+
+static int shell_command_wifi_cred_set_personal(int argc, char **argv) // wifi-cred-set-personal <ssid> <passphrase>
+{
+  struct wifi_credentials credentials;
+  snprintf(credentials.ssid, sizeof(credentials.ssid), (char *)argv[1]);
+  snprintf(credentials.passphrase, sizeof(credentials.passphrase), (char *)argv[2]);
+  Serial.printf("Setting internet credentials (personal). SSID: '%s'\n", credentials.ssid);
+  return internet.credentials_save_wifi(&credentials) ? EXIT_SUCCESS : -1;
+}
+
+static int shell_command_wifi_cred_set_ent(int argc, char **argv) // wifi-cred-set-ent <ssid> <identity> <username> <password>
+{
+  struct wifi_credentials credentials;
+  snprintf(credentials.ssid, sizeof(credentials.ssid), (char *)argv[1]);
+  snprintf(credentials.eap_identity, sizeof(credentials.eap_identity), (char *)argv[2]);
+  snprintf(credentials.eap_username, sizeof(credentials.eap_username), (char *)argv[3]);
+  snprintf(credentials.eap_password, sizeof(credentials.eap_password), (char *)argv[4]);
+  Serial.printf("Setting internet credentials (enterprise). SSID: '%s'\n", credentials.ssid);
+  return internet.credentials_save_wifi(&credentials) ? EXIT_SUCCESS : -1;
 }
