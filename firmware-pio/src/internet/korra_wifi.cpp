@@ -4,6 +4,12 @@
 
 #ifdef CONFIG_BOARD_HAS_WIFI
 
+#define PREFERENCES_KEY_WIFI_SSID "wifi-ssid"
+#define PREFERENCES_KEY_WIFI_PASSPHRASE "wifi-passphrase"
+#define PREFERENCES_KEY_WIFI_EAP_IDENTITY "wifi-eap-identity"
+#define PREFERENCES_KEY_WIFI_EAP_USERNAME "wifi-eap-username"
+#define PREFERENCES_KEY_WIFI_EAP_PASSWORD "wifi-eap-password"
+
 KorraWiFi::KorraWiFi(Preferences &prefs) : prefs(prefs), _status(WL_IDLE_STATUS) {}
 
 KorraWiFi::~KorraWiFi() {}
@@ -20,12 +26,113 @@ void KorraWiFi::begin()
   listNetworks();
 #endif // CONFIG_WIFI_SCAN_NETWORKS
 
+  // load the credentials
+  credentials_load();
+
+  // connect for the first time
   connect(true);
 }
 
 void KorraWiFi::maintain()
 {
   connect(false);
+}
+
+bool KorraWiFi::credentials_save(const struct wifi_credentials *credentials, bool disconnect)
+{
+  prefs.putBytes(PREFERENCES_KEY_WIFI_SSID,
+                 credentials->ssid, strlen(credentials->ssid));
+
+  if (credentials->passphrase != NULL)
+  {
+    prefs.putBytes(PREFERENCES_KEY_WIFI_PASSPHRASE,
+                   credentials->passphrase, strlen(credentials->passphrase));
+  }
+
+  if (credentials->eap_identity != NULL)
+  {
+    prefs.putBytes(PREFERENCES_KEY_WIFI_EAP_IDENTITY,
+                   credentials->eap_identity, strlen(credentials->eap_identity));
+  }
+
+  if (credentials->eap_username != NULL)
+  {
+    prefs.putBytes(PREFERENCES_KEY_WIFI_EAP_USERNAME,
+                   credentials->eap_username, strlen(credentials->eap_username));
+  }
+
+  if (credentials->eap_password != NULL)
+  {
+    prefs.putBytes(PREFERENCES_KEY_WIFI_EAP_PASSWORD,
+                   credentials->eap_password, strlen(credentials->eap_password));
+  }
+
+  // copy the value into memory
+  memcpy(&(this->credentials), credentials, sizeof(struct wifi_credentials));
+
+  // disconnect if told to
+  if (disconnect)
+  {
+    WiFi.disconnect();
+  }
+
+  return true;
+}
+
+bool KorraWiFi::credentials_clear()
+{
+  if (prefs.isKey(PREFERENCES_KEY_WIFI_SSID))
+  {
+    prefs.remove(PREFERENCES_KEY_WIFI_SSID);
+  }
+  if (prefs.isKey(PREFERENCES_KEY_WIFI_PASSPHRASE))
+  {
+    prefs.remove(PREFERENCES_KEY_WIFI_PASSPHRASE);
+  }
+  if (prefs.isKey(PREFERENCES_KEY_WIFI_EAP_IDENTITY))
+  {
+    prefs.remove(PREFERENCES_KEY_WIFI_EAP_IDENTITY);
+  }
+  if (prefs.isKey(PREFERENCES_KEY_WIFI_EAP_USERNAME))
+  {
+    prefs.remove(PREFERENCES_KEY_WIFI_EAP_USERNAME);
+  }
+  if (prefs.isKey(PREFERENCES_KEY_WIFI_EAP_PASSWORD))
+  {
+    prefs.remove(PREFERENCES_KEY_WIFI_EAP_PASSWORD);
+  }
+
+  return true;
+}
+
+void KorraWiFi::credentials_load()
+{
+  if (prefs.isKey(PREFERENCES_KEY_WIFI_SSID))
+  {
+    prefs.getBytes(PREFERENCES_KEY_WIFI_SSID,
+                   (char *)credentials.ssid, sizeof(credentials.ssid));
+  }
+
+  if (prefs.isKey(PREFERENCES_KEY_WIFI_PASSPHRASE))
+  {
+    prefs.getBytes(PREFERENCES_KEY_WIFI_PASSPHRASE,
+                   (char *)credentials.passphrase, sizeof(credentials.passphrase));
+  }
+  if (prefs.isKey(PREFERENCES_KEY_WIFI_EAP_IDENTITY))
+  {
+    prefs.getBytes(PREFERENCES_KEY_WIFI_EAP_IDENTITY,
+                   (char *)credentials.eap_identity, sizeof(credentials.eap_identity));
+  }
+  if (prefs.isKey(PREFERENCES_KEY_WIFI_EAP_USERNAME))
+  {
+    prefs.getBytes(PREFERENCES_KEY_WIFI_EAP_USERNAME,
+                   (char *)credentials.eap_username, sizeof(credentials.eap_username));
+  }
+  if (prefs.isKey(PREFERENCES_KEY_WIFI_EAP_PASSWORD))
+  {
+    prefs.getBytes(PREFERENCES_KEY_WIFI_EAP_PASSWORD,
+                   (char *)credentials.eap_password, sizeof(credentials.eap_password));
+  }
 }
 
 const __FlashStringHelper *encryptionTypeToString(wifi_auth_mode_t mode)
@@ -116,26 +223,29 @@ void KorraWiFi::connect(bool initial)
     Serial.println(F("WiFi disconnected"));
   }
 
-  const char *ssid = CONFIG_WIFI_SSID;
-  const char *passphrase = CONFIG_WIFI_PASSPHRASE;
-  const char *eap_identity = CONFIG_WIFI_ENTERPRISE_IDENTITY;
-  const char *eap_username = CONFIG_WIFI_ENTERPRISE_USERNAME;
-  const char *eap_password = CONFIG_WIFI_ENTERPRISE_PASSWORD;
-
-  Serial.printf("Attempting to connect to WiFi SSID: %s\n", ssid);
-
-  if (eap_identity != NULL)
+  if (strlen(credentials.ssid) == 0)
   {
-    status = WiFi.begin(
-        /* wpa2_ssid */ (const char *)ssid,
-        /* method */ wpa2_auth_method_t::WPA2_AUTH_PEAP,
-        /* wpa2_identity */ (const char *)eap_identity,
-        /* wpa2_username */ (const char *)eap_username,
-        /* wpa2_password */ (const char *)eap_password);
+    if (!logged_missing_creds)
+    {
+      Serial.println("WiFi credentials are not set. Use the shell e.g. \"wifi credentials set ....\"");
+      logged_missing_creds = true;
+    }
+    return;
+  }
+
+  Serial.printf("Attempting to connect to WiFi SSID: %s\n", credentials.ssid);
+
+  if (credentials.eap_identity != NULL)
+  {
+    status = WiFi.begin(/* wpa2_ssid */ (const char *)credentials.ssid,
+                        /* method */ wpa2_auth_method_t::WPA2_AUTH_PEAP,
+                        /* wpa2_identity */ (const char *)credentials.eap_identity,
+                        /* wpa2_username */ (const char *)credentials.eap_username,
+                        /* wpa2_password */ (const char *)credentials.eap_password);
   }
   else
   {
-    status = WiFi.begin(/* ssid */ ssid, /* passphrase */ passphrase);
+    status = WiFi.begin(credentials.ssid, credentials.passphrase);
   }
 
   uint32_t started = millis();
