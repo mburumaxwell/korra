@@ -10,7 +10,7 @@ import process from 'node:process';
 import readline from 'node:readline';
 import * as semver from 'semver';
 
-import packageJson from '../../package.json' with { type: "json" };
+import packageJson from '../package.json' with { type: "json" };
 
 // There might be lots of overlap in this file/tool with west or scripts in a west manifest.
 // However, this is more readable/maintainable than Python scripts, has things like parallelism and versioning.
