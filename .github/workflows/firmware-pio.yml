@@ -32,7 +32,9 @@ jobs:
     # using macos-latest because it tends to be faster and closely mirrors dev environment
     runs-on: macos-latest
     timeout-minutes: 15
-    if: ${{ !(contains(github.actor, '[bot]') && !github.event.repository.public) }}
+    # Checking if repo is public/private does not work at this level, when private restore the simple check
+    # if: ${{ !contains(github.actor, '[bot]') }}
+    # if: ${{ !(contains(github.actor, '[bot]') && !github.event.repository.public) }}
 
     steps:
       - name: Checkout
