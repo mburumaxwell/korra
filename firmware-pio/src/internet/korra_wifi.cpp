@@ -1,18 +1,46 @@
-#include <sys/reboot.h>
-
 #include "korra_wifi.h"
 
 #ifdef CONFIG_BOARD_HAS_WIFI
 
 #define PREFERENCES_KEY_WIFI_SSID "wifi-ssid"
 #define PREFERENCES_KEY_WIFI_PASSPHRASE "wifi-passphrase"
-#define PREFERENCES_KEY_WIFI_EAP_IDENTITY "wifi-eap-identity"
-#define PREFERENCES_KEY_WIFI_EAP_USERNAME "wifi-eap-username"
-#define PREFERENCES_KEY_WIFI_EAP_PASSWORD "wifi-eap-password"
+#define PREFERENCES_KEY_WIFI_EAP_IDENTITY "wifi-eap-id"
+#define PREFERENCES_KEY_WIFI_EAP_USERNAME "wifi-eap-user"
+#define PREFERENCES_KEY_WIFI_EAP_PASSWORD "wifi-eap-pass"
 
-KorraWiFi::KorraWiFi(Preferences &prefs) : prefs(prefs), _status(WL_IDLE_STATUS) {}
+static void on_wifi_event_callback_korra(WiFiEvent_t event, WiFiEventInfo_t info)
+{
+  KorraWiFi::instance()->on_wifi_event(event, info);
+}
 
-KorraWiFi::~KorraWiFi() {}
+static int mask_to_buffer(const char *pw, size_t visible, char *dest, size_t destsize)
+{
+  size_t len = strlen(pw);
+  size_t show = visible < len ? visible : len;
+  size_t total = len; // output length (no hidden length leak!)
+
+  // ensure room for all chars + NULL
+  if (destsize < total + 1)
+    return -1;
+
+  memcpy(dest, pw, show);               // copy visible prefix
+  memset(dest + show, '*', len - show); // fill the rest with '*'
+
+  dest[total] = '\0';
+  return 0;
+}
+
+KorraWiFi *KorraWiFi::_instance = nullptr;
+
+KorraWiFi::KorraWiFi(Preferences &prefs) : prefs(prefs)
+{
+  _instance = this;
+}
+
+KorraWiFi::~KorraWiFi()
+{
+  _instance = nullptr;
+}
 
 void KorraWiFi::begin()
 {
@@ -26,55 +54,52 @@ void KorraWiFi::begin()
   listNetworks();
 #endif // CONFIG_WIFI_SCAN_NETWORKS
 
-  // load the credentials
-  credentials_load();
-
-  // connect for the first time
-  connect(true);
+  WiFi.setAutoReconnect(true);
+  WiFi.onEvent(on_wifi_event_callback_korra);
+  credentials_load(); // load the credentials
 }
 
 void KorraWiFi::maintain()
 {
-  connect(false);
+  connect();
 }
 
-bool KorraWiFi::credentials_save(const struct wifi_credentials *credentials, bool disconnect)
+bool KorraWiFi::credentials_save(const struct wifi_credentials *credentials)
 {
   prefs.putBytes(PREFERENCES_KEY_WIFI_SSID,
                  credentials->ssid, strlen(credentials->ssid));
 
-  if (credentials->passphrase != NULL)
+  if (strlen(credentials->passphrase) > 0)
   {
     prefs.putBytes(PREFERENCES_KEY_WIFI_PASSPHRASE,
                    credentials->passphrase, strlen(credentials->passphrase));
   }
 
-  if (credentials->eap_identity != NULL)
+  if (strlen(credentials->eap_identity) > 0)
   {
     prefs.putBytes(PREFERENCES_KEY_WIFI_EAP_IDENTITY,
                    credentials->eap_identity, strlen(credentials->eap_identity));
   }
 
-  if (credentials->eap_username != NULL)
+  if (strlen(credentials->eap_username) > 0)
   {
     prefs.putBytes(PREFERENCES_KEY_WIFI_EAP_USERNAME,
                    credentials->eap_username, strlen(credentials->eap_username));
   }
 
-  if (credentials->eap_password != NULL)
+  if (strlen(credentials->eap_password) > 0)
   {
     prefs.putBytes(PREFERENCES_KEY_WIFI_EAP_PASSWORD,
                    credentials->eap_password, strlen(credentials->eap_password));
   }
 
-  // copy the value into memory
+  // copy the values into memory
   memcpy(&(this->credentials), credentials, sizeof(struct wifi_credentials));
 
-  // disconnect if told to
-  if (disconnect)
-  {
-    WiFi.disconnect();
-  }
+  // disconnect
+  WiFi.disconnect();
+  connection_requested = false;
+  logged_missing_creds = false;
 
   return true;
 }
@@ -101,6 +126,13 @@ bool KorraWiFi::credentials_clear()
   {
     prefs.remove(PREFERENCES_KEY_WIFI_EAP_PASSWORD);
   }
+
+  // clear the values from memory
+  memset(&(this->credentials), 0, sizeof(struct wifi_credentials));
+
+  // disconnect
+  WiFi.disconnect();
+  connection_requested = false;
 
   return true;
 }
@@ -133,6 +165,33 @@ void KorraWiFi::credentials_load()
     prefs.getBytes(PREFERENCES_KEY_WIFI_EAP_PASSWORD,
                    (char *)credentials.eap_password, sizeof(credentials.eap_password));
   }
+
+  credentials_print();
+}
+
+void KorraWiFi::credentials_print()
+{
+  Serial.printf("WiFi Credentials SSID: '%s'\n", credentials.ssid);
+
+  size_t passphrase_len = strlen(credentials.passphrase);
+  char protected_passphrase[sizeof(credentials.passphrase)];
+  mask_to_buffer(credentials.passphrase, 0.3 * passphrase_len, protected_passphrase, sizeof(protected_passphrase));
+  Serial.printf("WiFi Credentials Passphrase: '%s'\n", passphrase_len > 0 ? protected_passphrase : "<unset>");
+
+  size_t eap_identity_len = strlen(credentials.eap_identity);
+  char protected_eap_identity[sizeof(credentials.eap_identity)];
+  mask_to_buffer(credentials.eap_identity, 0.4 * eap_identity_len, protected_eap_identity, sizeof(protected_eap_identity));
+  Serial.printf("WiFi Credentials EAP Identity: '%s'\n", eap_identity_len > 0 ? protected_eap_identity : "<unset>");
+
+  size_t eap_username_len = strlen(credentials.eap_username);
+  char protected_eap_username[sizeof(credentials.eap_username)];
+  mask_to_buffer(credentials.eap_username, 0.4 * eap_username_len, protected_eap_username, sizeof(protected_eap_username));
+  Serial.printf("WiFi Credentials EAP Username: '%s'\n", eap_username_len > 0 ? protected_eap_username : "<unset>");
+
+  size_t eap_password_len = strlen(credentials.eap_password);
+  char protected_eap_password[sizeof(credentials.eap_password)];
+  mask_to_buffer(credentials.eap_password, 0.4 * eap_password_len, protected_eap_password, sizeof(protected_eap_password));
+  Serial.printf("WiFi Credentials EAP Password: '%s'\n", eap_password_len > 0 ? protected_eap_password : "<unset>");
 }
 
 const __FlashStringHelper *encryptionTypeToString(wifi_auth_mode_t mode)
@@ -208,21 +267,15 @@ void KorraWiFi::listNetworks()
 }
 #endif
 
-void KorraWiFi::connect(bool initial)
+void KorraWiFi::connect()
 {
-  // if already connected, there is nothing more to do
-  uint8_t status = WiFi.status();
-  if (status == WL_CONNECTED)
+  // if already connected, or we requested it, there is nothing more to do
+  if (connected() || connection_requested)
   {
     return;
   }
 
-  // detect disconnection
-  if (_status == WL_CONNECTED && _status != status)
-  {
-    Serial.println(F("WiFi disconnected"));
-  }
-
+  // ensure we have credentials
   if (strlen(credentials.ssid) == 0)
   {
     if (!logged_missing_creds)
@@ -233,63 +286,70 @@ void KorraWiFi::connect(bool initial)
     return;
   }
 
-  Serial.printf("Attempting to connect to WiFi SSID: %s\n", credentials.ssid);
-
-  if (credentials.eap_identity != NULL)
+  if (strlen(credentials.eap_identity) > 0 || strlen(credentials.eap_username) > 0 || strlen(credentials.eap_password) > 0)
   {
-    status = WiFi.begin(/* wpa2_ssid */ (const char *)credentials.ssid,
-                        /* method */ wpa2_auth_method_t::WPA2_AUTH_PEAP,
-                        /* wpa2_identity */ (const char *)credentials.eap_identity,
-                        /* wpa2_username */ (const char *)credentials.eap_username,
-                        /* wpa2_password */ (const char *)credentials.eap_password);
+    Serial.printf("Attempting to connect to WiFi (EAP) SSID: '%s'\n", credentials.ssid);
+    WiFi.begin(/* wpa2_ssid */ (const char *)credentials.ssid,
+               /* method */ wpa2_auth_method_t::WPA2_AUTH_PEAP,
+               /* wpa2_identity */ (const char *)credentials.eap_identity,
+               /* wpa2_username */ (const char *)credentials.eap_username,
+               /* wpa2_password */ (const char *)credentials.eap_password);
   }
   else
   {
-    status = WiFi.begin(credentials.ssid, credentials.passphrase);
-  }
-
-  uint32_t started = millis();
-  while (status != WL_CONNECTED)
-  {
-    // Timeout reached – perform a reset
-    if ((millis() - started) > (CONFIG_WIFI_CONNECTION_REBOOT_TIMEOUT_SEC * 1000))
+    if (strlen(credentials.passphrase) > 0)
     {
-      Serial.printf(" taken too long (%d sec). Rebooting in 5 sec ....\n", CONFIG_WIFI_CONNECTION_REBOOT_TIMEOUT_SEC);
-      delay(5000);
-      sys_reboot();
+      Serial.printf("Attempting to connect to WiFi (Personal) SSID: '%s'\n", credentials.ssid);
+      WiFi.begin(credentials.ssid, credentials.passphrase);
     }
-
-    delay(500);
-    Serial.print(F("."));
-    status = WiFi.status();
+    else
+    {
+      Serial.printf("Attempting to connect to WiFi (Open) SSID: '%s'\n", credentials.ssid);
+      WiFi.begin(credentials.ssid, NULL);
+    }
   }
-  _status = WL_CONNECTED;
 
-  Serial.println();
-  Serial.println(F("WiFi connected successfully!"));
-  Serial.printf("SSID: %s\n", WiFi.SSID().c_str());
-  Serial.printf("BSSID: %s\n", WiFi.BSSIDstr().c_str());
-  Serial.printf("Channel: %d\n", WiFi.channel());
-  // Serial.printf("Security: %s\n", encryptionTypeToString(WiFi.encryptionType()));
-  Serial.printf("RSSI: %d\n", WiFi.RSSI());
-  Serial.printf("IP Address: %s\n", WiFi.localIP().toString());
+  connection_requested = true;
+}
 
-  // populate net_props
-  snprintf(net_props.kind, sizeof(net_props.kind), KORRA_NETWORK_KIND_WIFI);
-  WiFi.macAddress(net_props.mac_addr);
-  snprintf(net_props.mac, sizeof(net_props.mac), WiFi.macAddress().c_str());
-  snprintf(net_props.network, sizeof(net_props.network), WiFi.SSID().c_str());
-  net_props.local_ipaddr = WiFi.localIP();
-  snprintf(net_props.local_ip, sizeof(net_props.local_ip), WiFi.localIP().toString().c_str());
-
-  // For the first time, set the hostname using the mac address.
-  // Change the hostname to a more useful name. E.g. a default value like "esp32s3-594E40" changes to "korra-594E40"
-  // The WiFi stack needs to have been activated by scanning or connecting hence why this is done last. Otherwise just zeros.
-  if (initial)
+void KorraWiFi::on_wifi_event(WiFiEvent_t event, WiFiEventInfo_t info)
+{
+  if (event == WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_GOT_IP)
   {
-    snprintf(net_props.hostname, sizeof(net_props.hostname), "korra-" FMT_LL_ADDR_6_LOWER_NO_COLONS, PRINT_LL_ADDR_6(net_props.mac_addr));
-    WiFi.setHostname(net_props.hostname);
-    Serial.printf("Set hostname to %s\n", net_props.hostname);
+    Serial.println();
+    Serial.println(F("WiFi connected successfully!"));
+    Serial.printf("SSID: %s\n", WiFi.SSID().c_str());
+    Serial.printf("BSSID: %s\n", WiFi.BSSIDstr().c_str());
+    Serial.printf("Channel: %d\n", WiFi.channel());
+    // Serial.printf("Security: %s\n", encryptionTypeToString(WiFi.encryptionType()));
+    Serial.printf("RSSI: %d\n", WiFi.RSSI());
+    Serial.printf("IP Address: %s\n", WiFi.localIP().toString());
+
+    // populate net_props
+    snprintf(net_props.kind, sizeof(net_props.kind), KORRA_NETWORK_KIND_WIFI);
+    WiFi.macAddress(net_props.mac_addr);
+    snprintf(net_props.mac, sizeof(net_props.mac), WiFi.macAddress().c_str());
+    snprintf(net_props.network, sizeof(net_props.network), WiFi.SSID().c_str());
+    net_props.local_ipaddr = WiFi.localIP();
+    snprintf(net_props.local_ip, sizeof(net_props.local_ip), WiFi.localIP().toString().c_str());
+
+    // For the first time, set the hostname using the mac address.
+    // Change the hostname to a more useful name. E.g. a default value like "esp32s3-594E40" changes to "korra-594E40"
+    // The WiFi stack needs to have been activated by scanning or connecting hence why this is done last. Otherwise just zeros.
+    if (strlen(net_props.hostname) == 0)
+    {
+      snprintf(net_props.hostname, sizeof(net_props.hostname), "korra-" FMT_LL_ADDR_6_LOWER_NO_COLONS, PRINT_LL_ADDR_6(net_props.mac_addr));
+      WiFi.setHostname(net_props.hostname);
+      Serial.printf("Set hostname to %s\n", net_props.hostname);
+    }
+  }
+  else if (event == WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_LOST_IP)
+  {
+    Serial.println(F("WiFi disconnected"));
+  }
+  else
+  {
+    // Serial.printf("[WiFi-event] event: %d\n", event);
   }
 }
 

@@ -30,20 +30,14 @@ public:
   ~KorraMdns();
 
   /**
-   * Initiate mDNS
-   *
-   * @param props Properties of the network interface.
-   */
-  void begin(const struct korra_network_props *props);
-
-  /**
    * This method should be called periodically inside the main loop of the firmware.
    * It's safe to call this method in some interval (like 5ms).
    */
-  void maintain();
+  void maintain(const struct korra_network_props *props);
 
 private:
   MDNS mdns;
+  bool setup = false;
 };
 
 #endif // BOARD_HAS_INTERNET

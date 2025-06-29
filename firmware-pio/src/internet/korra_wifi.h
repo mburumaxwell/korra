@@ -63,9 +63,8 @@ public:
    * Save the credentials to the preferences.
    *
    * @param credentials The credentials.
-   * @param disconnect Whether to disconnect the network.
    */
-  bool credentials_save(const struct wifi_credentials *credentials, bool disconnect = false);
+  bool credentials_save(const struct wifi_credentials *credentials);
 
   /**
    * Clear the credentials from the preferences.
@@ -82,9 +81,23 @@ public:
    */
   inline bool connected() { return WiFi.isConnected(); }
 
+  /**
+   * Returns existing instance (singleton) of the KorraWiFi class.
+   * It may be a null pointer if the KorraWiFi object was never constructed or it was destroyed.
+   */
+  inline static KorraWiFi *instance() { return _instance; }
+
+  /**
+   * Please do not call this method from outside the `KorraWiFi` class
+   */
+  void on_wifi_event(WiFiEvent_t event, WiFiEventInfo_t info);
+
+  /// Living instance of the KorraWiFi class. It can be nullptr.
+  static KorraWiFi *_instance;
+
 private:
   Preferences &prefs;
-  uint8_t _status;
+  bool connection_requested = 0;
   struct wifi_credentials credentials = {0};
   struct korra_network_props net_props = {0};
   bool logged_missing_creds;
@@ -94,8 +107,9 @@ private:
   void listNetworks();
 #endif // CONFIG_WIFI_SCAN_NETWORKS
 
-  void connect(bool initial);
+  void connect();
   void credentials_load();
+  void credentials_print();
 };
 
 #endif // BOARD_HAS_WIFI

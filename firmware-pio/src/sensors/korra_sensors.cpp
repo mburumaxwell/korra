@@ -9,8 +9,8 @@ void KorraSensors::begin()
 {
 #ifdef CONFIG_APP_KIND_KEEPER
   // TODO: confirm model or switch to auto detect
-  dht.setup(CONFIG_SENSORS_DHT21_PIN, DHTesp::AUTO_DETECT);
   dht.setup(CONFIG_SENSORS_DHT21_PIN, DHTesp::DHT11);
+  // dht.setup(CONFIG_SENSORS_DHT21_PIN, DHTesp::AUTO_DETECT);
 #endif // CONFIG_APP_KIND_KEEPER
 }
 
