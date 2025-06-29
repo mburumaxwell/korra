@@ -118,21 +118,26 @@ void KorraWiFi::connect(bool initial)
     Serial.println(F("WiFi disconnected"));
   }
 
-  Serial.printf("Attempting to connect to WiFi SSID: %s\n", CONFIG_WIFI_SSID);
+  const char *ssid = CONFIG_WIFI_SSID;
+  const char *passphrase = CONFIG_WIFI_PASSPHRASE;
+  const char *eap_identity = CONFIG_WIFI_ENTERPRISE_IDENTITY;
+  const char *eap_username = CONFIG_WIFI_ENTERPRISE_USERNAME;
+  const char *eap_password = CONFIG_WIFI_ENTERPRISE_PASSWORD;
 
-#ifdef CONFIG_WIFI_PASSPHRASE
-  status = WiFi.begin(CONFIG_WIFI_SSID, CONFIG_WIFI_PASSPHRASE);
-#else
+  Serial.printf("Attempting to connect to WiFi SSID: %s\n", ssid);
 
-#ifdef CONFIG_WIFI_ENTERPRISE_USERNAME
-  esp_eap_client_set_identity((uint8_t *)"", 0);
-  esp_eap_client_set_username((uint8_t *)CONFIG_WIFI_ENTERPRISE_USERNAME, strlen(CONFIG_WIFI_ENTERPRISE_USERNAME));
-  esp_eap_client_set_password((uint8_t *)CONFIG_WIFI_ENTERPRISE_PASSWORD, strlen(CONFIG_WIFI_ENTERPRISE_PASSWORD));
-  esp_wifi_sta_enterprise_enable();
-#endif
-
-  status = WiFi.begin(CONFIG_WIFI_SSID);
-#endif
+  if (eap_identity != NULL)
+  {
+    esp_eap_client_set_identity((uint8_t *)eap_identity, strlen(eap_identity));
+    esp_eap_client_set_username((uint8_t *)eap_username, strlen(eap_username));
+    esp_eap_client_set_password((uint8_t *)eap_password, strlen(eap_password));
+    esp_wifi_sta_enterprise_enable();
+    status = WiFi.begin(ssid);
+  }
+  else
+  {
+    status = WiFi.begin(ssid, passphrase);
+  }
 
   uint32_t started = millis();
   while (status != WL_CONNECTED)
