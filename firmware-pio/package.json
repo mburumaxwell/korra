@@ -1,21 +1,17 @@
 {
   "name": "firmware-pio",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "license": "AGPL-3.0-later",
   "scripts": {
     "build": "node scripts/firmware.mjs build",
     "build:keeper": "pnpm build --environment keeper-esp32-s3-devkitc",
     "build:pot": "pnpm build --environment pot-esp32-s3-devkitc",
-
     "collect": "node scripts/firmware.mjs collect",
-
     "flash": "node scripts/firmware.mjs flash",
     "flash:keeper": "pnpm flash --environment keeper-esp32-s3-devkitc",
     "flash:pot": "pnpm flash --environment pot-esp32-s3-devkitc",
-
     "clean": "rimraf .pio binaries",
-
     "packages:version": "node scripts/firmware.mjs version"
   },
   "devDependencies": {
