@@ -4,13 +4,9 @@
 
 #ifdef CONFIG_BOARD_HAS_INTERNET
 
-KorraMdns::KorraMdns(UDP &client) : mdns(client)
-{
-}
+KorraMdns::KorraMdns(UDP &client) : mdns(client) {}
 
-KorraMdns::~KorraMdns()
-{
-}
+KorraMdns::~KorraMdns() {}
 
 void KorraMdns::begin(const struct korra_network_props *props)
 {

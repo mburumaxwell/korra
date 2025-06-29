@@ -19,8 +19,10 @@ public:
   /**
    * Creates a new instance of the KorraCellular class.
    * Please note that only one instance of the class can be initialized at the same time.
+   *
+   * @param prefs The preferences instance to use for storing the Cellular credentials.
    */
-  KorraCellular();
+  KorraCellular(Preferences &prefs);
 
   /**
    * Cleanup resources created and managed by the KorraCellular class.

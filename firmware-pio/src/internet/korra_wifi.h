@@ -6,6 +6,7 @@
 
 #ifdef CONFIG_BOARD_HAS_WIFI
 
+#include <Preferences.h>
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 
@@ -13,19 +14,21 @@
  * This class is a wrapper for the WiFi logic.
  * It is where all the WiFi related code is located.
  */
-class KorraWifi
+class KorraWiFi
 {
 public:
   /**
-   * Creates a new instance of the KorraWifi class.
+   * Creates a new instance of the KorraWiFi class.
    * Please note that only one instance of the class can be initialized at the same time.
+   *
+   * @param prefs The preferences instance to use for storing the WiFi credentials.
    */
-  KorraWifi();
+  KorraWiFi(Preferences &prefs);
 
   /**
-   * Cleanup resources created and managed by the KorraWifi class.
+   * Cleanup resources created and managed by the KorraWiFi class.
    */
-  ~KorraWifi();
+  ~KorraWiFi();
 
   /**
    * Scan for networks and connect to the one configured.
@@ -44,6 +47,7 @@ public:
   inline const struct korra_network_props *props() { return &net_props; }
 
 private:
+  Preferences &prefs;
   uint8_t _status;
   korra_network_props net_props;
 

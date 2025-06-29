@@ -12,7 +12,7 @@ static Preferences prefs;
 
 static KorraSensors sensors;
 static KorraCredentials credentials(prefs);
-static KorraWifi wifi;
+static KorraInternet internet(prefs);
 
 static WiFiUDP udp_client;
 static KorraMdns mdns(udp_client);
@@ -57,8 +57,8 @@ void setup()
   sensors.begin();
 
   // setup networking
-  wifi.begin();
-  mdns.begin(wifi.props());
+  internet.begin();
+  mdns.begin(internet.props());
   timing.begin(6 * 3600 /* 6 hours, in seconds */);
 
   // force early sync so that credentials and everything else in the system works easy
@@ -94,7 +94,7 @@ void setup()
 
 static bool maintain(void *)
 {
-  wifi.maintain();
+  internet.maintain();
   mdns.maintain();
   timing.maintain();
 
@@ -122,7 +122,7 @@ static bool collect_data(void *)
     return true; // true to repeat the action, false to stop
   }
 
-  hub.push(&sensors_data, wifi.props());
+  hub.push(&sensors_data, internet.props());
   return true; // true to repeat the action, false to stop
 }
 

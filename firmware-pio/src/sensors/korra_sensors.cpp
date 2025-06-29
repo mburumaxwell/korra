@@ -1,13 +1,9 @@
 #include <Arduino.h>
 #include "korra_sensors.h"
 
-KorraSensors::KorraSensors()
-{
-}
+KorraSensors::KorraSensors() {}
 
-KorraSensors::~KorraSensors()
-{
-}
+KorraSensors::~KorraSensors() {}
 
 void KorraSensors::begin()
 {

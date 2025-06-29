@@ -6,15 +6,11 @@
 
 #include "esp_eap_client.h"
 
-KorraWifi::KorraWifi() : _status(WL_IDLE_STATUS)
-{
-}
+KorraWiFi::KorraWiFi(Preferences &prefs) : prefs(prefs), _status(WL_IDLE_STATUS) {}
 
-KorraWifi::~KorraWifi()
-{
-}
+KorraWiFi::~KorraWiFi() {}
 
-void KorraWifi::begin()
+void KorraWiFi::begin()
 {
   // Set WiFi to station mode and disconnect from an AP if it was previously connected.
   WiFi.mode(WIFI_STA);
@@ -29,7 +25,7 @@ void KorraWifi::begin()
   connect(true);
 }
 
-void KorraWifi::maintain()
+void KorraWiFi::maintain()
 {
   connect(false);
 }
@@ -62,7 +58,7 @@ const __FlashStringHelper *encryptionTypeToString(wifi_auth_mode_t mode)
 }
 
 #ifdef CONFIG_WIFI_SCAN_NETWORKS
-void KorraWifi::listNetworks()
+void KorraWiFi::listNetworks()
 {
   Serial.println(F("** Scan Networks **"));
   int8_t count = WiFi.scanNetworks();
@@ -107,7 +103,7 @@ void KorraWifi::listNetworks()
 }
 #endif
 
-void KorraWifi::connect(bool initial)
+void KorraWiFi::connect(bool initial)
 {
   // if already connected, there is nothing more to do
   uint8_t status = WiFi.status();

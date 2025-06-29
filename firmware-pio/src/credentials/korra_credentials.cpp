@@ -81,9 +81,7 @@ static int generate_cert(const char *devid, const size_t devid_len,
     return ret;
 }
 
-KorraCredentials::KorraCredentials(Preferences &prefs) : prefs(prefs)
-{
-}
+KorraCredentials::KorraCredentials(Preferences &prefs) : prefs(prefs) {}
 
 KorraCredentials::~KorraCredentials()
 {
