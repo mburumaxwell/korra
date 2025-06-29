@@ -7,7 +7,10 @@ param location string = resourceGroup().location
 param name string = 'korra'
 
 /* Managed Identity */
-resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = { name: name, location: location }
+resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+  name: name
+  location: location
+}
 
 /* IoT Hub */
 resource iotHub 'Microsoft.Devices/IotHubs@2023-06-30' = {
@@ -19,14 +22,40 @@ resource iotHub 'Microsoft.Devices/IotHubs@2023-06-30' = {
     routing: {
       enrichments: [{ key: 'deviceId', value: '$twin.tags.deviceId', endpointNames: ['events'] }]
       routes: [
-        { name: 'DeviceLifecycleEvents', source: 'DeviceLifecycleEvents', condition: 'true', endpointNames: ['events'], isEnabled: true }
-        { name: 'DeviceTwinEvents', source: 'TwinChangeEvents', condition: 'true', endpointNames: ['events'], isEnabled: true }
-        { name: 'DeviceConnectionStateEvents', source: 'DeviceConnectionStateEvents', condition: 'true', endpointNames: ['events'], isEnabled: true }
+        {
+          name: 'DeviceLifecycleEvents'
+          source: 'DeviceLifecycleEvents'
+          condition: 'true'
+          endpointNames: ['events']
+          isEnabled: true
+        }
+        {
+          name: 'DeviceTwinEvents'
+          source: 'TwinChangeEvents'
+          condition: 'true'
+          endpointNames: ['events']
+          isEnabled: true
+        }
+        {
+          name: 'DeviceConnectionStateEvents'
+          source: 'DeviceConnectionStateEvents'
+          condition: 'true'
+          endpointNames: ['events']
+          isEnabled: true
+        }
       ]
-      fallbackRoute: { name: '$fallback', source: 'DeviceMessages', condition: 'true', endpointNames: ['events'], isEnabled: true }
+      fallbackRoute: {
+        name: '$fallback'
+        source: 'DeviceMessages'
+        condition: 'true'
+        endpointNames: ['events']
+        isEnabled: true
+      }
     }
     storageEndpoints: { '$default': { sasTtlAsIso8601: 'PT1H', connectionString: '', containerName: '' } }
-    messagingEndpoints: { fileNotifications: { lockDurationAsIso8601: 'PT1M', ttlAsIso8601: 'PT1H', maxDeliveryCount: 10 } }
+    messagingEndpoints: {
+      fileNotifications: { lockDurationAsIso8601: 'PT1M', ttlAsIso8601: 'PT1H', maxDeliveryCount: 10 }
+    }
     enableFileUploadNotifications: false
     cloudToDevice: {
       maxDeliveryCount: 10
@@ -43,12 +72,14 @@ resource iotDps 'Microsoft.Devices/provisioningServices@2022-12-12' = {
   name: name
   location: location
   properties: {
-    iotHubs: [{
-      location: location
-      #disable-next-line BCP037
-      authenticationType: 'KeyBased'
-      connectionString: 'HostName=${iotHub.properties.hostName};SharedAccessKeyName=iothubowner;SharedAccessKey=${iotHub.listkeys().value[0].primaryKey}'
-    }]
+    iotHubs: [
+      {
+        location: location
+        #disable-next-line BCP037
+        authenticationType: 'KeyBased'
+        connectionString: 'HostName=${iotHub.properties.hostName};SharedAccessKeyName=iothubowner;SharedAccessKey=${iotHub.listkeys().value[0].primaryKey}'
+      }
+    ]
     allocationPolicy: 'Hashed'
   }
   sku: { name: 'S1', capacity: 1 }
@@ -84,14 +115,16 @@ var roles = [
   { name: 'Device Provisioning Service Data Contributor', id: 'dfce44e4-17b7-4bd1-a6d1-04996ec95633' } // Allows for full access to Device Provisioning Service data-plane operations.
 ]
 
-resource roleAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for role in roles: {
-  name: guid(managedIdentity.id, role.name)
-  scope: resourceGroup()
-  properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', role.id)
-    principalId: managedIdentity.properties.principalId
+resource roleAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [
+  for role in roles: {
+    name: guid(managedIdentity.id, role.name)
+    scope: resourceGroup()
+    properties: {
+      roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', role.id)
+      principalId: managedIdentity.properties.principalId
+    }
   }
-}]
+]
 
 output managedIdentityPrincipalId string = managedIdentity.properties.principalId
 output iotHubHostName string = iotHub.properties.hostName
