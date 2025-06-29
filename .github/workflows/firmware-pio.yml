@@ -56,19 +56,28 @@ jobs:
       - name: Install PlatformIO
         run: pip install --upgrade platformio
 
-      - name: Build Project
-        run: pio run
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
 
-      - name: Collect binaries
-        run: |
-          mkdir -p ${{ env.DEST }}
-          cp ${{ env.SRC }}/keeper-esp32-s3-devkitc/firmware.elf ${{ env.DEST }}/arduino-keeper-esp32-s3-devkitc.elf
-          cp ${{ env.SRC }}/keeper-esp32-s3-devkitc/firmware.bin ${{ env.DEST }}/arduino-keeper-esp32-s3-devkitc.bin
-          cp ${{ env.SRC }}/pot-esp32-s3-devkitc/firmware.elf ${{ env.DEST }}/arduino-pot-esp32-s3-devkitc.elf
-          cp ${{ env.SRC }}/pot-esp32-s3-devkitc/firmware.bin ${{ env.DEST }}/arduino-pot-esp32-s3-devkitc.bin
-        env:
-          SRC: ${{ github.workspace }}/firmware-pio/.pio/build
-          DEST: ${{ github.workspace }}/firmware-pio/binaries
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Download deps
+        run: pnpm install
+        working-directory: '${{ github.workspace }}/firmware'
+
+      - name: Build
+        run: pio run
+        # running the below tends to fail but since pio knows how to run parallel, we do not need it to add hacks in CI
+        # run: pnpm build
+        # working-directory: '${{ github.workspace }}/firmware-pio'
+
+      - name: Collect output
+        run: pnpm collect
+        working-directory: '${{ github.workspace }}/firmware-pio'
 
       - name: Upload Artifact (binaries)
         uses: actions/upload-artifact@v4
