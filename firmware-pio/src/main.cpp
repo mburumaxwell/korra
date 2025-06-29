@@ -1,4 +1,5 @@
 #include <app_version.h>
+#include <sys/reboot.h>
 
 #include <SimpleSerialShell.h>
 
@@ -35,6 +36,7 @@ static bool maintain(void *);
 static bool collect_data(void *);
 
 static int shell_command_info(int argc, char **argv);
+static int shell_command_reboot(int argc, char **argv);
 static int shell_command_internet_cred_clear(int argc, char **argv);
 static int shell_command_wifi_cred_set_open(int argc, char **argv);
 static int shell_command_wifi_cred_set_personal(int argc, char **argv);
@@ -66,14 +68,7 @@ void setup()
 
   // setup networking
   internet.begin();
-  mdns.begin(internet.props());
   timing.begin(6 * 3600 /* 6 hours, in seconds */);
-
-  // force early sync so that credentials and everything else in the system works easy
-  if (internet.connected())
-  {
-    timing.sync();
-  }
 
   // prepare credentials
   credentials.begin(devid, devid_len);
@@ -106,6 +101,7 @@ void setup()
 
   shell.attach(Serial);
   shell.addCommand(F("info"), shell_command_info);
+  shell.addCommand(F("reboot"), shell_command_reboot);
   shell.addCommand(F("internet-cred-clear"), shell_command_internet_cred_clear);
   shell.addCommand(F("wifi-cred-set-open <ssid>"), shell_command_wifi_cred_set_open);
   shell.addCommand(F("wifi-cred-set-personal <ssid> <passphrase>"), shell_command_wifi_cred_set_personal);
@@ -126,7 +122,7 @@ static bool maintain(void *)
     return true; // true to repeat the action, false to stop
   }
 
-  mdns.maintain();
+  mdns.maintain(internet.props());
   timing.maintain();
 
   // cloud maintenance
@@ -168,36 +164,42 @@ static int shell_command_info(int argc, char **argv) // info
   return EXIT_SUCCESS;
 }
 
+static int shell_command_reboot(int argc, char **argv) // reboot
+{
+  sys_reboot();
+  return EXIT_SUCCESS;
+}
+
 static int shell_command_internet_cred_clear(int argc, char **argv) // internet-cred-clear
 {
   Serial.println("Clearing internet credentials");
-  return internet.credentials_clear() ? EXIT_SUCCESS : -1;
+  return internet.credentials_clear() ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
 static int shell_command_wifi_cred_set_open(int argc, char **argv) // wifi-cred-set-open <ssid>
 {
-  struct wifi_credentials credentials;
+  struct wifi_credentials credentials = {0};
   snprintf(credentials.ssid, sizeof(credentials.ssid), (char *)argv[1]);
   Serial.printf("Setting internet credentials (open network). SSID: '%s'\n", credentials.ssid);
-  return internet.credentials_save_wifi(&credentials) ? EXIT_SUCCESS : -1;
+  return internet.credentials_save_wifi(&credentials) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
 static int shell_command_wifi_cred_set_personal(int argc, char **argv) // wifi-cred-set-personal <ssid> <passphrase>
 {
-  struct wifi_credentials credentials;
+  struct wifi_credentials credentials = {0};
   snprintf(credentials.ssid, sizeof(credentials.ssid), (char *)argv[1]);
   snprintf(credentials.passphrase, sizeof(credentials.passphrase), (char *)argv[2]);
   Serial.printf("Setting internet credentials (personal). SSID: '%s'\n", credentials.ssid);
-  return internet.credentials_save_wifi(&credentials) ? EXIT_SUCCESS : -1;
+  return internet.credentials_save_wifi(&credentials) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
 static int shell_command_wifi_cred_set_ent(int argc, char **argv) // wifi-cred-set-ent <ssid> <identity> <username> <password>
 {
-  struct wifi_credentials credentials;
+  struct wifi_credentials credentials = {0};
   snprintf(credentials.ssid, sizeof(credentials.ssid), (char *)argv[1]);
   snprintf(credentials.eap_identity, sizeof(credentials.eap_identity), (char *)argv[2]);
   snprintf(credentials.eap_username, sizeof(credentials.eap_username), (char *)argv[3]);
   snprintf(credentials.eap_password, sizeof(credentials.eap_password), (char *)argv[4]);
   Serial.printf("Setting internet credentials (enterprise). SSID: '%s'\n", credentials.ssid);
-  return internet.credentials_save_wifi(&credentials) ? EXIT_SUCCESS : -1;
+  return internet.credentials_save_wifi(&credentials) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

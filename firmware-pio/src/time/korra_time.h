@@ -37,12 +37,6 @@ public:
   void begin(uint32_t update_interval_sec = 60);
 
   /**
-   * Sync time once.
-   * Call this if you need to ensure sync early such as in main.
-   */
-  void sync();
-
-  /**
    * This method should be called periodically inside the main loop of the firmware.
    * It's safe to call this method in some interval (like 5ms).
    */

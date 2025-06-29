@@ -14,7 +14,7 @@ void KorraTime::begin(uint32_t update_interval_sec)
     client.setUpdateInterval(update_interval_sec * 1000);
 }
 
-void KorraTime::sync()
+void KorraTime::maintain()
 {
     if (client.update())
     {
@@ -32,9 +32,4 @@ void KorraTime::sync()
         strftime(time_str, sizeof(time_str), "%FT%T", &tm);
         Serial.printf("Time is now %s\n", time_str);
     }
-}
-
-void KorraTime::maintain()
-{
-    sync();
 }
