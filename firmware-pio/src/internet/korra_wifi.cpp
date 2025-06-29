@@ -4,8 +4,6 @@
 
 #ifdef CONFIG_BOARD_HAS_WIFI
 
-#include "esp_eap_client.h"
-
 KorraWiFi::KorraWiFi(Preferences &prefs) : prefs(prefs), _status(WL_IDLE_STATUS) {}
 
 KorraWiFi::~KorraWiFi() {}
@@ -128,15 +126,16 @@ void KorraWiFi::connect(bool initial)
 
   if (eap_identity != NULL)
   {
-    esp_eap_client_set_identity((uint8_t *)eap_identity, strlen(eap_identity));
-    esp_eap_client_set_username((uint8_t *)eap_username, strlen(eap_username));
-    esp_eap_client_set_password((uint8_t *)eap_password, strlen(eap_password));
-    esp_wifi_sta_enterprise_enable();
-    status = WiFi.begin(ssid);
+    status = WiFi.begin(
+        /* wpa2_ssid */ (const char *)ssid,
+        /* method */ wpa2_auth_method_t::WPA2_AUTH_PEAP,
+        /* wpa2_identity */ (const char *)eap_identity,
+        /* wpa2_username */ (const char *)eap_username,
+        /* wpa2_password */ (const char *)eap_password);
   }
   else
   {
-    status = WiFi.begin(ssid, passphrase);
+    status = WiFi.begin(/* ssid */ ssid, /* passphrase */ passphrase);
   }
 
   uint32_t started = millis();
