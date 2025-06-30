@@ -34,6 +34,8 @@ static size_t devid_len;
 
 static bool maintain(void *);
 static bool collect_data(void *);
+static bool update_device_twin(void *);
+static void device_twin_updated(struct korra_device_twin *twin, bool initial);
 
 static int shell_command_info(int argc, char **argv);
 static int shell_command_reboot(int argc, char **argv);
@@ -50,7 +52,7 @@ void setup()
   devid_len = snprintf(devid, sizeof(devid), "%llx", (unsigned long long)raw_devid);
 
   Serial.begin(9600);
-  Serial.printf("*** Booting Korra %s build v%s (%s) ***\n", CONFIG_APP_NAME, APP_VERSION_STRING, APP_BUILD_VERSION);
+  Serial.printf("*** Booting Korra %s build v%s (%s) ***\n", CONFIG_APP_NAME, APP_VERSION_STRING, STRINGIFY(APP_BUILD_VERSION));
   Serial.printf("*** Device ID: %s ***\n", devid);
 
   if (!prefs.begin("korra", /* readonly */ false))
@@ -88,16 +90,19 @@ void setup()
   tcp_client_hub.setCertificate(devcert);
   tcp_client_hub.setPrivateKey(devkey);
   hub.begin();
+  hub.onDeviceTwinUpdated(device_twin_updated);
 
   // setup timers
   timer.every(500, maintain);
   timer.every((CONFIG_SENSORS_READ_PERIOD_SECONDS * 1000), collect_data);
+  timer.every((3600 * 1000) /* 1 hour, in millis */, update_device_twin);
 
   // // clear credentials and/or provisioning info (only during test)
   // credentials.clear();
   // provisioning.clear();
   // internet.credentials_clear();
-  // while (1) ;
+  // while (1)
+  //   ;
 
   shell.attach(Serial);
   shell.addCommand(F("info"), shell_command_info);
@@ -142,7 +147,7 @@ static bool collect_data(void *)
   // read sensors data
   sensors.read(&sensors_data);
 
-  // check if hubs is connected
+  // check if hub is connected
   if (!hub.connected())
   {
     Serial.println("Hub is not connected. Skipping push.");
@@ -153,9 +158,70 @@ static bool collect_data(void *)
   return true; // true to repeat the action, false to stop
 }
 
+static bool update_device_twin(void *)
+{
+  // check if hub is connected
+  if (!hub.connected())
+  {
+    return true; // true to repeat the action, false to stop
+  }
+
+  // check if the values we have reported need updating
+  bool update = false;
+  struct korra_device_twin_reported props = {0};
+  memcpy(&props, &(hub.device_twin()->reported), sizeof(struct korra_device_twin_reported));
+
+  // check firmware version (value)
+  if (props.firmware.version.value != APP_VERSION_NUMBER)
+  {
+    props.firmware.version.value = APP_VERSION_NUMBER;
+    update |= true;
+  }
+
+  // check firmware version (semver)
+  if (strcmp(props.firmware.version.semver, APP_VERSION_STRING) != 0)
+  {
+    snprintf((char *)props.firmware.version.semver, sizeof(props.firmware.version.semver), APP_VERSION_STRING);
+    update |= true;
+  }
+
+  // push the update to the hub
+  if (update)
+    hub.update(&props);
+  else
+    Serial.println("No update required for the reported properties in the device twin");
+
+  return true; // true to repeat the action, false to stop
+}
+
+static void device_twin_updated(struct korra_device_twin *twin, bool initial)
+{
+  // for the first time, trigger an update in 5 seconds (it will check if there needs to be a push)
+  if (initial)
+  {
+    timer.in((5 * 1000) /* 5 seconds, in millis */, [](void *) -> bool
+             {
+               update_device_twin(NULL);
+               return false; // true to repeat the action, false to stop
+             });
+    return;
+  }
+
+  // check for firmware updates
+  if (twin->desired.firmware.version.value != APP_VERSION_NUMBER ||
+      strcmp(twin->desired.firmware.version.semver, APP_VERSION_STRING) != 0)
+  {
+    Serial.printf("We have a new firmware version: %s (%d)",
+                  twin->desired.firmware.version.semver,
+                  twin->desired.firmware.version.value);
+
+    // TODO: handle new firmware
+  }
+}
+
 static int shell_command_info(int argc, char **argv) // info
 {
-  Serial.printf("Korra %s build v%s (%s)\n", CONFIG_APP_NAME, APP_VERSION_STRING, APP_BUILD_VERSION);
+  Serial.printf("Korra %s build v%s (%s)\n", CONFIG_APP_NAME, APP_VERSION_STRING, STRINGIFY(APP_BUILD_VERSION));
   Serial.printf("Device ID: %s\n", devid);
   Serial.printf("Arduino Stack: %d of %d bytes free\n",
                 uxTaskGetStackHighWaterMark(NULL),

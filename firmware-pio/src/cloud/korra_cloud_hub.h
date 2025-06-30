@@ -11,6 +11,43 @@
 #include "internet/korra_network_shared.h"
 #include "korra_cloud_shared.h"
 
+struct korra_firmware_version
+{
+  uint32_t value;
+  char semver[20 + 1]; // human-readable version
+};
+
+struct korra_firmware_desired
+{
+  struct korra_firmware_version version; // version
+  char url[256 + 1];                     // firmware binary URL
+  char hash[64 + 1];                     // SHA-256 hash in hex
+  char signature[128 + 1];               // Signature (e.g., base64 or hex)
+};
+
+struct korra_firmware_reported
+{
+  struct korra_firmware_version version; // version
+};
+
+struct korra_device_twin_desired
+{
+  uint32_t version; // $version
+  struct korra_firmware_desired firmware;
+};
+
+struct korra_device_twin_reported
+{
+  uint32_t version; // $version
+  struct korra_firmware_reported firmware;
+};
+
+struct korra_device_twin
+{
+  struct korra_device_twin_desired desired;
+  struct korra_device_twin_reported reported;
+};
+
 /**
  * This class is a wrapper for the cloud functionalities.
  */
@@ -54,11 +91,30 @@ public:
   void push(const struct korra_sensors_data *source, const struct korra_network_props *net_props);
 
   /**
+   * Update reported properties of the device twin.
+   *
+   * @param props The properties to be reported.
+   */
+  void update(struct korra_device_twin_reported *props);
+
+  /**
    * Check if the connection to the cloud is established.
    *
    * @return `true` if the connection is established, `false` otherwise.
    */
   inline bool connected() { return mqtt.connected(); }
+
+  /**
+   * Get the device twin.
+   */
+  inline const struct korra_device_twin *device_twin() { return &twin; }
+
+  /**
+   * Registers callback that will be called each time the twin is updated.
+   *
+   * @param callback The callback to register.
+   */
+  inline void onDeviceTwinUpdated(void (*callback)(struct korra_device_twin *twin, bool initial)) { device_twin_updated_callback = callback; }
 
   /**
    * Returns existing instance (singleton) of the KorraCloudHub class.
@@ -77,12 +133,17 @@ private:
 
 private:
   void connect(int retries = 3, int delay_ms = 5000);
+  void query_device_twin();
 
 private:
   MqttClient mqtt;
   bool client_setup = false;
   char *username = NULL, *hostname = NULL, *deviceid = NULL;
   size_t username_len = 0, hostname_len = 0, deviceid_len = 0;
+  uint16_t request_id = 1;
+  bool twin_requested = false;
+  struct korra_device_twin twin = {0};
+  void (*device_twin_updated_callback)(struct korra_device_twin *twin, bool initial);
 };
 
 #endif // BOARD_HAS_INTERNET

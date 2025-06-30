@@ -85,6 +85,26 @@ resource iotDps 'Microsoft.Devices/provisioningServices@2022-12-12' = {
   sku: { name: 'S1', capacity: 1 }
 }
 
+resource iotUpdateAccount 'Microsoft.DeviceUpdate/accounts@2023-07-01' = {
+  name: name
+  location: location
+  properties: {
+    sku: 'Free'
+  }
+
+  /* Cannot create the instance with a free tier iot hub. Till then we do the magic manually */
+  // resource instance 'instances' = {
+  //   name: name
+  //   location: location
+  //   properties: {
+  //     enableDiagnostics: false
+  //     iotHubs: [{ resourceId: iotHub.id }]
+  //   }
+  // }
+
+  identity: { type: 'UserAssigned', userAssignedIdentities: { '${managedIdentity.id}': {} } }
+}
+
 /* Static WebApp */
 resource staticWebApp 'Microsoft.Web/staticSites@2024-11-01' = {
   name: name
@@ -113,6 +133,7 @@ resource staticWebApp 'Microsoft.Web/staticSites@2024-11-01' = {
 var roles = [
   { name: 'IoT Hub Data Contributor', id: '4fc6c259-987e-4a07-842e-c321cc9d413f' } // Allows for full access to IoT Hub data plane operations.
   { name: 'Device Provisioning Service Data Contributor', id: 'dfce44e4-17b7-4bd1-a6d1-04996ec95633' } // Allows for full access to Device Provisioning Service data-plane operations.
+  { name: 'Device Update Administrator', id: '02ca0879-e8e4-47a5-a61e-5c618b76e64a' } // Gives you full access to management and content operations
 ]
 
 resource roleAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [

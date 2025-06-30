@@ -186,8 +186,8 @@ private:
   registration_operation_status status;
   char *username = NULL;
   size_t username_len = 0;
+  uint16_t request_id = 1;
   bool registration_requested = false;
-  int request_id = 1;
   Timer<> &timer;
 
   /// Living instance of the KorraCloudProvisioning class. It can be nullptr.
