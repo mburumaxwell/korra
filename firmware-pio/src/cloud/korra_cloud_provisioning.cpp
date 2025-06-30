@@ -114,6 +114,7 @@ void KorraCloudProvisioning::maintain()
         mqtt.beginMessage(topic, /* retain */ false, /* qos */ 0, /* dup */ false);
         mqtt.print("{}"); // must be an empty json otherwise it won't work
         mqtt.endMessage();
+        request_id++;
         registration_requested = true;
     }
 }
@@ -201,7 +202,7 @@ void KorraCloudProvisioning::on_mqtt_message(int size)
     Serial.printf("Received a message on topic '%s', length %d bytes:\n", topic, size);
 
     // read payload
-    char payload[size + 1];
+    char payload[size + 1] = {0};
     mqtt.readBytes(payload, size);
     Serial.printf("%s\n", payload);
 

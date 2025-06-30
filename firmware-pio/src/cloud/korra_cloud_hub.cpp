@@ -1,3 +1,4 @@
+#include <sys/reboot.h>
 #include <ArduinoJson.h>
 
 #include "korra_cloud_hub.h"
@@ -15,6 +16,8 @@
 
 #define TOPIC_TWIN_RESULT_PREFIX "$iothub/twin/res/"
 #define TOPIC_TWIN_RESULT_FILTER TOPIC_TWIN_RESULT_PREFIX "#"
+#define TOPIC_FORMAT_TWIN_GET_STATUS "$iothub/twin/GET/?$rid=%d"
+#define TOPIC_FORMAT_TWIN_PATCH_REPORTED "$iothub/twin/PATCH/properties/reported/?$rid=%d"
 
 KorraCloudHub *KorraCloudHub::_instance = nullptr;
 
@@ -98,6 +101,13 @@ void KorraCloudHub::maintain(struct korra_cloud_provisioning_info *info)
     }
 
     mqtt.poll();
+
+    // request twin if not requested
+    if (!twin_requested)
+    {
+        query_device_twin();
+        twin_requested = true;
+    }
 }
 
 void KorraCloudHub::push(const struct korra_sensors_data *source, const struct korra_network_props *net_props)
@@ -150,6 +160,35 @@ void KorraCloudHub::push(const struct korra_sensors_data *source, const struct k
     mqtt.endMessage();
 }
 
+void KorraCloudHub::update(struct korra_device_twin_reported *props)
+{
+    JsonDocument doc;
+
+    // The request message body contains a JSON document that contains new values for reported properties.
+    // Each member in the JSON document updates or add the corresponding member in the device twin's document.
+    // A member set to null deletes the member from the containing object.
+    doc["firmware"]["version"]["value"] = props->firmware.version.value;
+    doc["firmware"]["version"]["semver"] = props->firmware.version.semver;
+
+    // prepare topic
+    size_t topic_len = snprintf(NULL, 0, TOPIC_FORMAT_TWIN_PATCH_REPORTED, request_id);
+    char topic[topic_len + 1] = {0};
+    topic_len = snprintf(topic, sizeof(topic), TOPIC_FORMAT_TWIN_PATCH_REPORTED, request_id);
+
+    // prepare payload
+    size_t payload_len = measureJson(doc);
+    char payload[payload_len + 1] = {0};
+    payload_len = serializeJson(doc, payload, payload_len);
+    Serial.printf("Sending message to topic '%s', length %d bytes:\n%s\n", topic, payload_len, payload);
+
+    // publish
+    mqtt.beginMessage(topic, /* retain */ false, /* qos */ 0, /* dup */ false);
+    mqtt.write((const uint8_t *)payload, payload_len);
+    mqtt.endMessage();
+    request_id++;
+    memcpy(&(twin.reported.firmware), props, sizeof(struct korra_device_twin_reported));
+}
+
 void KorraCloudHub::connect(int retries, int delay_ms)
 {
     for (int i = 0; i < retries; i++)
@@ -172,6 +211,18 @@ void KorraCloudHub::connect(int retries, int delay_ms)
     }
 }
 
+void KorraCloudHub::query_device_twin()
+{
+    Serial.printf("Requesting device twin with rid: %d\n", request_id);
+    size_t topic_len = snprintf(NULL, 0, TOPIC_FORMAT_TWIN_GET_STATUS, request_id);
+    char topic[topic_len + 1] = {0};
+    topic_len = snprintf(topic, sizeof(topic), TOPIC_FORMAT_TWIN_GET_STATUS, request_id);
+    mqtt.beginMessage(topic, /* retain */ false, /* qos */ 0, /* dup */ false);
+    mqtt.print("{}"); // must be an empty json otherwise it won't work
+    mqtt.endMessage();
+    request_id++;
+}
+
 void KorraCloudHub::on_mqtt_message(int size)
 {
     // Keep the String alive until the function ends since we depend on it.
@@ -181,7 +232,108 @@ void KorraCloudHub::on_mqtt_message(int size)
     Serial.printf("Received a message on topic '%s', length %d bytes:\n", topic, size);
 
     // read payload
-    char payload[size + 1];
+    char payload[size + 1] = {0};
     mqtt.readBytes(payload, size);
     Serial.printf("%s\n", payload);
+
+    // sample topics
+    // twin -> $iothub/registrations/res/200/?$rid=1
+
+    // find the prefix
+    const char *prefix_pos = strstr(topic, TOPIC_TWIN_RESULT_PREFIX);
+    if (prefix_pos == NULL)
+    {
+        Serial.printf("Unknown topic. Expected prefix: %s\n", TOPIC_TWIN_RESULT_PREFIX);
+        return;
+    }
+    int status_code = 0;
+    sscanf(prefix_pos + strlen(TOPIC_TWIN_RESULT_PREFIX), "%d", &status_code);
+
+    if (status_code == 200)
+    {
+        // parse the json payload
+        JsonDocument doc;
+        DeserializationError error = deserializeJson(doc, payload);
+        if (error)
+        {
+            Serial.print(F("deserializeJson() failed: "));
+            Serial.println(error.f_str());
+            return;
+        }
+
+        const uint16_t desired_version = doc["desired"]["$version"];
+        const uint16_t reported_version = doc["reported"]["$version"];
+        const bool changed = desired_version != twin.desired.version || reported_version != twin.reported.version;
+        const bool initial = twin.desired.version == 0 || twin.reported.version == 0;
+        if (!changed)
+        {
+            // no changes, nothing to do
+            return;
+        }
+
+        // reset the stored twin
+        twin = {0};
+
+        // update the twin stored locally (desired)
+        twin.desired.version = desired_version;
+        // desired.firmware.version.value
+        twin.desired.firmware.version.value = doc["desired"]["firmware"]["version"]["value"];
+        // desired.firmware.version.semver
+        const char *semver_raw = doc["desired"]["firmware"]["version"]["semver"];
+        if (semver_raw != NULL)
+        {
+            size_t semver_raw_len = min((int)strlen(semver_raw) + 1, (int)sizeof(twin.desired.firmware.version.semver));
+            memcpy(twin.desired.firmware.version.semver, semver_raw, semver_raw_len - 1);
+        }
+        // desired.firmware.url
+        const char *url_raw = doc["desired"]["firmware"]["url"];
+        if (url_raw != NULL)
+        {
+            size_t url_raw_len = min((int)strlen(url_raw) + 1, (int)sizeof(twin.desired.firmware.url));
+            memcpy(twin.desired.firmware.url, url_raw, url_raw_len - 1);
+        }
+        // desired.firmware.hash
+        const char *hash_raw = doc["desired"]["firmware"]["hash"];
+        if (hash_raw != NULL)
+        {
+            size_t hash_raw_len = min((int)strlen(hash_raw) + 1, (int)sizeof(twin.desired.firmware.hash));
+            memcpy(twin.desired.firmware.hash, hash_raw, hash_raw_len - 1);
+        }
+        // desired.firmware.signature
+        const char *signature_raw = doc["desired"]["firmware"]["signature"];
+        if (signature_raw != NULL)
+        {
+            size_t signature_raw_len = min((int)strlen(signature_raw) + 1, (int)sizeof(twin.desired.firmware.signature));
+            memcpy(twin.desired.firmware.signature, signature_raw, signature_raw_len - 1);
+        }
+
+        // update the twin stored locally (reported)
+        twin.reported.version = reported_version;
+        // reported.firmware.version.value
+        twin.reported.firmware.version.value = doc["reported"]["firmware"]["version"]["value"];
+        // reported.firmware.version.semver
+        semver_raw = doc["reported"]["firmware"]["version"]["semver"];
+        if (semver_raw != NULL)
+        {
+            size_t semver_raw_len = min((int)strlen(semver_raw) + 1, (int)sizeof(twin.reported.firmware.version.semver));
+            memcpy(twin.reported.firmware.version.semver, semver_raw, semver_raw_len - 1);
+        }
+
+        // invoke callback
+        if (changed && device_twin_updated_callback != NULL)
+        {
+            device_twin_updated_callback(&twin, initial);
+        }
+    }
+    else if (status_code == 204)
+    {
+        Serial.println("Update was successful.");
+    }
+    else
+    {
+        // assume a transient error and reboot (should actually parse the error)
+        Serial.println("Unknown status code. Rebooting in 5 seconds ...");
+        delay(5000);
+        sys_reboot();
+    }
 }

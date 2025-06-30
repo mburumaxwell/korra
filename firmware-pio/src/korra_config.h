@@ -1,6 +1,8 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#define STRINGIFY(a) __STRINGIFY(a)
+
 #ifdef ARDUINO_ARCH_ESP32
 #define CONFIG_BOARD_HAS_WIFI 1
 #endif
