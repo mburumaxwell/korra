@@ -15,15 +15,15 @@
 
 struct korra_sensors_data {
 #ifdef CONFIG_APP_KIND_KEEPER
-  // measured in °C
+  /** Measured in °C */
   float temperature;
 
-  // relative humidity (%)
+  /** Relative humidity (%) */
   float humidity;
 #endif // CONFIG_APP_KIND_KEEPER
 
 #ifdef CONFIG_APP_KIND_POT
-  // percentage (%) of water in a substance
+  /** Percentage (%) of water in a substance */
   int32_t moisture;
 
   float ph;

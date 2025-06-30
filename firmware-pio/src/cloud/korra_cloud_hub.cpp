@@ -152,6 +152,9 @@ void KorraCloudHub::update(struct korra_device_twin_reported *props) {
   // A member set to null deletes the member from the containing object.
   doc["firmware"]["version"]["value"] = props->firmware.version.value;
   doc["firmware"]["version"]["semver"] = props->firmware.version.semver;
+  doc["actuator"]["count"] = props->actuator.count;
+  doc["actuator"]["last_time"] = props->actuator.last_time;
+  doc["actuator"]["total_duration"] = props->actuator.total_duration;
 
   // prepare topic
   size_t topic_len = snprintf(NULL, 0, TOPIC_FORMAT_TWIN_PATCH_REPORTED, request_id);
@@ -275,6 +278,10 @@ void KorraCloudHub::on_mqtt_message(int size) {
       size_t signature_raw_len = min((int)strlen(signature_raw) + 1, (int)sizeof(twin.desired.firmware.signature));
       memcpy(twin.desired.firmware.signature, signature_raw, signature_raw_len - 1);
     }
+    // desired.actuator.enabled
+    twin.desired.actuator.enabled = doc["desired"]["actuator"]["enabled"];
+    // desired.actuator.target
+    twin.desired.actuator.target = doc["desired"]["actuator"]["target"];
 
     // update the twin stored locally (reported)
     twin.reported.version = reported_version;
