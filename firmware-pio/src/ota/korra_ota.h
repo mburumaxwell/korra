@@ -42,7 +42,7 @@ public:
   void maintain();
 
 private:
-    const char *ca_cert;
+  const char *ca_cert;
 };
 
 #endif // KORRA_OTA_H

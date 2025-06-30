@@ -35,7 +35,6 @@ static KorraOta ota(tcp_client_ota);
 static struct korra_sensors_data sensors_data;
 static char devid[(sizeof(uint64_t) * 2) + 1]; // the efuse is a 64-bit integer (64 bit -> 8 bytes -> 16 hex chars)
 static size_t devid_len;
-static bool ota_initiated = false;
 
 static bool maintain(void *);
 static bool collect_data(void *);
@@ -213,7 +212,6 @@ static void device_twin_updated(struct korra_device_twin *twin, bool initial) {
 
     // initialize the firmware update
     ota.update(twin->desired.firmware.url, twin->desired.firmware.hash, twin->desired.firmware.signature);
-    ota_initiated = true;
   }
 }
 
@@ -227,23 +225,20 @@ static int shell_command_info(int argc, char **argv) // info
   return EXIT_SUCCESS;
 }
 
-static int shell_command_reboot(int argc, char **argv) // reboot
-{
+static int shell_command_reboot(int argc, char **argv) {
+  // command format: reboot
+
   sys_reboot();
   return EXIT_SUCCESS;
 }
 
-static int shell_command_device_cred_clear(int argc, char **argv) // device-cred-clear
-{
-  // disconnect from the cloud
-  hub.disconnect();
+static int shell_command_device_cred_clear(int argc, char **argv) {
+  // command format: device-cred-clear
+
+  hub.disconnect(); // disconnect from the cloud
   provisioning.disconnect();
-
-  // clear provisioning info
-  provisioning.clear();
-
-  // clear device cred
-  credentials.clear();
+  provisioning.clear(); // clear provisioning info
+  credentials.clear();  // clear device cred
 
   // reboot after 5 sec
   Serial.println("Rebooting in 10 sec ...");
@@ -253,14 +248,12 @@ static int shell_command_device_cred_clear(int argc, char **argv) // device-cred
   return EXIT_SUCCESS;
 }
 
-static int shell_command_provisioning_clear(int argc, char **argv) // provisioning-cred-clear
-{
-  // disconnect from the cloud
-  hub.disconnect();
-  provisioning.disconnect();
+static int shell_command_provisioning_clear(int argc, char **argv) {
+  // command format: provisioning-cred-clear
 
-  // clear provisioning info
-  provisioning.clear();
+  hub.disconnect(); // disconnect from the cloud
+  provisioning.disconnect();
+  provisioning.clear(); // clear provisioning info
 
   // reboot after 5 sec
   Serial.println("It is often wise to reboot/reset after clearing provisioning info");
@@ -268,14 +261,14 @@ static int shell_command_provisioning_clear(int argc, char **argv) // provisioni
   return EXIT_SUCCESS;
 }
 
-static int shell_command_internet_cred_clear(int argc, char **argv) // internet-cred-clear
-{
+static int shell_command_internet_cred_clear(int argc, char **argv) {
+  // command format: internet-cred-clear
   Serial.println("Clearing internet credentials");
   return internet.credentials_clear() ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
-static int shell_command_wifi_cred_set_open(int argc, char **argv) // wifi-cred-set-open <ssid>
-{
+static int shell_command_wifi_cred_set_open(int argc, char **argv) {
+  // command format: wifi-cred-set-open <ssid>
   struct wifi_credentials credentials = {0};
   snprintf(credentials.ssid, sizeof(credentials.ssid), (char *)argv[1]);
   Serial.printf("Setting internet credentials (open network). SSID: '%s'\n", credentials.ssid);
@@ -283,8 +276,8 @@ static int shell_command_wifi_cred_set_open(int argc, char **argv) // wifi-cred-
   return internet.credentials_save_wifi(&credentials) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
-static int shell_command_wifi_cred_set_personal(int argc, char **argv) // wifi-cred-set-personal <ssid> <passphrase>
-{
+static int shell_command_wifi_cred_set_personal(int argc, char **argv) {
+  // command format: wifi-cred-set-personal <ssid> <passphrase>
   struct wifi_credentials credentials = {0};
   snprintf(credentials.ssid, sizeof(credentials.ssid), (char *)argv[1]);
   snprintf(credentials.passphrase, sizeof(credentials.passphrase), (char *)argv[2]);
@@ -293,9 +286,8 @@ static int shell_command_wifi_cred_set_personal(int argc, char **argv) // wifi-c
   return internet.credentials_save_wifi(&credentials) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
-static int shell_command_wifi_cred_set_ent(int argc,
-                                           char **argv) // wifi-cred-set-ent <ssid> <identity> <username> <password>
-{
+static int shell_command_wifi_cred_set_ent(int argc, char **argv) {
+  // command format: wifi-cred-set-ent <ssid> <identity> <username> <password>
   struct wifi_credentials credentials = {0};
   snprintf(credentials.ssid, sizeof(credentials.ssid), (char *)argv[1]);
   snprintf(credentials.eap_identity, sizeof(credentials.eap_identity), (char *)argv[2]);
