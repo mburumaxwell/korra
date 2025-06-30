@@ -6,6 +6,8 @@
         "gruntfuggly.todo-tree",
         "ms-azuretools.vscode-bicep",
         "mylonics.zephyr-ide-extension-pack",
+        "nordic-semiconductor.nrf-devicetree",
+        "nordic-semiconductor.nrf-kconfig",
         "nordic-semiconductor.nrf-terminal",
         "platformio.platformio-ide",
         "shardulm94.trailing-spaces",
