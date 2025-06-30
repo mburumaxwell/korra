@@ -14,8 +14,8 @@ import packageJson from '../package.json' with { type: "json" };
 
 const isCI = Boolean(process.env['CI'] || process.env['GITHUB_ACTIONS']);
 const KNOWN_ENVIRONMENTS = [
-  'keeper-esp32-s3-devkitc',
-  'pot-esp32-s3-devkitc',
+  'arduino-keeper-esp32-s3-devkitc',
+  'arduino-pot-esp32-s3-devkitc',
 ];
 
 const version = new Command('version')
@@ -185,8 +185,8 @@ const collect = new Command('collect')
       const buildDir = `.pio//build/${environment}`;
       const binSrc = join(buildDir, 'firmware.bin');
       const elfSrc = join(buildDir, 'firmware.elf');
-      const binDest = join(outputDir, `arduino-${environment}.bin`);
-      const elfDest = join(outputDir, `arduino-${environment}.elf`);
+      const binDest = join(outputDir, `${environment}.bin`);
+      const elfDest = join(outputDir, `${environment}.elf`);
 
       console.log(`🔹 Copying ${binSrc} → ${binDest}`);
       await copyFile(binSrc, binDest);
