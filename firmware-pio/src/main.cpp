@@ -9,6 +9,7 @@
 #include "credentials/korra_credentials.h"
 #include "internet/korra_internet.h"
 #include "mdns/korra_mdns.h"
+#include "ota/korra_ota.h"
 #include "time/korra_time.h"
 
 static Preferences prefs;
@@ -28,12 +29,17 @@ static KorraCloudProvisioning provisioning(tcp_client_provisioning, prefs, timer
 static WiFiClientSecure tcp_client_hub; // each client can only open one socket so we cannot share
 static KorraCloudHub hub(tcp_client_hub);
 
+static WiFiClientSecure tcp_client_ota; // each client can only open one socket so we cannot share
+static KorraOta ota(tcp_client_ota);
+
 static struct korra_sensors_data sensors_data;
 static char devid[(sizeof(uint64_t) * 2) + 1]; // the efuse is a 64-bit integer (64 bit -> 8 bytes -> 16 hex chars)
 static size_t devid_len;
+static bool ota_initiated = false;
 
 static bool maintain(void *);
 static bool collect_data(void *);
+static bool maintain_ota(void *);
 static bool update_device_twin(void *);
 static void device_twin_updated(struct korra_device_twin *twin, bool initial);
 
@@ -92,17 +98,20 @@ void setup() {
   hub.begin();
   hub.onDeviceTwinUpdated(device_twin_updated);
 
+  // setup OTA
+  ota.begin(root_ca_certs);
+
   // setup timers
   timer.every(500, maintain);
   timer.every((CONFIG_SENSORS_READ_PERIOD_SECONDS * 1000), collect_data);
   timer.every((3600 * 1000) /* 1 hour, in millis */, update_device_twin);
+  timer.every(1000, maintain_ota);
 
   // // clear credentials and/or provisioning info (only during test)
   // credentials.clear();
   // provisioning.clear();
   // internet.credentials_clear();
-  // while (1)
-  //   ;
+  // while (1);
 
   shell.attach(Serial);
   shell.addCommand(F("info"), shell_command_info);
@@ -150,6 +159,11 @@ static bool collect_data(void *) {
   return true; // true to repeat the action, false to stop
 }
 
+static bool maintain_ota(void *) {
+  ota.maintain();
+  return true; // true to repeat the action, false to stop
+}
+
 static bool update_device_twin(void *) {
   // check if hub is connected
   if (!hub.connected()) return true; // true to repeat the action, false to stop
@@ -172,10 +186,11 @@ static bool update_device_twin(void *) {
   }
 
   // push the update to the hub
-  if (update)
+  if (update) {
     hub.update(&props);
-  else
+  } else {
     Serial.println("No update required for the reported properties in the device twin");
+  }
 
   return true; // true to repeat the action, false to stop
 }
@@ -196,7 +211,9 @@ static void device_twin_updated(struct korra_device_twin *twin, bool initial) {
     Serial.printf("We have a new firmware version: %s (%d)", twin->desired.firmware.version.semver,
                   twin->desired.firmware.version.value);
 
-    // TODO: handle new firmware
+    // initialize the firmware update
+    ota.update(twin->desired.firmware.url, twin->desired.firmware.hash, twin->desired.firmware.signature);
+    ota_initiated = true;
   }
 }
 
