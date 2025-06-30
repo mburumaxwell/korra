@@ -34,8 +34,8 @@ static uint8_t tx_buffer[256];
 static struct mqtt_client client;
 static struct sockaddr_storage broker;
 
-static char *clientid, *username, *resource_uri;
-static size_t clientid_len, username_len, resource_uri_len;
+static char *clientid, *username;
+static size_t clientid_len, username_len;
 // static int dps_provision(void);
 // static int iot_hub_connect(void);
 
