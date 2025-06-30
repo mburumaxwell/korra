@@ -29,9 +29,6 @@ KorraCloudProvisioning::KorraCloudProvisioning(
     Timer<> &timer) : mqtt(client), prefs(prefs), timer(timer)
 {
     _instance = this;
-
-    memset(&stored_info, 0, sizeof(stored_info));
-    memset(&status, 0, sizeof(status));
 }
 
 KorraCloudProvisioning::~KorraCloudProvisioning()
@@ -293,7 +290,7 @@ void KorraCloudProvisioning::on_mqtt_message(int size)
 
         // save to info
         Serial.printf("Assigned '%s/%s'\n", status.registration_state.assigned_hub, status.registration_state.device_id);
-        memset(&stored_info, 0, sizeof(stored_info));
+        stored_info = {0};
         stored_info.hostname_len = assigned_hub_raw_len - 1;
         stored_info.id_len = device_id_raw_len - 1;
         memcpy(stored_info.hostname, status.registration_state.assigned_hub, stored_info.hostname_len);
@@ -377,7 +374,7 @@ void KorraCloudProvisioning::free_status()
         }
     }
 
-    memset(&status, 0, sizeof(status));
+    status = {0};
 }
 
 void KorraCloudProvisioning::schedule_query_registration_result(int delay_sec)

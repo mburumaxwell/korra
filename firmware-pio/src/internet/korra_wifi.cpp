@@ -128,7 +128,7 @@ bool KorraWiFi::credentials_clear()
   }
 
   // clear the values from memory
-  memset(&(this->credentials), 0, sizeof(struct wifi_credentials));
+  this->credentials = {0};
 
   // disconnect
   WiFi.disconnect();

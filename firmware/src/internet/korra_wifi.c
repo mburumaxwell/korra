@@ -133,7 +133,7 @@ int korra_wifi_provisioning()
     }
 
     // Get the URI
-    memset(&params, 0, sizeof(params));
+    params = {0};
     params.action = WIFI_DPP_BOOTSTRAP_GET_URI;
     params.id = net_if_get_by_iface(iface); // needs to be the index of the interface
     ret = net_mgmt(NET_REQUEST_WIFI_DPP, iface, &params, sizeof(params));
@@ -147,7 +147,7 @@ int korra_wifi_provisioning()
 
     // TODO: confirm if we need to set this
     // // Set response time
-    // memset(&params, 0, sizeof(params));
+    // params = {0};
     // params.action = WIFI_DPP_SET_WAIT_RESP_TIME;
     // params.dpp_resp_wait_time = 30*1000;
     // ret = net_mgmt(NET_REQUEST_WIFI_DPP, iface, &params, sizeof(params));
@@ -158,7 +158,7 @@ int korra_wifi_provisioning()
     // }
 
     // Listen
-    memset(&params, 0, sizeof(params));
+    params = {0};
     params.action = WIFI_DPP_LISTEN;
     params.listen.role = WIFI_DPP_ROLE_ENROLLEE;
     params.listen.freq = 2412; // center frequency for channel 1

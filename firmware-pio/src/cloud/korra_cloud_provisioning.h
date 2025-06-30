@@ -182,8 +182,8 @@ protected:
 private:
   Preferences &prefs;
   MqttClient mqtt;
-  korra_cloud_provisioning_info stored_info;
-  registration_operation_status status;
+  korra_cloud_provisioning_info stored_info = {0};
+  registration_operation_status status = {0};
   char *username = NULL;
   size_t username_len = 0;
   uint16_t request_id = 1;
