@@ -247,6 +247,8 @@ static int shell_command_wifi_cred_set_open(int argc, char **argv) // wifi-cred-
   struct wifi_credentials credentials = {0};
   snprintf(credentials.ssid, sizeof(credentials.ssid), (char *)argv[1]);
   Serial.printf("Setting internet credentials (open network). SSID: '%s'\n", credentials.ssid);
+  if (!internet.credentials_clear())
+    return EXIT_FAILURE;
   return internet.credentials_save_wifi(&credentials) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
@@ -256,6 +258,8 @@ static int shell_command_wifi_cred_set_personal(int argc, char **argv) // wifi-c
   snprintf(credentials.ssid, sizeof(credentials.ssid), (char *)argv[1]);
   snprintf(credentials.passphrase, sizeof(credentials.passphrase), (char *)argv[2]);
   Serial.printf("Setting internet credentials (personal). SSID: '%s'\n", credentials.ssid);
+  if (!internet.credentials_clear())
+    return EXIT_FAILURE;
   return internet.credentials_save_wifi(&credentials) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
@@ -267,5 +271,7 @@ static int shell_command_wifi_cred_set_ent(int argc, char **argv) // wifi-cred-s
   snprintf(credentials.eap_username, sizeof(credentials.eap_username), (char *)argv[3]);
   snprintf(credentials.eap_password, sizeof(credentials.eap_password), (char *)argv[4]);
   Serial.printf("Setting internet credentials (enterprise). SSID: '%s'\n", credentials.ssid);
+  if (!internet.credentials_clear())
+    return EXIT_FAILURE;
   return internet.credentials_save_wifi(&credentials) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
