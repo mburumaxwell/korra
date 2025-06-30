@@ -5,6 +5,7 @@
 
 #include "sensors/korra_sensors.h"
 
+#include "actuator/korra_actuator.h"
 #include "cloud/korra_cloud.h"
 #include "credentials/korra_credentials.h"
 #include "internet/korra_internet.h"
@@ -35,6 +36,8 @@ static KorraOta ota(tcp_client_ota);
 static struct korra_sensors_data sensors_data;
 static char devid[(sizeof(uint64_t) * 2) + 1]; // the efuse is a 64-bit integer (64 bit -> 8 bytes -> 16 hex chars)
 static size_t devid_len;
+
+KorraActuator actuator;
 
 static bool maintain(void *);
 static bool collect_data(void *);
@@ -100,18 +103,17 @@ void setup() {
   // setup OTA
   ota.begin(root_ca_certs);
 
+  // setup actuator
+  actuator.begin();
+  actuator.onStateUpdated([](const struct korra_actuator_state *) { update_device_twin(NULL); });
+
   // setup timers
   timer.every(500, maintain);
   timer.every((CONFIG_SENSORS_READ_PERIOD_SECONDS * 1000), collect_data);
   timer.every((3600 * 1000) /* 1 hour, in millis */, update_device_twin);
   timer.every(1000, maintain_ota);
 
-  // // clear credentials and/or provisioning info (only during test)
-  // credentials.clear();
-  // provisioning.clear();
-  // internet.credentials_clear();
-  // while (1);
-
+  // setup shell
   shell.attach(Serial);
   shell.addCommand(F("info"), shell_command_info);
   shell.addCommand(F("reboot"), shell_command_reboot);
@@ -141,6 +143,9 @@ static bool maintain(void *) {
   if (!pi->valid) return true; // true to repeat the action, false to stop
   hub.maintain(pi);
 
+  // actuator maintenance
+  actuator.maintain();
+
   return true; // true to repeat the action, false to stop
 }
 
@@ -154,7 +159,9 @@ static bool collect_data(void *) {
     return true; // true to repeat the action, false to stop
   }
 
-  hub.push(&sensors_data, internet.props());
+  hub.push(&sensors_data, internet.props()); // update the hub
+  actuator.update(&sensors_data);            // update the actuator
+
   return true; // true to repeat the action, false to stop
 }
 
@@ -184,6 +191,21 @@ static bool update_device_twin(void *) {
     update |= true;
   }
 
+  // check the actuator state
+  const struct korra_actuator_state *actuator_state = actuator.state();
+  if (props.actuator.count != actuator_state->count) {
+    props.actuator.count = actuator_state->count;
+    update |= true;
+  }
+  if (props.actuator.last_time != actuator_state->last_time) {
+    props.actuator.last_time = actuator_state->last_time;
+    update |= true;
+  }
+  if (props.actuator.total_duration != actuator_state->total_duration) {
+    props.actuator.total_duration = actuator_state->total_duration;
+    update |= true;
+  }
+
   // push the update to the hub
   if (update) {
     hub.update(&props);
@@ -195,6 +217,12 @@ static bool update_device_twin(void *) {
 }
 
 static void device_twin_updated(struct korra_device_twin *twin, bool initial) {
+  // set values in the actuator
+  struct korra_actuator_config acc = {0};
+  acc.enabled = twin->desired.actuator.enabled;
+  acc.target = twin->desired.actuator.target;
+  actuator.set_config(&acc);
+
   // for the first time, trigger an update in 5 seconds (it will check if there needs to be a push)
   if (initial) {
     timer.in((5 * 1000) /* 5 seconds, in millis */, [](void *) -> bool {

@@ -11,30 +11,56 @@
 #include "internet/korra_network_shared.h"
 #include "korra_cloud_shared.h"
 
-struct korra_firmware_version {
+struct korra_device_twin_firmware_version {
   uint32_t value;
   char semver[20 + 1]; // human-readable version
 };
 
-struct korra_firmware_desired {
-  struct korra_firmware_version version; // version
-  char url[256 + 1];                     // firmware binary URL
-  char hash[64 + 1];                     // SHA-256 hash in hex
-  char signature[128 + 1];               // Signature (e.g., base64 or hex)
+struct korra_device_twin_desired_firmware {
+  struct korra_device_twin_firmware_version version; // version
+  char url[256 + 1];                                 // firmware binary URL
+  char hash[64 + 1];                                 // SHA-256 hash in hex
+  char signature[128 + 1];                           // Signature (e.g., base64 or hex)
 };
 
-struct korra_firmware_reported {
-  struct korra_firmware_version version; // version
+struct korra_device_twin_desired_actuator {
+  /** Whether the actuator is enabled. */
+  bool enabled;
+
+  /**
+   * The target value.
+   * @note This depends on the application.
+   * @note For pot, it is moisture (percentage).
+   * @note For keeper, it is temperature (Celsius).
+   */
+  float target;
 };
 
 struct korra_device_twin_desired {
   uint32_t version; // $version
-  struct korra_firmware_desired firmware;
+  struct korra_device_twin_desired_firmware firmware;
+  struct korra_device_twin_desired_actuator actuator;
+};
+
+struct korra_device_twin_reported_firmware {
+  struct korra_device_twin_firmware_version version; // version
+};
+
+struct korra_device_twin_reported_actuator {
+  /** Number of times the actuator was activated */
+  uint16_t count;
+
+  /** Last time the actuator was activated */
+  time_t last_time;
+
+  /** Total time the actuator was active */
+  uint32_t total_duration;
 };
 
 struct korra_device_twin_reported {
   uint32_t version; // $version
-  struct korra_firmware_reported firmware;
+  struct korra_device_twin_reported_firmware firmware;
+  struct korra_device_twin_reported_actuator actuator;
 };
 
 struct korra_device_twin {
