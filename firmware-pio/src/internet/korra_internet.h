@@ -22,8 +22,7 @@
  * This class is a wrapper for the Internet logic.
  * It is where all the Internet related code is located.
  */
-class KorraInternet
-{
+class KorraInternet {
 public:
   /**
    * Creates a new instance of the KorraInternet class.
@@ -56,8 +55,7 @@ public:
    *
    * @note This method should be called once during the initialization of the firmware.
    */
-  inline void begin()
-  {
+  inline void begin() {
 #ifdef CONFIG_BOARD_HAS_CELLULAR
     cellular.begin();
 #endif // CONFIG_BOARD_HAS_CELLULAR
@@ -77,8 +75,7 @@ public:
    * @note This method should be called periodically inside the main loop of the firmware.
    * @note It's safe to call this method in some interval (like 5ms).
    */
-  inline void maintain()
-  {
+  inline void maintain() {
 #ifdef CONFIG_BOARD_HAS_CELLULAR
     cellular.maintain();
 #endif // CONFIG_BOARD_HAS_CELLULAR
@@ -98,8 +95,7 @@ public:
    *
    * @param credentials The credentials.
    */
-  inline bool credentials_save_wifi(const struct wifi_credentials *credentials)
-  {
+  inline bool credentials_save_wifi(const struct wifi_credentials *credentials) {
     return wifi.credentials_save(credentials);
   }
 #endif // CONFIG_BOARD_HAS_WIFI
@@ -107,8 +103,7 @@ public:
   /**
    * Clear the internet credentials.
    */
-  inline bool credentials_clear()
-  {
+  inline bool credentials_clear() {
 #ifdef CONFIG_BOARD_HAS_WIFI
     return wifi.credentials_clear();
 #endif // CONFIG_BOARD_HAS_WIFI
@@ -117,8 +112,7 @@ public:
   /**
    * Get the props of the currently connected network.
    */
-  inline const struct korra_network_props *props()
-  {
+  inline const struct korra_network_props *props() {
 #ifdef CONFIG_BOARD_HAS_CELLULAR
     return cellular.props();
 #endif // CONFIG_BOARD_HAS_CELLULAR
@@ -135,8 +129,7 @@ public:
   /**
    * Whether connected to the network.
    */
-  inline bool connected()
-  {
+  inline bool connected() {
 #ifdef CONFIG_BOARD_HAS_CELLULAR
     return cellular.connected();
 #endif // CONFIG_BOARD_HAS_CELLULAR

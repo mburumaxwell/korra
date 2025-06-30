@@ -13,8 +13,7 @@
  * This class is a wrapper for the Ethernet logic.
  * It is where all the Ethernet related code is located.
  */
-class KorraEthernet
-{
+class KorraEthernet {
 public:
   /**
    * Creates a new instance of the KorraEthernet class.

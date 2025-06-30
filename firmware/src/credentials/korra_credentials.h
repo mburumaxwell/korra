@@ -4,24 +4,23 @@
 #include <zephyr/kernel.h>
 #include <zephyr/net/tls_credentials.h>
 
-enum korra_credential_tag_type
-{
+enum korra_credential_tag_type {
 #ifdef CONFIG_WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE
-    /* WiFi enterprise */
-    KORRA_CREDENTIAL_WIFI_CA_TAG = 0x10,
-    KORRA_CREDENTIAL_WIFI_CLIENT_TAG,
-    KORRA_CREDENTIAL_WIFI_CLIENT_KEY_TAG,
-    /* Phase 2 */
-    KORRA_CREDENTIAL_WIFI_CA_P2_TAG,
-    KORRA_CREDENTIAL_WIFI_CLIENT_P2_TAG,
-    KORRA_CREDENTIAL_WIFI_CLIENT_KEY_P2_TAG,
+  /* WiFi enterprise */
+  KORRA_CREDENTIAL_WIFI_CA_TAG = 0x10,
+  KORRA_CREDENTIAL_WIFI_CLIENT_TAG,
+  KORRA_CREDENTIAL_WIFI_CLIENT_KEY_TAG,
+  /* Phase 2 */
+  KORRA_CREDENTIAL_WIFI_CA_P2_TAG,
+  KORRA_CREDENTIAL_WIFI_CLIENT_P2_TAG,
+  KORRA_CREDENTIAL_WIFI_CLIENT_KEY_P2_TAG,
 #endif // CONFIG_WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE
 
-    /* Azure */
-    KORRA_CREDENTIAL_AZURE_CA_TAG = 0x20,
+  /* Azure */
+  KORRA_CREDENTIAL_AZURE_CA_TAG = 0x20,
 
-    /* Device */
-    KORRA_CREDENTIAL_DEVICE_TAG,
+  /* Device */
+  KORRA_CREDENTIAL_DEVICE_TAG,
 };
 
 /**
@@ -62,9 +61,7 @@ extern int settings_exists_one(const char *name, bool *exists);
  * @param exists - pointer to the boolean to set
  * @return 0 on success, negative error code on failure
  */
-extern int tls_credential_exists(enum korra_credential_tag_type tag,
-                                 enum tls_credential_type type,
-                                 size_t known_len,
+extern int tls_credential_exists(enum korra_credential_tag_type tag, enum tls_credential_type type, size_t known_len,
                                  bool *exists);
 
 /**

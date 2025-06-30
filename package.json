@@ -4,6 +4,10 @@
   "private": true,
   "license": "AGPL-3.0-later",
   "scripts": {
+    "format:c:base": "git ls-files '*.c' '*.h' '*.cpp' '*.hpp' | xargs clang-format --style=file",
+    "format:c": "pnpm format:c:base -i",
+    "format:c:check": "pnpm format:c:base --dry-run -Werror",
+
     "changeset": "changeset",
     "packages:version": "changeset version && pnpm --recursive packages:version",
     "packages:publish": "changeset publish",

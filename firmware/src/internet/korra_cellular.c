@@ -16,38 +16,31 @@ static struct net_mgmt_event_callback cellular_cb;
 
 static void cellular_event_handler(struct net_mgmt_event_callback *cb, uint64_t mgmt_event, struct net_if *iface);
 
-void korra_cellular_init()
-{
-    LOG_DBG("Initializing");
+void korra_cellular_init() {
+  LOG_DBG("Initializing");
 
-    struct net_if *iface = get_cellular_iface();
-    struct net_linkaddr *linkaddr = net_if_get_link_addr(iface);
-    if (linkaddr && linkaddr->len == NET_ETH_ADDR_LEN)
-    {
-        LOG_INF("Mac Address: " FMT_LL_ADDR_6, PRINT_LL_ADDR_6(linkaddr->addr));
-    }
+  struct net_if *iface = get_cellular_iface();
+  struct net_linkaddr *linkaddr = net_if_get_link_addr(iface);
+  if (linkaddr && linkaddr->len == NET_ETH_ADDR_LEN) {
+    LOG_INF("Mac Address: " FMT_LL_ADDR_6, PRINT_LL_ADDR_6(linkaddr->addr));
+  }
 
-    // Initialize and add event callbacks for cellular
-    net_mgmt_init_event_callback(&cellular_cb,
-                                 cellular_event_handler,
-                                 NET_EVENT_CELLULAR_CONNECTED | NET_EVENT_CELLULAR_DISCONNECTED);
-    net_mgmt_add_event_callback(&cellular_cb);
+  // Initialize and add event callbacks for cellular
+  net_mgmt_init_event_callback(&cellular_cb, cellular_event_handler,
+                               NET_EVENT_CELLULAR_CONNECTED | NET_EVENT_CELLULAR_DISCONNECTED);
+  net_mgmt_add_event_callback(&cellular_cb);
 }
 
-static void cellular_event_handler(struct net_mgmt_event_callback *cb, uint64_t mgmt_event, struct net_if *iface)
-{
-    if (mgmt_event == NET_EVENT_CELLULAR_CONNECTED)
-    {
-        LOG_INF("Connected!");
+static void cellular_event_handler(struct net_mgmt_event_callback *cb, uint64_t mgmt_event, struct net_if *iface) {
+  if (mgmt_event == NET_EVENT_CELLULAR_CONNECTED) {
+    LOG_INF("Connected!");
 
-		return;
-    }
-    else if (mgmt_event == NET_EVENT_CELLULAR_DISCONNECTED)
-    {
-        LOG_INF("Disconnected!");
+    return;
+  } else if (mgmt_event == NET_EVENT_CELLULAR_DISCONNECTED) {
+    LOG_INF("Disconnected!");
 
-		return;
-    }
+    return;
+  }
 }
 
 #endif // CONFIG_BOARD_HAS_CELLULAR

@@ -13,8 +13,7 @@
 /**
  * This class is a wrapper for the service discovery via mDNS/Bonjour.
  */
-class KorraMdns
-{
+class KorraMdns {
 public:
   /**
    * Creates a new instance of the KorraMdns class.

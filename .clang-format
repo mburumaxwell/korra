@@ -1,0 +1,11 @@
+BasedOnStyle: LLVM         # or Google, Mozilla, etc.
+BreakBeforeBraces: Attach  # “{” stays on same line
+ColumnLimit: 120
+
+# # allow short one-liners
+AllowShortIfStatementsOnASingleLine: true
+AllowShortLoopsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: InlineOnly
+
+# make breaking here really expensive so it only happens if you exceed ColumnLimit
+PenaltyReturnTypeOnItsOwnLine: 10000

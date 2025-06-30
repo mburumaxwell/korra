@@ -1,12 +1,14 @@
 #include <Arduino.h>
+
 #include "korra_sensors.h"
 
-KorraSensors::KorraSensors() {}
+KorraSensors::KorraSensors() {
+}
 
-KorraSensors::~KorraSensors() {}
+KorraSensors::~KorraSensors() {
+}
 
-void KorraSensors::begin()
-{
+void KorraSensors::begin() {
 #ifdef CONFIG_APP_KIND_KEEPER
   // TODO: confirm model or switch to auto detect
   dht.setup(CONFIG_SENSORS_DHT21_PIN, DHTesp::DHT11);
@@ -14,8 +16,7 @@ void KorraSensors::begin()
 #endif // CONFIG_APP_KIND_KEEPER
 }
 
-void KorraSensors::read(struct korra_sensors_data *dest)
-{
+void KorraSensors::read(struct korra_sensors_data *dest) {
 #ifdef CONFIG_APP_KIND_KEEPER
   TempAndHumidity th = dht.getTempAndHumidity();
   dest->temperature = th.temperature;
@@ -29,14 +30,12 @@ void KorraSensors::read(struct korra_sensors_data *dest)
 }
 
 #ifdef CONFIG_APP_KIND_POT
-float KorraSensors::readPH()
-{
+float KorraSensors::readPH() {
   // TODO: implement this once we have the soil sensor selected
   return -1;
 }
 
-int32_t KorraSensors::readMoisture()
-{
+int32_t KorraSensors::readMoisture() {
   // TODO: Need to calibrate this
   int dry = 587;
   int wet = 84;

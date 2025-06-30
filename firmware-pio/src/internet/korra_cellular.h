@@ -13,8 +13,7 @@
  * This class is a wrapper for the Cellular logic.
  * It is where all the Cellular related code is located.
  */
-class KorraCellular
-{
+class KorraCellular {
 public:
   /**
    * Creates a new instance of the KorraCellular class.

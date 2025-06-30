@@ -4,9 +4,8 @@
 #include <esp_system.h>
 
 /** Reboot because something has failed. */
-inline __attribute__((noreturn)) void sys_reboot()
-{
-    esp_restart();
+inline __attribute__((noreturn)) void sys_reboot() {
+  esp_restart();
 }
 
 #endif // SYS_REBOOT_H

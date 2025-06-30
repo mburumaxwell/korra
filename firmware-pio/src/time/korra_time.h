@@ -12,8 +12,7 @@
 /**
  * This class is a wrapper for the time sync.
  */
-class KorraTime
-{
+class KorraTime {
 public:
   /**
    * Creates a new instance of the KorraTime class.

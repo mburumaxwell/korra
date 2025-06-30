@@ -2,6 +2,7 @@
 #define KORRA_SENSORS_H
 
 #include <stdint.h>
+
 #include "korra_config.h"
 
 #ifdef CONFIG_APP_KIND_KEEPER
@@ -12,8 +13,7 @@
 // #include <DFRobot_PH.h>
 #endif // CONFIG_APP_KIND_POT
 
-struct korra_sensors_data
-{
+struct korra_sensors_data {
 #ifdef CONFIG_APP_KIND_KEEPER
   // measured in °C
   float temperature;
@@ -34,8 +34,7 @@ struct korra_sensors_data
  * This class is a wrapper for the sensors logic.
  * It is where all the sensors related code is located.
  */
-class KorraSensors
-{
+class KorraSensors {
 public:
   /**
    * Creates a new instance of the KorraSensors class.

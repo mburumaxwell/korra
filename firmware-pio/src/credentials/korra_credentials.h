@@ -3,8 +3,7 @@
 
 #include <Preferences.h>
 
-class KorraCredentials
-{
+class KorraCredentials {
 public:
   /**
    * Creates a new instance of the KorraCredentials class.

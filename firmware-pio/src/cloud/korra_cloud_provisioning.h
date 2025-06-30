@@ -5,8 +5,8 @@
 
 #ifdef CONFIG_BOARD_HAS_INTERNET
 
-#include <Preferences.h>
 #include <ArduinoMqttClient.h>
+#include <Preferences.h>
 #include <arduino-timer.h>
 
 #include "korra_cloud_shared.h"
@@ -14,8 +14,7 @@
 /**
  * This class is a wrapper for the cloud functionalities.
  */
-class KorraCloudProvisioning
-{
+class KorraCloudProvisioning {
 public:
   /**
    * Creates a new instance of the KorraCloudProvisioning class.
@@ -87,8 +86,7 @@ public:
 
 protected:
   /** The provisioning status type. */
-  enum provisioning_registration_status
-  {
+  enum provisioning_registration_status {
     PROVISIONING_REGISTRATION_STATUS_UNKNOWN = 0,
 
     /** Device has not yet come online. */
@@ -108,29 +106,27 @@ protected:
   };
 
   /** The provisioning substatus type. */
-  enum provisioning_registration_sub_status
-  {
+  enum provisioning_registration_sub_status {
     PROVISIONING_REGISTRATION_SUB_STATUS_UNKNOWN = 1,
 
     /** Device has been assigned to an IoT hub for the first time. */
     PROVISIONING_REGISTRATION_SUB_STATUS_INITIAL_ASSIGNMENT = 1,
 
     /**
-     * Device has been assigned to a different IoT hub and its device data was migrated from the previously assigned IoT hub.
-     * Device data was removed from the previously assigned IoT hub.
+     * Device has been assigned to a different IoT hub and its device data was migrated from the previously assigned IoT
+     * hub. Device data was removed from the previously assigned IoT hub.
      */
     PROVISIONING_REGISTRATION_SUB_STATUS_DEVICE_DATA_MIGRATED = 2,
 
     /**
-     * Device has been assigned to a different IoT hub and its device data was populated from the initial state stored in the enrollment.
-     * Device data was removed from the previously assigned IoT hub.
+     * Device has been assigned to a different IoT hub and its device data was populated from the initial state stored
+     * in the enrollment. Device data was removed from the previously assigned IoT hub.
      */
     PROVISIONING_REGISTRATION_SUB_STATUS_DEVICE_DATA_RESET = 3,
   };
 
   /** The result of a registration operation. */
-  struct device_provisioning_result
-  {
+  struct device_provisioning_result {
     /** The registration id. */
     char *registration_id;
 
@@ -169,8 +165,7 @@ protected:
   };
 
   /** Registration operation status. */
-  struct registration_operation_status
-  {
+  struct registration_operation_status {
     /** The operation Id. */
     char *operation_id;
 

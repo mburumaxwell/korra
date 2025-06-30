@@ -10,8 +10,7 @@
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 
-struct wifi_credentials
-{
+struct wifi_credentials {
   /** The SSID of the network. */
   char ssid[32 + 1];
 
@@ -32,8 +31,7 @@ struct wifi_credentials
  * This class is a wrapper for the WiFi logic.
  * It is where all the WiFi related code is located.
  */
-class KorraWiFi
-{
+class KorraWiFi {
 public:
   /**
    * Creates a new instance of the KorraWiFi class.
