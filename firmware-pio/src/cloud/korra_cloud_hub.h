@@ -105,6 +105,11 @@ public:
   inline bool connected() { return mqtt.connected(); }
 
   /**
+   * Disconnect the client from the cloud.
+   */
+  inline void disconnect() { mqtt.stop(); }
+
+  /**
    * Get the device twin.
    */
   inline const struct korra_device_twin *device_twin() { return &twin; }

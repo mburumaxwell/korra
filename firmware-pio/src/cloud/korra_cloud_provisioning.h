@@ -65,6 +65,11 @@ public:
   inline bool connected() { return mqtt.connected(); }
 
   /**
+   * Disconnect the client from the cloud.
+   */
+  inline void disconnect() { mqtt.stop(); }
+
+  /**
    * Returns existing instance (singleton) of the KorraCloudProvisioning class.
    * It may be a null pointer if the KorraCloudProvisioning object was never constructed or it was destroyed.
    */

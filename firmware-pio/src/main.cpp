@@ -39,6 +39,7 @@ static void device_twin_updated(struct korra_device_twin *twin, bool initial);
 
 static int shell_command_info(int argc, char **argv);
 static int shell_command_reboot(int argc, char **argv);
+static int shell_command_provisioning_clear(int argc, char **argv);
 static int shell_command_internet_cred_clear(int argc, char **argv);
 static int shell_command_wifi_cred_set_open(int argc, char **argv);
 static int shell_command_wifi_cred_set_personal(int argc, char **argv);
@@ -107,6 +108,7 @@ void setup()
   shell.attach(Serial);
   shell.addCommand(F("info"), shell_command_info);
   shell.addCommand(F("reboot"), shell_command_reboot);
+  shell.addCommand(F("provisioning-clear"), shell_command_provisioning_clear);
   shell.addCommand(F("internet-cred-clear"), shell_command_internet_cred_clear);
   shell.addCommand(F("wifi-cred-set-open <ssid>"), shell_command_wifi_cred_set_open);
   shell.addCommand(F("wifi-cred-set-personal <ssid> <passphrase>"), shell_command_wifi_cred_set_personal);
@@ -233,6 +235,21 @@ static int shell_command_info(int argc, char **argv) // info
 static int shell_command_reboot(int argc, char **argv) // reboot
 {
   sys_reboot();
+  return EXIT_SUCCESS;
+}
+
+static int shell_command_provisioning_clear(int argc, char **argv) // provisioning-cred-clear
+{
+  // disconnect from the cloud
+  hub.disconnect();
+  provisioning.disconnect();
+
+  // clear provisioning info
+  provisioning.clear();
+
+  // reboot after 5 sec
+  Serial.println("It is often wise to reboot/reset after clearing provisioning info");
+
   return EXIT_SUCCESS;
 }
 
