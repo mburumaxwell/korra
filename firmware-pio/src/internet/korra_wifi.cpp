@@ -1,12 +1,10 @@
+#include <ArduinoJson.h>
+
 #include "korra_wifi.h"
 
 #ifdef CONFIG_BOARD_HAS_WIFI
 
-#define PREFERENCES_KEY_WIFI_SSID "wifi-ssid"
-#define PREFERENCES_KEY_WIFI_PASSPHRASE "wifi-passphrase"
-#define PREFERENCES_KEY_WIFI_EAP_IDENTITY "wifi-eap-id"
-#define PREFERENCES_KEY_WIFI_EAP_USERNAME "wifi-eap-user"
-#define PREFERENCES_KEY_WIFI_EAP_PASSWORD "wifi-eap-pass"
+#define PREFERENCES_KEY_WIFI_CREDS "wifi-creds"
 
 static void on_wifi_event_callback_korra(WiFiEvent_t event, WiFiEventInfo_t info) {
   KorraWiFi::instance()->on_wifi_event(event, info);
@@ -58,23 +56,19 @@ void KorraWiFi::maintain() {
 }
 
 bool KorraWiFi::credentials_save(const struct wifi_credentials *credentials) {
-  prefs.putBytes(PREFERENCES_KEY_WIFI_SSID, credentials->ssid, strlen(credentials->ssid));
+  JsonDocument doc;
 
-  if (strlen(credentials->passphrase) > 0) {
-    prefs.putBytes(PREFERENCES_KEY_WIFI_PASSPHRASE, credentials->passphrase, strlen(credentials->passphrase));
-  }
+  doc["ssid"] = credentials->ssid;
+  if (strlen(credentials->passphrase) > 0) doc["passphrase"] = credentials->passphrase;
+  if (strlen(credentials->eap_identity) > 0) doc["eap_identity"] = credentials->eap_identity;
+  if (strlen(credentials->eap_username) > 0) doc["eap_username"] = credentials->eap_username;
+  if (strlen(credentials->eap_password) > 0) doc["eap_password"] = credentials->eap_password;
 
-  if (strlen(credentials->eap_identity) > 0) {
-    prefs.putBytes(PREFERENCES_KEY_WIFI_EAP_IDENTITY, credentials->eap_identity, strlen(credentials->eap_identity));
-  }
-
-  if (strlen(credentials->eap_username) > 0) {
-    prefs.putBytes(PREFERENCES_KEY_WIFI_EAP_USERNAME, credentials->eap_username, strlen(credentials->eap_username));
-  }
-
-  if (strlen(credentials->eap_password) > 0) {
-    prefs.putBytes(PREFERENCES_KEY_WIFI_EAP_PASSWORD, credentials->eap_password, strlen(credentials->eap_password));
-  }
+  // serialize json and save
+  size_t payload_len = measureJson(doc);
+  char payload[payload_len + 1] = {0};
+  payload_len = serializeJson(doc, payload, payload_len);
+  prefs.putBytes(PREFERENCES_KEY_WIFI_CREDS, payload, payload_len);
 
   // copy the values into memory
   memcpy(&(this->credentials), credentials, sizeof(struct wifi_credentials));
@@ -88,21 +82,7 @@ bool KorraWiFi::credentials_save(const struct wifi_credentials *credentials) {
 }
 
 bool KorraWiFi::credentials_clear() {
-  if (prefs.isKey(PREFERENCES_KEY_WIFI_SSID)) {
-    prefs.remove(PREFERENCES_KEY_WIFI_SSID);
-  }
-  if (prefs.isKey(PREFERENCES_KEY_WIFI_PASSPHRASE)) {
-    prefs.remove(PREFERENCES_KEY_WIFI_PASSPHRASE);
-  }
-  if (prefs.isKey(PREFERENCES_KEY_WIFI_EAP_IDENTITY)) {
-    prefs.remove(PREFERENCES_KEY_WIFI_EAP_IDENTITY);
-  }
-  if (prefs.isKey(PREFERENCES_KEY_WIFI_EAP_USERNAME)) {
-    prefs.remove(PREFERENCES_KEY_WIFI_EAP_USERNAME);
-  }
-  if (prefs.isKey(PREFERENCES_KEY_WIFI_EAP_PASSWORD)) {
-    prefs.remove(PREFERENCES_KEY_WIFI_EAP_PASSWORD);
-  }
+  if (prefs.isKey(PREFERENCES_KEY_WIFI_CREDS)) prefs.remove(PREFERENCES_KEY_WIFI_CREDS);
 
   // clear the values from memory
   this->credentials = {0};
@@ -115,24 +95,56 @@ bool KorraWiFi::credentials_clear() {
 }
 
 void KorraWiFi::credentials_load() {
-  if (prefs.isKey(PREFERENCES_KEY_WIFI_SSID)) {
-    prefs.getBytes(PREFERENCES_KEY_WIFI_SSID, (char *)credentials.ssid, sizeof(credentials.ssid));
-  }
+  const size_t payload_len = prefs.getBytesLength(PREFERENCES_KEY_WIFI_CREDS);
+  if (payload_len > 0) {
+    // read from prefs
+    char payload[payload_len + 1];
+    prefs.getBytes(PREFERENCES_KEY_WIFI_CREDS, payload, payload_len);
+    // Serial.printf("Read %d bytes from %s key:\n%s\n", payload_len, PREFERENCES_KEY_WIFI_CREDS, payload);
 
-  if (prefs.isKey(PREFERENCES_KEY_WIFI_PASSPHRASE)) {
-    prefs.getBytes(PREFERENCES_KEY_WIFI_PASSPHRASE, (char *)credentials.passphrase, sizeof(credentials.passphrase));
-  }
-  if (prefs.isKey(PREFERENCES_KEY_WIFI_EAP_IDENTITY)) {
-    prefs.getBytes(PREFERENCES_KEY_WIFI_EAP_IDENTITY, (char *)credentials.eap_identity,
-                   sizeof(credentials.eap_identity));
-  }
-  if (prefs.isKey(PREFERENCES_KEY_WIFI_EAP_USERNAME)) {
-    prefs.getBytes(PREFERENCES_KEY_WIFI_EAP_USERNAME, (char *)credentials.eap_username,
-                   sizeof(credentials.eap_username));
-  }
-  if (prefs.isKey(PREFERENCES_KEY_WIFI_EAP_PASSWORD)) {
-    prefs.getBytes(PREFERENCES_KEY_WIFI_EAP_PASSWORD, (char *)credentials.eap_password,
-                   sizeof(credentials.eap_password));
+    // parse JSON
+    JsonDocument doc;
+    DeserializationError error = deserializeJson(doc, payload);
+    if (error) {
+      Serial.print(F("deserializeJson() failed: "));
+      Serial.println(error.f_str());
+      return;
+    }
+
+    // ssid
+    const char *ssid_raw = doc["ssid"];
+    if (ssid_raw != NULL) {
+      size_t ssid_raw_len = min((int)strlen(ssid_raw) + 1, (int)sizeof(credentials.ssid));
+      memcpy(credentials.ssid, ssid_raw, ssid_raw_len - 1);
+    }
+
+    // passphrase
+    const char *passphrase_raw = doc["passphrase"];
+    if (passphrase_raw != NULL) {
+      size_t passphrase_raw_len = min((int)strlen(passphrase_raw) + 1, (int)sizeof(credentials.passphrase));
+      memcpy(credentials.passphrase, passphrase_raw, passphrase_raw_len - 1);
+    }
+
+    // eap_identity
+    const char *eap_identity_raw = doc["eap_identity"];
+    if (eap_identity_raw != NULL) {
+      size_t eap_identity_raw_len = min((int)strlen(eap_identity_raw) + 1, (int)sizeof(credentials.eap_identity));
+      memcpy(credentials.eap_identity, eap_identity_raw, eap_identity_raw_len - 1);
+    }
+
+    // eap_username
+    const char *eap_username_raw = doc["eap_username"];
+    if (eap_username_raw != NULL) {
+      size_t eap_username_raw_len = min((int)strlen(eap_username_raw) + 1, (int)sizeof(credentials.eap_username));
+      memcpy(credentials.eap_username, eap_username_raw, eap_username_raw_len - 1);
+    }
+
+    // eap_password
+    const char *eap_password_raw = doc["eap_password"];
+    if (eap_password_raw != NULL) {
+      size_t eap_password_raw_len = min((int)strlen(eap_password_raw) + 1, (int)sizeof(credentials.eap_password));
+      memcpy(credentials.eap_password, eap_password_raw, eap_password_raw_len - 1);
+    }
   }
 
   credentials_print();
