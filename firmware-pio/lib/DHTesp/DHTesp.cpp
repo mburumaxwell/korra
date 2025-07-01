@@ -146,8 +146,8 @@ const char *DHTesp::getStatusString() {
 
 void DHTesp::readSensor() {
   // Make sure we don't poll the sensor too often
-  // - Max sample rate DHT11 is 1 Hz   (duty cicle 1000 ms)
-  // - Max sample rate DHT22 is 0.5 Hz (duty cicle 2000 ms)
+  // - Max sample rate DHT11 is 1 Hz   (duty cycle 1000 ms)
+  // - Max sample rate DHT22 is 0.5 Hz (duty cycle 2000 ms)
   unsigned long startTime = millis();
   if ((unsigned long)(startTime - lastReadTime) < (model == DHT11 ? 999L : 1999L)) {
     return;
@@ -262,7 +262,7 @@ void DHTesp::readSensor() {
   error = ERROR_NONE;
 }
 
-// boolean isFahrenheit: True == Fahrenheit; False == Celcius
+// boolean isFahrenheit: True == Fahrenheit; False == Celsius
 float DHTesp::computeHeatIndex(float temperature, float percentHumidity, bool isFahrenheit) {
   // Using both Rothfusz and Steadman's equations
   // http://www.wpc.ncep.noaa.gov/html/heatindex_equation.shtml
@@ -291,7 +291,7 @@ float DHTesp::computeHeatIndex(float temperature, float percentHumidity, bool is
   return isFahrenheit ? hi : toCelsius(hi);
 }
 
-// boolean isFahrenheit: True == Fahrenheit; False == Celcius
+// boolean isFahrenheit: True == Fahrenheit; False == Celsius
 float DHTesp::computeDewPoint(float temperature, float percentHumidity, bool isFahrenheit) {
   // reference: http://wahiduddin.net/calc/density_algorithms.htm
   if (isFahrenheit) {
@@ -309,7 +309,7 @@ float DHTesp::computeDewPoint(float temperature, float percentHumidity, bool isF
   return isFahrenheit ? toFahrenheit(calc_dew_temp) : calc_dew_temp;
 }
 
-// boolean isFahrenheit: True == Fahrenheit; False == Celcius
+// boolean isFahrenheit: True == Fahrenheit; False == Celsius
 byte DHTesp::computePerception(float temperature, float percentHumidity, bool isFahrenheit) {
   // Computing human perception from dew point
   // reference: https://en.wikipedia.org/wiki/Dew_point ==> Relationship to human comfort
@@ -349,7 +349,7 @@ byte DHTesp::computePerception(float temperature, float percentHumidity, bool is
   return Perception_SevereUncomfy;
 }
 
-// boolean isFahrenheit: True == Fahrenheit; False == Celcius
+// boolean isFahrenheit: True == Fahrenheit; False == Celsius
 float DHTesp::getComfortRatio(ComfortState &destComfortStatus, float temperature, float percentHumidity,
                               bool isFahrenheit) {
   float ratio = 100; // 100%

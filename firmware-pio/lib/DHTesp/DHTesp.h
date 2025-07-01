@@ -121,7 +121,7 @@ public:
   int8_t getLowerBoundHumidity() { return model == DHT11 ? 20 : 0; };
   int8_t getUpperBoundHumidity() { return model == DHT11 ? 90 : 100; };
 
-  static float toFahrenheit(float fromCelcius) { return 1.8 * fromCelcius + 32.0; };
+  static float toFahrenheit(float fromCelsius) { return 1.8 * fromCelsius + 32.0; };
   static float toCelsius(float fromFahrenheit) { return (fromFahrenheit - 32.0) / 1.8; };
 
   float computeHeatIndex(float temperature, float percentHumidity, bool isFahrenheit = false);
