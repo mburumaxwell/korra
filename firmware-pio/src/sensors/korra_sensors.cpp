@@ -35,6 +35,8 @@ float KorraSensors::read_ph() {
 
 uint8_t KorraSensors::read_moisture() {
   // TODO: May need to recalibrate this from time to time or sensor to sensor, if too much move it to device twin
+  // There is an inverse ratio between the sensor output value and soil moisture.
+  // https://wiki.dfrobot.com/Capacitive_Soil_Moisture_Sensor_SKU_SEN0193
   static const uint32_t dry = 2565;
   static const uint32_t wet = 1263;
   uint32_t reading = analogReadMilliVolts(CONFIG_SENSORS_MOISTURE_PIN);
