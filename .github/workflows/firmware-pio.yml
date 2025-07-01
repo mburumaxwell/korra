@@ -2,7 +2,7 @@ name: Firmware - PlatformIO
 
 on:
   push:
-    # branches: [main]
+    branches: [main]
     tags: ['firmware-pio@*']
     paths:
       - firmware-pio/**
