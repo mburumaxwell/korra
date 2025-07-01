@@ -1,3 +1,5 @@
+#include <Arduino.h>
+
 #include "korra_actuator.h"
 
 // good default values for the actuator instead of having them as build flags
@@ -25,10 +27,6 @@ KorraActuator::~KorraActuator() {
   fan.detach();
 #endif // CONFIG_APP_KIND_KEEPER
 
-#ifdef CONFIG_APP_KIND_POT
-  pump.detach();
-#endif // CONFIG_APP_KIND_POT
-
   state_updated_callback = nullptr;
 }
 
@@ -38,7 +36,7 @@ void KorraActuator::begin() {
 #endif // CONFIG_APP_KIND_KEEPER
 
 #ifdef CONFIG_APP_KIND_POT
-  pump.attach(CONFIG_ACTUATORS_PUMP_PIN);
+  pinMode(CONFIG_ACTUATORS_PUMP_PIN, OUTPUT);
 #endif // CONFIG_APP_KIND_POT
 
   timepoint = millis();
@@ -98,9 +96,9 @@ void KorraActuator::actuate() {
 
 #ifdef CONFIG_APP_KIND_POT
 
-  pump.write(0); // full speed forward
+  digitalWrite(CONFIG_ACTUATORS_PUMP_PIN, HIGH); // on
   delay(duration);
-  pump.write(90); // stop
+  digitalWrite(CONFIG_ACTUATORS_PUMP_PIN, LOW); // off
 
 #endif // CONFIG_APP_KIND_POT
 

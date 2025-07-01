@@ -4,8 +4,10 @@
 #include "korra_config.h"
 #include "sensors/korra_sensors.h"
 
+#ifdef CONFIG_APP_KIND_KEEPER
 #include <ESP32Servo.h>
 // #include <Servo.h>
+#endif // CONFIG_APP_KIND_KEEPER
 
 struct korra_actuator_config {
   /** Whether or not the actuator is allowed */
@@ -80,10 +82,6 @@ private:
 #ifdef CONFIG_APP_KIND_KEEPER
   Servo fan;
 #endif // CONFIG_APP_KIND_KEEPER
-
-#ifdef CONFIG_APP_KIND_POT
-  Servo pump;
-#endif // CONFIG_APP_KIND_POT
 
 private:
   void actuate();
