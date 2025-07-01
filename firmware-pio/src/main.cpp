@@ -47,6 +47,7 @@ static void device_twin_updated(struct korra_device_twin *twin, bool initial);
 
 static int shell_command_info(int argc, char **argv);
 static int shell_command_reboot(int argc, char **argv);
+static int shell_command_prefs_clear(int argc, char **argv);
 static int shell_command_device_cred_clear(int argc, char **argv);
 static int shell_command_provisioning_clear(int argc, char **argv);
 static int shell_command_internet_cred_clear(int argc, char **argv);
@@ -118,6 +119,7 @@ void setup() {
   shell.attach(Serial);
   shell.addCommand(F("info"), shell_command_info);
   shell.addCommand(F("reboot"), shell_command_reboot);
+  shell.addCommand(F("prefs-clear"), shell_command_prefs_clear);
   shell.addCommand(F("device-cred-clear"), shell_command_device_cred_clear);
   shell.addCommand(F("provisioning-clear"), shell_command_provisioning_clear);
   shell.addCommand(F("internet-cred-clear"), shell_command_internet_cred_clear);
@@ -261,6 +263,19 @@ static int shell_command_reboot(int argc, char **argv) {
   return EXIT_SUCCESS;
 }
 
+static int shell_command_prefs_clear(int argc, char **argv) {
+  // command format: prefs-clear
+
+  prefs.clear();  // clear preferences
+
+  // reboot after 10 sec
+  Serial.println("Rebooting in 10 sec ...");
+  delay(10 * 1000);
+  sys_reboot();
+
+  return EXIT_SUCCESS;
+}
+
 static int shell_command_device_cred_clear(int argc, char **argv) {
   // command format: device-cred-clear
 
@@ -269,7 +284,7 @@ static int shell_command_device_cred_clear(int argc, char **argv) {
   provisioning.clear(); // clear provisioning info
   credentials.clear();  // clear device cred
 
-  // reboot after 5 sec
+  // reboot after 10 sec
   Serial.println("Rebooting in 10 sec ...");
   delay(10 * 1000);
   sys_reboot();
