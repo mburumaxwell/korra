@@ -16,3 +16,7 @@ updates:
     schedule:
       interval: 'monthly'
       time: '02:00'
+    groups:
+      # grouping all to avoid PR noise
+      npm:
+        patterns: ['*']
