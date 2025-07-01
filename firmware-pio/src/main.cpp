@@ -61,6 +61,7 @@ void setup() {
   devid_len = snprintf(devid, sizeof(devid), "%llx", (unsigned long long)raw_devid);
 
   Serial.begin(9600);
+  Serial.printf("*** Running on ESP-IDF %s ***\n", esp_get_idf_version());
   Serial.printf("*** Booting Korra %s build v%s (%s) ***\n", CONFIG_APP_NAME, APP_VERSION_STRING,
                 STRINGIFY(APP_BUILD_VERSION));
   Serial.printf("*** Device ID: %s ***\n", devid);
