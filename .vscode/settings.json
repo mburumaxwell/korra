@@ -26,5 +26,6 @@
         "procpu",
         "RSSI",
         "SNTP"
-    ]
+    ],
+    "yaml.format.singleQuote": true
 }
