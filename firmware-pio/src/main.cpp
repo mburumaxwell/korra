@@ -266,7 +266,7 @@ static int shell_command_reboot(int argc, char **argv) {
 static int shell_command_prefs_clear(int argc, char **argv) {
   // command format: prefs-clear
 
-  prefs.clear();  // clear preferences
+  prefs.clear(); // clear preferences
 
   // reboot after 10 sec
   Serial.println("Rebooting in 10 sec ...");
