@@ -24,7 +24,7 @@ struct korra_sensors_data {
 
 #ifdef CONFIG_APP_KIND_POT
   /** Percentage (%) of water in a substance */
-  int32_t moisture;
+  uint8_t moisture;
 
   float ph;
 #endif // CONFIG_APP_KIND_POT
@@ -72,8 +72,8 @@ private:
 
 private:
 #ifdef CONFIG_APP_KIND_POT
-  float readPH();
-  int32_t readMoisture();
+  float read_ph();
+  uint8_t read_moisture();
 #endif // CONFIG_APP_KIND_POT
 };
 

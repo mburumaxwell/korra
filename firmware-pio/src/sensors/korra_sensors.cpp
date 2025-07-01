@@ -22,22 +22,23 @@ void KorraSensors::read(struct korra_sensors_data *dest) {
 #endif // CONFIG_APP_KIND_KEEPER
 
 #ifdef CONFIG_APP_KIND_POT
-  dest->moisture = readMoisture();
-  dest->ph = readPH();
+  dest->moisture = read_moisture();
+  dest->ph = read_ph();
 #endif // CONFIG_APP_KIND_POT
 }
 
 #ifdef CONFIG_APP_KIND_POT
-float KorraSensors::readPH() {
+float KorraSensors::read_ph() {
   // TODO: implement this once we have the soil sensor selected
   return -1;
 }
 
-int32_t KorraSensors::readMoisture() {
-  // TODO: Need to calibrate this
-  int dry = 587;
-  int wet = 84;
-  int reading = analogRead(CONFIG_SENSORS_MOISTURE_PIN);
-  return (int32_t)(100.0 * (dry - reading) / (dry - wet));
+uint8_t KorraSensors::read_moisture() {
+  // TODO: May need to recalibrate this from time to time or sensor to sensor, if too much move it to device twin
+  static const uint32_t dry = 2565;
+  static const uint32_t wet = 1263;
+  uint32_t reading = analogReadMilliVolts(CONFIG_SENSORS_MOISTURE_PIN);
+  uint8_t value = (uint8_t)(100.0 * (dry - reading) / (dry - wet));
+  return (uint8_t)std::ranges::clamp((int)value, 0, 100);
 }
 #endif // CONFIG_APP_KIND_POT
