@@ -46,6 +46,12 @@ jobs:
           permission-contents: write
           permission-pull-requests: write
 
+      # Change git info to match the token
+      - name: Setup git info
+        run: |
+          git config user.name release-automator-mburumaxwell[bot]
+          git config user.email 214517399+release-automator-mburumaxwell[bot]@users.noreply.github.com
+
       - name: Create release pull request
         if: ${{ github.event_name != 'pull_request' }}
         uses: changesets/action@v1
@@ -54,6 +60,6 @@ jobs:
           version: pnpm packages:version
           publish: pnpm packages:publish
           commit: 'Version packages'
-          commitMode: 'github-api'
+          setupGitUser: false # setup above
         env:
           GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
