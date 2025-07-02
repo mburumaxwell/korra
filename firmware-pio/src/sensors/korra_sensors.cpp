@@ -10,7 +10,7 @@ KorraSensors::~KorraSensors() {
 
 void KorraSensors::begin() {
 #ifdef CONFIG_APP_KIND_KEEPER
-  dht.setup(CONFIG_SENSORS_DHT21_PIN, DHTesp::DHT11);
+  dht.setup(CONFIG_SENSORS_DHT_PIN, DHTesp::DHT11);
 #endif // CONFIG_APP_KIND_KEEPER
 }
 
