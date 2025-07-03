@@ -30,8 +30,7 @@ static KorraCloudProvisioning provisioning(tcp_client_provisioning, prefs, timer
 static WiFiClientSecure tcp_client_hub; // each client can only open one socket so we cannot share
 static KorraCloudHub hub(tcp_client_hub);
 
-static WiFiClientSecure tcp_client_ota; // each client can only open one socket so we cannot share
-static KorraOta ota(tcp_client_ota);
+static KorraOta ota;
 
 static struct korra_sensors_data sensors_data;
 static char devid[(sizeof(uint64_t) * 2) + 1]; // the efuse is a 64-bit integer (64 bit -> 8 bytes -> 16 hex chars)
@@ -208,7 +207,9 @@ static void device_twin_updated(struct korra_device_twin *twin, bool initial) {
                   twin->desired.firmware.version.value);
 
     // initialize the firmware update
-    ota.update(twin->desired.firmware.url, twin->desired.firmware.hash, twin->desired.firmware.signature);
+    struct korra_ota_info ota_inf = {0};
+    ota.populate(twin->desired.firmware.url, twin->desired.firmware.hash, twin->desired.firmware.signature, &ota_inf);
+    ota.update(&ota_inf);
     return;
   }
 

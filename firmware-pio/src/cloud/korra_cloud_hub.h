@@ -1,9 +1,9 @@
 #ifndef KORRA_CLOUD_HUB_H_
 #define KORRA_CLOUD_HUB_H_
 
+#include "actuator/korra_actuator.h"
 #include "korra_config.h"
 #include "sensors/korra_sensors.h"
-#include "actuator/korra_actuator.h"
 
 #ifdef CONFIG_BOARD_HAS_INTERNET
 

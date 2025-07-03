@@ -54,7 +54,7 @@ void KorraActuator::maintain() {
   // check if the current value is less than the target value
   if (!current_value_consumed && !is_within(current_value, current_config.target_min, current_config.target_max)) {
     // check if the time since the last actuation is greater than the equilibrium time
-    const auto elapsed_time = (millis() - timepoint) / 1000;
+    const unsigned long elapsed_time = (millis() - timepoint) / 1000;
     if (elapsed_time > current_config.equilibrium_time) {
       // Actuating for a given duration
       const uint32_t duration = current_config.duration * 1000;
