@@ -95,9 +95,9 @@ bool KorraWiFi::credentials_clear() {
 }
 
 void KorraWiFi::credentials_load() {
-  const size_t payload_len = prefs.getBytesLength(PREFERENCES_KEY_WIFI_CREDS);
-  if (payload_len > 0) {
+  if (prefs.isKey(PREFERENCES_KEY_WIFI_CREDS)) {
     // read from prefs
+    const size_t payload_len = prefs.getBytesLength(PREFERENCES_KEY_WIFI_CREDS);
     char payload[payload_len + 1];
     prefs.getBytes(PREFERENCES_KEY_WIFI_CREDS, payload, payload_len);
     // Serial.printf("Read %d bytes from %s key:\n%s\n", payload_len, PREFERENCES_KEY_WIFI_CREDS, payload);
