@@ -4,6 +4,8 @@
 #include "korra_config.h"
 #include "sensors/korra_sensors.h"
 
+#include <time.h>
+
 struct korra_actuator_config {
   /** Whether or not the actuator is allowed */
   bool enabled;
