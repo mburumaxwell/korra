@@ -56,7 +56,7 @@ static int shell_command_wifi_cred_set_personal(int argc, char **argv);
 static int shell_command_wifi_cred_set_ent(int argc, char **argv);
 
 void setup() {
-  delay(min(1, CONFIG_INITIAL_BOOT_DELAY_SECONDS) * 1000);
+  delay(max(1, CONFIG_INITIAL_BOOT_DELAY_SECONDS) * 1000);
 
   uint64_t raw_devid = ESP.getEfuseMac();
   devid_len = snprintf(devid, sizeof(devid), "%llx", (unsigned long long)raw_devid);
