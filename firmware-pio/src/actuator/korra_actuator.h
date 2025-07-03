@@ -51,7 +51,7 @@ public:
 
   /**
    * Initializes the cloud provisioning logic.
-   * This should be called once at the begining of the program.
+   * This should be called once at the beginning of the program.
    */
   void begin();
 

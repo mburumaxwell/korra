@@ -88,7 +88,7 @@ public:
 
   /**
    * Initializes the cloud hub logic.
-   * This should be called once at the begining of the program.
+   * This should be called once at the beginning of the program.
    */
   void begin();
 

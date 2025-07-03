@@ -33,7 +33,7 @@ public:
 
   /**
    * Initializes the cloud provisioning logic.
-   * This should be called once at the begining of the program.
+   * This should be called once at the beginning of the program.
    *
    * @param regid The device ID.
    * @param regid_len The length of the device ID.

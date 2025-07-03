@@ -20,7 +20,7 @@ public:
 
   /**
    * Initializes the credentials logic.
-   * This should be called once at the begining of the program.
+   * This should be called once at the beginning of the program.
    *
    * @param devid The device ID.
    * @param devid_len The length of the device ID.
