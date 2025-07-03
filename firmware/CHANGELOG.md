@@ -1,5 +1,11 @@
 # firmware
 
+## 0.2.1
+
+### Patch Changes
+
+- 5bdfe77: Label USERTrust certificate appropriately and add ECC version
+
 ## 0.2.0
 
 ### Minor Changes

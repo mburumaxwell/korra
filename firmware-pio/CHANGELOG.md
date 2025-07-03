@@ -1,5 +1,27 @@
 # firmware-pio
 
+## 0.3.0
+
+### Minor Changes
+
+- 9a7163e: JSON parsing for twin should account for when desired/reported keys are missing
+- b505f1e: Better detection of changes in reported properties
+- 136b29b: Move whole actuator config into device twin and configure hub to listen for updates
+- 155298b: Use `as<T>()` to parse from JsonDocument to get right values
+- 2fb05e8: Replace single target value for actuator with a min and max for stability
+
+### Patch Changes
+
+- abdbbdb: Change board target to one with smaller flash and no PSRAM
+- 5bdfe77: Label USERTrust certificate appropriately and add ECC version
+- ba3fb0f: Refactor OTA update handling to make sure it works with large buffers
+- 9bd2119: Set actuator config on initial twin update hence prevent unnecessary updates
+- 789b8c6: Allow OTA updates to be initiated on initial twin update
+- e108215: Check existence of WiFi creds before getting bytes length
+- d1a3222: Fix semantics for min/max in delays
+- d7e6f4e: Prevent early actuation when sensor values are still zero
+- 4d6abb0: Do not reboot on error status from IoT Hub/DPS
+
 ## 0.2.0
 
 ### Minor Changes
