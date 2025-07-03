@@ -1,5 +1,4 @@
 #include <ArduinoJson.h>
-#include <sys/reboot.h>
 
 #include "korra_cloud_provisioning.h"
 
@@ -259,10 +258,11 @@ void KorraCloudProvisioning::on_mqtt_message(int size) {
     // disconnect from the server
     mqtt.stop();
   } else {
-    // assume a transient error and reboot (should actually parse the error)
-    Serial.println("Unknown status code. Rebooting in 5 seconds ...");
-    delay(5000);
-    sys_reboot();
+    // it is likely a transient error, we should actually parse the error
+    // TODO: parse the error
+
+    // not rebooting to allow other tasks to continue
+    Serial.println("Unknown status code. It is wise to reboot ...");
   }
 }
 

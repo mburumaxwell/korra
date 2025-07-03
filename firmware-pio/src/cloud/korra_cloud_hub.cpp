@@ -1,5 +1,4 @@
 #include <ArduinoJson.h>
-#include <sys/reboot.h>
 
 #include "korra_cloud_hub.h"
 
@@ -301,9 +300,10 @@ void KorraCloudHub::on_mqtt_message(int size) {
   } else if (status_code == 204) {
     Serial.println("Update was successful.");
   } else {
-    // assume a transient error and reboot (should actually parse the error)
-    Serial.println("Unknown status code. Rebooting in 5 seconds ...");
-    delay(5000);
-    sys_reboot();
+    // it is likely a transient error, we should actually parse the error
+    // TODO: parse the error
+
+    // not rebooting to allow other tasks to continue
+    Serial.println("Unknown status code. It is wise to reboot ...");
   }
 }
