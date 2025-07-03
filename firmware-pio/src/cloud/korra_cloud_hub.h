@@ -87,8 +87,8 @@ public:
   ~KorraCloudHub();
 
   /**
-   * Initializes the time logic.
-   * This should be called once at the beginning of the program.
+   * Initializes the cloud hub logic.
+   * This should be called once at the begining of the program.
    */
   void begin();
 

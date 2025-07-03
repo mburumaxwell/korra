@@ -38,12 +38,39 @@ struct korra_actuator_state {
 
 class KorraActuator {
 public:
+  /**
+   * Creates a new instance of the KorraActuator class.
+   * Please note that only one instance of the class can be initialized at the same time.
+   */
   KorraActuator();
+
+  /**
+   * Cleanup resources created and managed by the KorraActuator class.
+   */
   ~KorraActuator();
 
+  /**
+   * Initializes the cloud provisioning logic.
+   * This should be called once at the begining of the program.
+   */
   void begin();
+
+  /**
+   * This method should be called periodically inside the main loop of the firmware.
+   * It's safe to call this method in some interval (like 5ms).
+   */
   void maintain();
+
+  /**
+   * Update the sensor values relied on by the actuator.
+   *
+   * @param value The sensor values collected.
+   */
   void update(const struct korra_sensors_data *value);
+
+  /**
+   * Update the config used by the actuator.
+   */
   void set_config(const struct korra_actuator_config *value);
 
   /**

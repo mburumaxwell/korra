@@ -48,8 +48,8 @@ public:
   ~KorraSensors();
 
   /**
-   * Initializes the sensors.
-   * This should be called once at the beginning of the program.
+   * Initializes the sensors logic.
+   * This should be called once at the begining of the program.
    * The required interrupts are also attached.
    */
   void begin();

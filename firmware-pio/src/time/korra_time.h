@@ -29,7 +29,7 @@ public:
 
   /**
    * Initializes the time logic.
-   * This should be called once at the beginning of the program.
+   * This should be called once at the begining of the program.
    *
    * @param update_interval_sec The interval in seconds to update the time.
    */

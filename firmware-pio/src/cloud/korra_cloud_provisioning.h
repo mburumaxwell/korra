@@ -22,7 +22,7 @@ public:
    *
    * @param client The secure TCP client to use for communication.
    * @param prefs The preferences instance to use for storing the provisioning info.
-   * @param tier The timer instance to use for scheduling repetitive tasks.
+   * @param timer The timer instance to use for scheduling repetitive tasks.
    */
   KorraCloudProvisioning(Client &client, Preferences &prefs, Timer<> &timer);
 
@@ -32,8 +32,8 @@ public:
   ~KorraCloudProvisioning();
 
   /**
-   * Initializes the time logic.
-   * This should be called once at the beginning of the program.
+   * Initializes the cloud provisioning logic.
+   * This should be called once at the begining of the program.
    *
    * @param regid The device ID.
    * @param regid_len The length of the device ID.
