@@ -19,7 +19,7 @@ void KorraTime::maintain() {
       .tv_sec = epoch,
       .tv_usec = 0, // do not set, it tends to cause errors
   };
-  settimeofday(&tv, /* timezone */ nullptr);
+  settimeofday(&tv, /* timezone */ NULL);
 
   struct tm tm;
   time_t now = time(NULL);

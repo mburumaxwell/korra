@@ -18,7 +18,7 @@
 #define TOPIC_TWIN_PATCH_PREFIX "$iothub/twin/PATCH/properties/desired/"
 #define TOPIC_TWIN_PATCH_FILTER TOPIC_TWIN_PATCH_PREFIX "#"
 
-KorraCloudHub *KorraCloudHub::_instance = nullptr;
+KorraCloudHub *KorraCloudHub::_instance = NULL;
 
 static void on_mqtt_message_callback(int size) {
   KorraCloudHub::instance()->on_mqtt_message(size);
@@ -29,7 +29,7 @@ KorraCloudHub::KorraCloudHub(Client &client) : mqtt(client) {
 }
 
 KorraCloudHub::~KorraCloudHub() {
-  _instance = nullptr;
+  _instance = NULL;
 
   if (username) {
     free(username);

@@ -15,7 +15,7 @@
 #define TOPIC_REGISTRATION_RESULT_FILTER TOPIC_REGISTRATION_RESULT_PREFIX "#"
 #define TOPIC_REGISTRATION_RESULT_RETRY_AFTER_KEY "retry-after="
 
-KorraCloudProvisioning *KorraCloudProvisioning::_instance = nullptr;
+KorraCloudProvisioning *KorraCloudProvisioning::_instance = NULL;
 
 static void on_mqtt_message_callback(int size) {
   KorraCloudProvisioning::instance()->on_mqtt_message(size);
@@ -27,7 +27,7 @@ KorraCloudProvisioning::KorraCloudProvisioning(Client &client, Preferences &pref
 }
 
 KorraCloudProvisioning::~KorraCloudProvisioning() {
-  _instance = nullptr;
+  _instance = NULL;
 
   if (username) {
     free(username);

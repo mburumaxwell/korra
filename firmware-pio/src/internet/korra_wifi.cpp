@@ -25,14 +25,14 @@ static int mask_to_buffer(const char *pw, size_t visible, char *dest, size_t des
   return 0;
 }
 
-KorraWiFi *KorraWiFi::_instance = nullptr;
+KorraWiFi *KorraWiFi::_instance = NULL;
 
 KorraWiFi::KorraWiFi(Preferences &prefs) : prefs(prefs) {
   _instance = this;
 }
 
 KorraWiFi::~KorraWiFi() {
-  _instance = nullptr;
+  _instance = NULL;
 }
 
 void KorraWiFi::begin() {

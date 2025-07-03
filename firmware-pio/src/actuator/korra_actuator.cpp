@@ -17,7 +17,7 @@ KorraActuator::KorraActuator() {
 }
 
 KorraActuator::~KorraActuator() {
-  state_updated_callback = nullptr;
+  state_updated_callback = NULL;
 }
 
 void KorraActuator::begin() {

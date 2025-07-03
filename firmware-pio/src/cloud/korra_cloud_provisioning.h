@@ -190,7 +190,7 @@ private:
   bool registration_requested = false;
   Timer<> &timer;
 
-  /// Living instance of the KorraCloudProvisioning class. It can be nullptr.
+  /// Living instance of the KorraCloudProvisioning class. It can be NULL.
   static KorraCloudProvisioning *_instance;
 
 private:

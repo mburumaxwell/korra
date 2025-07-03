@@ -132,7 +132,7 @@ public:
   void on_mqtt_message(int size);
 
 private:
-  /// Living instance of the KorraCloudHub class. It can be nullptr.
+  /// Living instance of the KorraCloudHub class. It can be NULL.
   static KorraCloudHub *_instance;
 
 private:

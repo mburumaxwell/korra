@@ -90,7 +90,7 @@ public:
    */
   void on_wifi_event(WiFiEvent_t event, WiFiEventInfo_t info);
 
-  /// Living instance of the KorraWiFi class. It can be nullptr.
+  /// Living instance of the KorraWiFi class. It can be NULL.
   static KorraWiFi *_instance;
 
 private:
