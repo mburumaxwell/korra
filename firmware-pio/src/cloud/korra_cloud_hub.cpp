@@ -269,8 +269,8 @@ void KorraCloudHub::on_mqtt_message(int size) {
         return;
       }
 
-      const uint16_t desired_version = doc["desired"]["$version"];
-      const uint16_t reported_version = doc["reported"]["$version"];
+      const uint16_t desired_version = doc["desired"]["$version"].as<uint16_t>();
+      const uint16_t reported_version = doc["reported"]["$version"].as<uint16_t>();
       const bool changed = desired_version != twin.desired.version || reported_version != twin.reported.version;
       const bool initial = twin.desired.version == 0 || twin.reported.version == 0;
       if (!changed) {
@@ -314,7 +314,7 @@ void KorraCloudHub::on_mqtt_message(int size) {
       return;
     }
 
-    const uint16_t desired_version = doc["desired"]["$version"];
+    const uint16_t desired_version = doc["desired"]["$version"].as<uint16_t>();
     const bool changed = desired_version != twin.desired.version;
     if (!changed) {
       // no changes, nothing to do
@@ -337,7 +337,7 @@ void KorraCloudHub::on_mqtt_message(int size) {
 void KorraCloudHub::populate_desired_props(const JsonDocument &doc, struct korra_device_twin_desired *desired) {
   // firmware version
   auto node = doc["desired"]["firmware"]["version"];
-  twin.desired.firmware.version.value = node["value"];
+  twin.desired.firmware.version.value = node["value"].as<uint32_t>();
   const char *semver_raw = node["semver"];
   if (semver_raw != NULL) {
     size_t semver_raw_len = min((int)strlen(semver_raw) + 1, (int)sizeof(twin.desired.firmware.version.semver));
@@ -367,10 +367,10 @@ void KorraCloudHub::populate_desired_props(const JsonDocument &doc, struct korra
 
   // actuator
   node = doc["desired"]["actuator"];
-  twin.desired.actuator.enabled = node["enabled"];
-  twin.desired.actuator.duration = node["duration"];
-  twin.desired.actuator.equilibrium_time = node["equilibrium_time"];
-  twin.desired.actuator.target = node["target"];
+  twin.desired.actuator.enabled = node["enabled"].as<bool>();
+  twin.desired.actuator.duration = node["duration"].as<uint16_t>();
+  twin.desired.actuator.equilibrium_time = node["equilibrium_time"].as<uint16_t>();
+  twin.desired.actuator.target = node["target"].as<float>();
 
   // clamp actuator values
   twin.desired.actuator.duration = (uint16_t)std::ranges::clamp((int)twin.desired.actuator.duration, 5, 15);
@@ -380,7 +380,7 @@ void KorraCloudHub::populate_desired_props(const JsonDocument &doc, struct korra
 void KorraCloudHub::populate_reported_props(const JsonDocument &doc, struct korra_device_twin_reported *reported) {
   // firmware version
   auto node = doc["reported"]["firmware"]["version"];
-  twin.reported.firmware.version.value = node["value"];
+  twin.reported.firmware.version.value = node["value"].as<uint32_t>();
   const char *semver_raw = node["semver"];
   if (semver_raw != NULL) {
     size_t semver_raw_len = min((int)strlen(semver_raw) + 1, (int)sizeof(twin.reported.firmware.version.semver));
