@@ -62,9 +62,20 @@ void KorraActuator::maintain() {
     // check if the time since the last actuation is greater than the equilibrium time
     const auto elapsed_time = (millis() - timepoint) / 1000;
     if (elapsed_time > current_config.equilibrium_time) {
-      actuate();
+      // Actuating for a given duration
+      const uint32_t duration = current_config.duration * 1000;
+#ifdef CONFIG_APP_KIND_KEEPER
+      Serial.printf("Actuating for %d ms, targeting %d% moisture, currently %d%\n", duration, current_config.target,
+                    current_value);
+#endif // CONFIG_APP_KIND_KEEPER
+#ifdef CONFIG_APP_KIND_POT
+      Serial.printf("Actuating for %d ms, targeting %d temperature, currently %d\n", duration, current_config.target,
+                    current_value);
+#endif // CONFIG_APP_KIND_POT
+      actuate(current_config.duration * 1000);
       timepoint = millis(); // reset the timepoint (must be done after actuation)
       current_value_consumed = true;
+      Serial.println(F("Actuation completed"));
     }
   }
 }
@@ -74,15 +85,11 @@ void KorraActuator::set_config(const struct korra_actuator_config *value) {
   memcpy(&current_config, value, sizeof(struct korra_actuator_config));
 }
 
-void KorraActuator::actuate() {
-  // Actuating for a given duration
-  const uint32_t duration = current_config.duration * 1000;
-  Serial.printf("Actuating for %d ms\n", duration);
-
+void KorraActuator::actuate(uint32_t duration_ms) {
 #ifdef CONFIG_APP_KIND_KEEPER
 
   digitalWrite(CONFIG_ACTUATORS_FAN_PIN, HIGH); // on
-  delay(duration);
+  delay(duration_ms);
   digitalWrite(CONFIG_ACTUATORS_FAN_PIN, LOW); // off
 
 #endif // CONFIG_APP_KIND_KEEPER
@@ -90,7 +97,7 @@ void KorraActuator::actuate() {
 #ifdef CONFIG_APP_KIND_POT
 
   digitalWrite(CONFIG_ACTUATORS_PUMP_PIN, HIGH); // on
-  delay(duration);
+  delay(duration_ms);
   digitalWrite(CONFIG_ACTUATORS_PUMP_PIN, LOW); // off
 
 #endif // CONFIG_APP_KIND_POT
@@ -98,9 +105,8 @@ void KorraActuator::actuate() {
   // update the state
   current_state.count++;
   current_state.last_time = time(NULL);
-  current_state.total_duration += duration;
+  current_state.total_duration += duration_ms;
   if (state_updated_callback) {
     state_updated_callback(&current_state);
   }
-  Serial.println(F("Actuation completed"));
 }

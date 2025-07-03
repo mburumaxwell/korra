@@ -102,7 +102,7 @@ private:
   float current_value = 0;
 
 private:
-  void actuate();
+  void actuate(uint32_t duration_ms);
 };
 
 #endif // KORRA_ACTUATOR_H
