@@ -2,6 +2,13 @@
 
 #include "korra_actuator.h"
 
+#ifdef CONFIG_APP_KIND_KEEPER
+#define TARGET_UNIT_STR "moisture (%%)"
+#endif // CONFIG_APP_KIND_KEEPER
+#ifdef CONFIG_APP_KIND_POT
+#define TARGET_UNIT_STR "temperature (C)"
+#endif // CONFIG_APP_KIND_POT
+
 KorraActuator::KorraActuator() {
 }
 
@@ -47,14 +54,8 @@ void KorraActuator::maintain() {
     if (elapsed_time > current_config.equilibrium_time) {
       // Actuating for a given duration
       const uint32_t duration = current_config.duration * 1000;
-#ifdef CONFIG_APP_KIND_KEEPER
-      Serial.printf("Actuating for %d ms, targeting %d% moisture, currently %d%\n", duration, current_config.target,
-                    current_value);
-#endif // CONFIG_APP_KIND_KEEPER
-#ifdef CONFIG_APP_KIND_POT
-      Serial.printf("Actuating for %d ms, targeting %d temperature, currently %d\n", duration, current_config.target,
-                    current_value);
-#endif // CONFIG_APP_KIND_POT
+      Serial.printf("Actuating for %d ms, targeting %.2f " TARGET_UNIT_STR ", currently %.2f\n", duration,
+                    current_config.target, current_value);
       actuate(current_config.duration * 1000);
       timepoint = millis(); // reset the timepoint (must be done after actuation)
       current_value_consumed = true;
