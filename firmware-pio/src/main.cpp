@@ -198,12 +198,7 @@ static bool update_device_twin(void *) {
 
 static void device_twin_updated(struct korra_device_twin *twin, bool initial) {
   // set values in the actuator
-  struct korra_actuator_config acc = {0};
-  acc.enabled = twin->desired.actuator.enabled;
-  acc.duration = twin->desired.actuator.duration;
-  acc.equilibrium_time = twin->desired.actuator.equilibrium_time;
-  acc.target = twin->desired.actuator.target;
-  actuator.set_config(&acc);
+  actuator.set_config(&(twin->desired.actuator));
 
   // check for firmware updates
   if ((twin->desired.firmware.version.value && twin->desired.firmware.version.value != APP_VERSION_NUMBER) ||

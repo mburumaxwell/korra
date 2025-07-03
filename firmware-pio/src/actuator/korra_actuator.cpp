@@ -9,6 +9,10 @@
 #define TARGET_UNIT_STR "temperature (C)"
 #endif // CONFIG_APP_KIND_POT
 
+template <typename T> constexpr bool is_within(const T &value, const T &min, const T &max) {
+  return value >= min && value <= max;
+}
+
 KorraActuator::KorraActuator() {
 }
 
@@ -48,14 +52,14 @@ void KorraActuator::maintain() {
   // and the time since the last actuation is greater than the equilibrium time then actuate
 
   // check if the current value is less than the target value
-  if (!current_value_consumed && current_value < current_config.target) {
+  if (!current_value_consumed && !is_within(current_value, current_config.target_min, current_config.target_max)) {
     // check if the time since the last actuation is greater than the equilibrium time
     const auto elapsed_time = (millis() - timepoint) / 1000;
     if (elapsed_time > current_config.equilibrium_time) {
       // Actuating for a given duration
       const uint32_t duration = current_config.duration * 1000;
-      Serial.printf("Actuating for %d ms, targeting %.2f " TARGET_UNIT_STR ", currently %.2f\n", duration,
-                    current_config.target, current_value);
+      Serial.printf("Actuating for %d ms, targeting [%.2f, %.2f] " TARGET_UNIT_STR ", currently %.2f\n", duration,
+                    current_config.target_min, current_config.target_max, current_value);
       actuate(current_config.duration * 1000);
       timepoint = millis(); // reset the timepoint (must be done after actuation)
       current_value_consumed = true;
@@ -105,5 +109,6 @@ void KorraActuator::print_config() {
   Serial.printf("Actuator Config: Enabled: %s\n", current_config.enabled ? "yes" : "no");
   Serial.printf("Actuator Config: Duration: %d seconds\n", current_config.duration);
   Serial.printf("Actuator Config: Equilibrium Time: %d seconds\n", current_config.equilibrium_time);
-  Serial.printf("Actuator Config: Target: %f\n", current_config.target);
+  Serial.printf("Actuator Config: Target Min: %.2f\n", current_config.target_min);
+  Serial.printf("Actuator Config: Target Max: %.2f\n", current_config.target_max);
 }
