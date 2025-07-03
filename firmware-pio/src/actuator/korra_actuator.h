@@ -9,9 +9,12 @@ struct korra_actuator_config {
   bool enabled;
 
   /**
-   * Seconds for which the actuator should be active at a given time (range: 5-60)
+   * Seconds for which the actuator should be active at a given time (range: 5-15)
    */
   uint16_t duration;
+
+  /** Seconds to wait before the next actuation (range: 5-60) */
+  uint16_t equilibrium_time;
 
   /**
    * The target value.
@@ -20,9 +23,6 @@ struct korra_actuator_config {
    * @note For keeper, it is temperature (Celsius).
    */
   float target;
-
-  /** Seconds to wait before the next actuation (range: 5-60) */
-  uint16_t equilibrium_time; //
 };
 
 struct korra_actuator_state {
@@ -103,6 +103,7 @@ private:
 
 private:
   void actuate(uint32_t duration_ms);
+  void print_config();
 };
 
 #endif // KORRA_ACTUATOR_H

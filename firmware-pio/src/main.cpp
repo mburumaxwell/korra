@@ -200,6 +200,8 @@ static void device_twin_updated(struct korra_device_twin *twin, bool initial) {
   // set values in the actuator
   struct korra_actuator_config acc = {0};
   acc.enabled = twin->desired.actuator.enabled;
+  acc.duration = twin->desired.actuator.duration;
+  acc.equilibrium_time = twin->desired.actuator.equilibrium_time;
   acc.target = twin->desired.actuator.target;
   actuator.set_config(&acc);
 

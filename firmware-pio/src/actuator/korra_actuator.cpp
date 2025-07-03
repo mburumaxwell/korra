@@ -2,24 +2,7 @@
 
 #include "korra_actuator.h"
 
-// good default values for the actuator instead of having them as build flags
-static const struct korra_actuator_config default_config = {
-    .enabled = false,
-    .duration = 5,
-
-#ifdef CONFIG_APP_KIND_KEEPER
-    .target = 34.0f,
-#endif // CONFIG_APP_KIND_KEEPER
-
-#ifdef CONFIG_APP_KIND_POT
-    .target = 50.0f,
-#endif // CONFIG_APP_KIND_POT
-
-    .equilibrium_time = 3,
-};
-
 KorraActuator::KorraActuator() {
-  memcpy(&this->current_config, &default_config, sizeof(struct korra_actuator_config));
 }
 
 KorraActuator::~KorraActuator() {
@@ -83,6 +66,8 @@ void KorraActuator::maintain() {
 void KorraActuator::set_config(const struct korra_actuator_config *value) {
   // copy the config, logic will update in the maintain() function
   memcpy(&current_config, value, sizeof(struct korra_actuator_config));
+  Serial.println("Actuator Config set");
+  print_config();
 }
 
 void KorraActuator::actuate(uint32_t duration_ms) {
@@ -109,4 +94,11 @@ void KorraActuator::actuate(uint32_t duration_ms) {
   if (state_updated_callback) {
     state_updated_callback(&current_state);
   }
+}
+
+void KorraActuator::print_config() {
+  Serial.printf("Actuator Config: Enabled: %s\n", current_config.enabled ? "yes" : "no");
+  Serial.printf("Actuator Config: Duration: %d seconds\n", current_config.duration);
+  Serial.printf("Actuator Config: Equilibrium Time: %d seconds\n", current_config.equilibrium_time);
+  Serial.printf("Actuator Config: Target: %f\n", current_config.target);
 }

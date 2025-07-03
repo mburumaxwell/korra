@@ -3,9 +3,11 @@
 
 #include "korra_config.h"
 #include "sensors/korra_sensors.h"
+#include "actuator/korra_actuator.h"
 
 #ifdef CONFIG_BOARD_HAS_INTERNET
 
+#include <ArduinoJson.h>
 #include <ArduinoMqttClient.h>
 
 #include "internet/korra_network_shared.h"
@@ -23,23 +25,10 @@ struct korra_device_twin_desired_firmware {
   char signature[128 + 1];                           // Signature (e.g., base64 or hex)
 };
 
-struct korra_device_twin_desired_actuator {
-  /** Whether the actuator is enabled. */
-  bool enabled;
-
-  /**
-   * The target value.
-   * @note This depends on the application.
-   * @note For pot, it is moisture (percentage).
-   * @note For keeper, it is temperature (Celsius).
-   */
-  float target;
-};
-
 struct korra_device_twin_desired {
   uint32_t version; // $version
   struct korra_device_twin_desired_firmware firmware;
-  struct korra_device_twin_desired_actuator actuator;
+  struct korra_actuator_config actuator;
 };
 
 struct korra_device_twin_reported_firmware {
@@ -160,6 +149,8 @@ private:
 private:
   void connect(int retries = 3, int delay_ms = 5000);
   void query_device_twin();
+  void populate_desired_props(const JsonDocument &doc, struct korra_device_twin_desired *desired);
+  void populate_reported_props(const JsonDocument &doc, struct korra_device_twin_reported *reported);
 
 private:
   MqttClient mqtt;

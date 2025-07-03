@@ -1,5 +1,3 @@
-#include <ArduinoJson.h>
-
 #include "korra_cloud_hub.h"
 
 // Username format -> {iotHub-hostname}/{device_id}/api-version=2021-04-12
@@ -17,6 +15,8 @@
 #define TOPIC_TWIN_RESULT_FILTER TOPIC_TWIN_RESULT_PREFIX "#"
 #define TOPIC_FORMAT_TWIN_GET_STATUS "$iothub/twin/GET/?$rid=%d"
 #define TOPIC_FORMAT_TWIN_PATCH_REPORTED "$iothub/twin/PATCH/properties/reported/?$rid=%d"
+#define TOPIC_TWIN_PATCH_PREFIX "$iothub/twin/PATCH/properties/desired/"
+#define TOPIC_TWIN_PATCH_FILTER TOPIC_TWIN_PATCH_PREFIX "#"
 
 KorraCloudHub *KorraCloudHub::_instance = nullptr;
 
@@ -79,7 +79,8 @@ void KorraCloudHub::maintain(struct korra_cloud_provisioning_info *info) {
       mqtt.subscribe(topic, /* qos */ 0);
 
       // subscribe to device twin messages
-      mqtt.subscribe(TOPIC_TWIN_RESULT_FILTER, /* qos */ 0);
+      mqtt.subscribe(TOPIC_TWIN_RESULT_FILTER, /* qos */ 0); // request response
+      mqtt.subscribe(TOPIC_TWIN_PATCH_FILTER, /* qos */ 0);  // updates to desired props
     }
   }
 
@@ -249,18 +250,61 @@ void KorraCloudHub::on_mqtt_message(int size) {
   Serial.printf("%s\n", payload);
 
   // sample topics
-  // twin -> $iothub/registrations/res/200/?$rid=1
+  // twin (request response) -> $iothub/registrations/res/200/?$rid=1
+  // twin (updated desired)  -> $iothub/twin/PATCH/properties/desired/?$version={new-version}
 
-  // find the prefix
+  // find the prefix (twin request response)
   const char *prefix_pos = strstr(topic, TOPIC_TWIN_RESULT_PREFIX);
-  if (prefix_pos == NULL) {
-    Serial.printf("Unknown topic. Expected prefix: %s\n", TOPIC_TWIN_RESULT_PREFIX);
+  if (prefix_pos != NULL) {
+    int status_code = 0;
+    sscanf(prefix_pos + strlen(TOPIC_TWIN_RESULT_PREFIX), "%d", &status_code);
+
+    if (status_code == 200) {
+      // parse the json payload
+      JsonDocument doc;
+      DeserializationError error = deserializeJson(doc, payload);
+      if (error) {
+        Serial.print(F("deserializeJson() failed: "));
+        Serial.println(error.f_str());
+        return;
+      }
+
+      const uint16_t desired_version = doc["desired"]["$version"];
+      const uint16_t reported_version = doc["reported"]["$version"];
+      const bool changed = desired_version != twin.desired.version || reported_version != twin.reported.version;
+      const bool initial = twin.desired.version == 0 || twin.reported.version == 0;
+      if (!changed) {
+        // no changes, nothing to do
+        return;
+      }
+
+      // reset the stored twin and then update it
+      twin = {0};
+      twin.desired.version = desired_version;
+      twin.reported.version = reported_version;
+      populate_desired_props(doc, &(twin.desired));
+      populate_reported_props(doc, &(twin.reported));
+
+      // invoke callback
+      if (changed && device_twin_updated_callback != NULL) {
+        device_twin_updated_callback(&twin, initial);
+      }
+    } else if (status_code == 204) {
+      Serial.println("Update was successful.");
+    } else {
+      // it is likely a transient error, we should actually parse the error
+      // TODO: parse the error
+
+      // not rebooting to allow other tasks to continue
+      Serial.println("Unknown status code. It is wise to reboot ...");
+    }
+
     return;
   }
-  int status_code = 0;
-  sscanf(prefix_pos + strlen(TOPIC_TWIN_RESULT_PREFIX), "%d", &status_code);
 
-  if (status_code == 200) {
+  // find the prefix (twin desired update)
+  prefix_pos = strstr(topic, TOPIC_TWIN_PATCH_PREFIX);
+  if (prefix_pos != NULL) {
     // parse the json payload
     JsonDocument doc;
     DeserializationError error = deserializeJson(doc, payload);
@@ -271,72 +315,75 @@ void KorraCloudHub::on_mqtt_message(int size) {
     }
 
     const uint16_t desired_version = doc["desired"]["$version"];
-    const uint16_t reported_version = doc["reported"]["$version"];
-    const bool changed = desired_version != twin.desired.version || reported_version != twin.reported.version;
-    const bool initial = twin.desired.version == 0 || twin.reported.version == 0;
+    const bool changed = desired_version != twin.desired.version;
     if (!changed) {
       // no changes, nothing to do
       return;
     }
 
-    // reset the stored twin
-    twin = {0};
-
-    // update the twin stored locally (desired)
-    twin.desired.version = desired_version;
-    // desired.firmware.version.value
-    twin.desired.firmware.version.value = doc["desired"]["firmware"]["version"]["value"];
-    // desired.firmware.version.semver
-    const char *semver_raw = doc["desired"]["firmware"]["version"]["semver"];
-    if (semver_raw != NULL) {
-      size_t semver_raw_len = min((int)strlen(semver_raw) + 1, (int)sizeof(twin.desired.firmware.version.semver));
-      memcpy(twin.desired.firmware.version.semver, semver_raw, semver_raw_len - 1);
-    }
-    // desired.firmware.url
-    const char *url_raw = doc["desired"]["firmware"]["url"];
-    if (url_raw != NULL) {
-      size_t url_raw_len = min((int)strlen(url_raw) + 1, (int)sizeof(twin.desired.firmware.url));
-      memcpy(twin.desired.firmware.url, url_raw, url_raw_len - 1);
-    }
-    // desired.firmware.hash
-    const char *hash_raw = doc["desired"]["firmware"]["hash"];
-    if (hash_raw != NULL) {
-      size_t hash_raw_len = min((int)strlen(hash_raw) + 1, (int)sizeof(twin.desired.firmware.hash));
-      memcpy(twin.desired.firmware.hash, hash_raw, hash_raw_len - 1);
-    }
-    // desired.firmware.signature
-    const char *signature_raw = doc["desired"]["firmware"]["signature"];
-    if (signature_raw != NULL) {
-      size_t signature_raw_len = min((int)strlen(signature_raw) + 1, (int)sizeof(twin.desired.firmware.signature));
-      memcpy(twin.desired.firmware.signature, signature_raw, signature_raw_len - 1);
-    }
-    // desired.actuator.enabled
-    twin.desired.actuator.enabled = doc["desired"]["actuator"]["enabled"];
-    // desired.actuator.target
-    twin.desired.actuator.target = doc["desired"]["actuator"]["target"];
-
-    // update the twin stored locally (reported)
-    twin.reported.version = reported_version;
-    // reported.firmware.version.value
-    twin.reported.firmware.version.value = doc["reported"]["firmware"]["version"]["value"];
-    // reported.firmware.version.semver
-    semver_raw = doc["reported"]["firmware"]["version"]["semver"];
-    if (semver_raw != NULL) {
-      size_t semver_raw_len = min((int)strlen(semver_raw) + 1, (int)sizeof(twin.reported.firmware.version.semver));
-      memcpy(twin.reported.firmware.version.semver, semver_raw, semver_raw_len - 1);
-    }
+    populate_desired_props(doc, &(twin.desired));
 
     // invoke callback
     if (changed && device_twin_updated_callback != NULL) {
-      device_twin_updated_callback(&twin, initial);
+      device_twin_updated_callback(&twin, /* initial */ false);
     }
-  } else if (status_code == 204) {
-    Serial.println("Update was successful.");
-  } else {
-    // it is likely a transient error, we should actually parse the error
-    // TODO: parse the error
 
-    // not rebooting to allow other tasks to continue
-    Serial.println("Unknown status code. It is wise to reboot ...");
+    return;
+  }
+
+  Serial.printf("Unknown topic.\n");
+}
+
+void KorraCloudHub::populate_desired_props(const JsonDocument &doc, struct korra_device_twin_desired *desired) {
+  // firmware version
+  auto node = doc["desired"]["firmware"]["version"];
+  twin.desired.firmware.version.value = node["value"];
+  const char *semver_raw = node["semver"];
+  if (semver_raw != NULL) {
+    size_t semver_raw_len = min((int)strlen(semver_raw) + 1, (int)sizeof(twin.desired.firmware.version.semver));
+    memcpy(twin.desired.firmware.version.semver, semver_raw, semver_raw_len - 1);
+  }
+
+  // firmware url
+  const char *url_raw = node["url"];
+  if (url_raw != NULL) {
+    size_t url_raw_len = min((int)strlen(url_raw) + 1, (int)sizeof(twin.desired.firmware.url));
+    memcpy(twin.desired.firmware.url, url_raw, url_raw_len - 1);
+  }
+
+  // firmware hash
+  const char *hash_raw = node["hash"];
+  if (hash_raw != NULL) {
+    size_t hash_raw_len = min((int)strlen(hash_raw) + 1, (int)sizeof(twin.desired.firmware.hash));
+    memcpy(twin.desired.firmware.hash, hash_raw, hash_raw_len - 1);
+  }
+
+  // firmware signature
+  const char *signature_raw = node["signature"];
+  if (signature_raw != NULL) {
+    size_t signature_raw_len = min((int)strlen(signature_raw) + 1, (int)sizeof(twin.desired.firmware.signature));
+    memcpy(twin.desired.firmware.signature, signature_raw, signature_raw_len - 1);
+  }
+
+  // actuator
+  node = doc["desired"]["actuator"];
+  twin.desired.actuator.enabled = node["enabled"];
+  twin.desired.actuator.duration = node["duration"];
+  twin.desired.actuator.equilibrium_time = node["equilibrium_time"];
+  twin.desired.actuator.target = node["target"];
+
+  // clamp actuator values
+  twin.desired.actuator.duration = (uint16_t)std::ranges::clamp((int)twin.desired.actuator.duration, 5, 15);
+  twin.desired.actuator.equilibrium_time = (uint16_t)std::ranges::clamp((int)twin.desired.actuator.equilibrium_time, 5, 60);
+}
+
+void KorraCloudHub::populate_reported_props(const JsonDocument &doc, struct korra_device_twin_reported *reported) {
+  // firmware version
+  auto node = doc["reported"]["firmware"]["version"];
+  twin.reported.firmware.version.value = node["value"];
+  const char *semver_raw = node["semver"];
+  if (semver_raw != NULL) {
+    size_t semver_raw_len = min((int)strlen(semver_raw) + 1, (int)sizeof(twin.reported.firmware.version.semver));
+    memcpy(twin.reported.firmware.version.semver, semver_raw, semver_raw_len - 1);
   }
 }
