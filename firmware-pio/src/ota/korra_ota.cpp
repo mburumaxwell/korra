@@ -144,9 +144,9 @@ void KorraOta::maintain() {
 }
 
 void KorraOta::populate(const char *url, const char *hash, const char *signature, struct korra_ota_info *dest) {
-  memcpy(dest->url, url, min((int)sizeof(dest->url), (int)strlen(url)));
-  memcpy(dest->hash, hash, min((int)sizeof(dest->hash), (int)strlen(hash)));
-  memcpy(dest->signature, signature, min((int)sizeof(dest->signature), (int)strlen(signature)));
+  memcpy(dest->url, url, MIN((int)sizeof(dest->url), (int)strlen(url)));
+  memcpy(dest->hash, hash, MIN((int)sizeof(dest->hash), (int)strlen(hash)));
+  memcpy(dest->signature, signature, MIN((int)sizeof(dest->signature), (int)strlen(signature)));
 }
 
 const enum KorraOta::https_ota_status KorraOta::current_status() {

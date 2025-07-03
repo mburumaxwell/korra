@@ -1,6 +1,8 @@
 #ifndef KORRA_OTA_H
 #define KORRA_OTA_H
 
+#include "korra_config.h"
+
 struct korra_ota_info {
   char url[256 + 1];       // firmware binary URL
   char hash[64 + 1];       // SHA-256 hash in hex

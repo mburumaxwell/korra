@@ -9,10 +9,6 @@
 #define TARGET_UNIT_STR "temperature (C)"
 #endif // CONFIG_APP_KIND_POT
 
-template <typename T> constexpr bool is_within(const T &value, const T &min, const T &max) {
-  return value >= min && value <= max;
-}
-
 KorraActuator::KorraActuator() {
 }
 
@@ -52,7 +48,7 @@ void KorraActuator::maintain() {
   // and the time since the last actuation is greater than the equilibrium time then actuate
 
   // check if the current value is less than the target value
-  if (!current_value_consumed && !is_within(current_value, current_config.target_min, current_config.target_max)) {
+  if (!current_value_consumed && !IN_RANGE(current_value, current_config.target_min, current_config.target_max)) {
     // check if the time since the last actuation is greater than the equilibrium time
     const unsigned long elapsed_time = (millis() - timepoint) / 1000;
     if (elapsed_time > current_config.equilibrium_time) {

@@ -341,7 +341,7 @@ void KorraCloudHub::populate_desired_props(const JsonVariantConst &json, struct 
       twin.desired.firmware.version.value = node_fw_v["value"].as<uint32_t>();
       const char *semver_raw = node_fw_v["semver"];
       if (semver_raw != NULL) {
-        size_t semver_raw_len = min((int)strlen(semver_raw) + 1, (int)sizeof(twin.desired.firmware.version.semver));
+        size_t semver_raw_len = MIN((int)strlen(semver_raw) + 1, (int)sizeof(twin.desired.firmware.version.semver));
         memcpy(twin.desired.firmware.version.semver, semver_raw, semver_raw_len - 1);
       }
     }
@@ -349,21 +349,21 @@ void KorraCloudHub::populate_desired_props(const JsonVariantConst &json, struct 
     // firmware url
     const char *url_raw = node_fw["url"];
     if (url_raw != NULL) {
-      size_t url_raw_len = min((int)strlen(url_raw) + 1, (int)sizeof(twin.desired.firmware.url));
+      size_t url_raw_len = MIN((int)strlen(url_raw) + 1, (int)sizeof(twin.desired.firmware.url));
       memcpy(twin.desired.firmware.url, url_raw, url_raw_len - 1);
     }
 
     // firmware hash
     const char *hash_raw = node_fw["hash"];
     if (hash_raw != NULL) {
-      size_t hash_raw_len = min((int)strlen(hash_raw) + 1, (int)sizeof(twin.desired.firmware.hash));
+      size_t hash_raw_len = MIN((int)strlen(hash_raw) + 1, (int)sizeof(twin.desired.firmware.hash));
       memcpy(twin.desired.firmware.hash, hash_raw, hash_raw_len - 1);
     }
 
     // firmware signature
     const char *signature_raw = node_fw["signature"];
     if (signature_raw != NULL) {
-      size_t signature_raw_len = min((int)strlen(signature_raw) + 1, (int)sizeof(twin.desired.firmware.signature));
+      size_t signature_raw_len = MIN((int)strlen(signature_raw) + 1, (int)sizeof(twin.desired.firmware.signature));
       memcpy(twin.desired.firmware.signature, signature_raw, signature_raw_len - 1);
     }
   }
@@ -378,9 +378,8 @@ void KorraCloudHub::populate_desired_props(const JsonVariantConst &json, struct 
     twin.desired.actuator.target_max = node_acc["target_max"].as<float>();
 
     // clamp actuator values
-    twin.desired.actuator.duration = (uint16_t)std::ranges::clamp((int)twin.desired.actuator.duration, 5, 15);
-    twin.desired.actuator.equilibrium_time =
-        (uint16_t)std::ranges::clamp((int)twin.desired.actuator.equilibrium_time, 5, 60);
+    twin.desired.actuator.duration = CLAMP(twin.desired.actuator.duration, 5, 15);
+    twin.desired.actuator.equilibrium_time = CLAMP(twin.desired.actuator.equilibrium_time, 5, 60);
   }
 }
 
@@ -391,7 +390,7 @@ void KorraCloudHub::populate_reported_props(const JsonVariantConst &json, struct
     twin.reported.firmware.version.value = node_fv["value"].as<uint32_t>();
     const char *semver_raw = node_fv["semver"];
     if (semver_raw != NULL) {
-      size_t semver_raw_len = min((int)strlen(semver_raw) + 1, (int)sizeof(twin.reported.firmware.version.semver));
+      size_t semver_raw_len = MIN((int)strlen(semver_raw) + 1, (int)sizeof(twin.reported.firmware.version.semver));
       memcpy(twin.reported.firmware.version.semver, semver_raw, semver_raw_len - 1);
     }
   }

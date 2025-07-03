@@ -319,7 +319,7 @@ void KorraCloudProvisioning::free_status() {
 }
 
 void KorraCloudProvisioning::schedule_query_registration_result(int delay_sec) {
-  delay_sec = max(3, delay_sec);
+  delay_sec = MAX(3, delay_sec);
   Serial.printf("Scheduling DPS retry/query in %d sec\n", delay_sec);
   timer.in((delay_sec * 1000), [](void *) -> bool {
     KorraCloudProvisioning::instance()->query_registration_result();

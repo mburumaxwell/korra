@@ -114,35 +114,35 @@ void KorraWiFi::credentials_load() {
     // ssid
     const char *ssid_raw = doc["ssid"];
     if (ssid_raw != NULL) {
-      size_t ssid_raw_len = min((int)strlen(ssid_raw) + 1, (int)sizeof(credentials.ssid));
+      size_t ssid_raw_len = MIN((int)strlen(ssid_raw) + 1, (int)sizeof(credentials.ssid));
       memcpy(credentials.ssid, ssid_raw, ssid_raw_len - 1);
     }
 
     // passphrase
     const char *passphrase_raw = doc["passphrase"];
     if (passphrase_raw != NULL) {
-      size_t passphrase_raw_len = min((int)strlen(passphrase_raw) + 1, (int)sizeof(credentials.passphrase));
+      size_t passphrase_raw_len = MIN((int)strlen(passphrase_raw) + 1, (int)sizeof(credentials.passphrase));
       memcpy(credentials.passphrase, passphrase_raw, passphrase_raw_len - 1);
     }
 
     // eap_identity
     const char *eap_identity_raw = doc["eap_identity"];
     if (eap_identity_raw != NULL) {
-      size_t eap_identity_raw_len = min((int)strlen(eap_identity_raw) + 1, (int)sizeof(credentials.eap_identity));
+      size_t eap_identity_raw_len = MIN((int)strlen(eap_identity_raw) + 1, (int)sizeof(credentials.eap_identity));
       memcpy(credentials.eap_identity, eap_identity_raw, eap_identity_raw_len - 1);
     }
 
     // eap_username
     const char *eap_username_raw = doc["eap_username"];
     if (eap_username_raw != NULL) {
-      size_t eap_username_raw_len = min((int)strlen(eap_username_raw) + 1, (int)sizeof(credentials.eap_username));
+      size_t eap_username_raw_len = MIN((int)strlen(eap_username_raw) + 1, (int)sizeof(credentials.eap_username));
       memcpy(credentials.eap_username, eap_username_raw, eap_username_raw_len - 1);
     }
 
     // eap_password
     const char *eap_password_raw = doc["eap_password"];
     if (eap_password_raw != NULL) {
-      size_t eap_password_raw_len = min((int)strlen(eap_password_raw) + 1, (int)sizeof(credentials.eap_password));
+      size_t eap_password_raw_len = MIN((int)strlen(eap_password_raw) + 1, (int)sizeof(credentials.eap_password));
       memcpy(credentials.eap_password, eap_password_raw, eap_password_raw_len - 1);
     }
   }

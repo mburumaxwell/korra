@@ -41,6 +41,6 @@ uint8_t KorraSensors::read_moisture() {
   static const uint32_t wet = 1263;
   uint32_t reading = analogReadMilliVolts(CONFIG_SENSORS_MOISTURE_PIN);
   uint8_t value = (uint8_t)(100.0 * (dry - reading) / (dry - wet));
-  return (uint8_t)std::ranges::clamp((int)value, 0, 100);
+  return CLAMP(value, 0, 100);
 }
 #endif // CONFIG_APP_KIND_POT
