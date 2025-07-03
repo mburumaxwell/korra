@@ -280,7 +280,7 @@ void KorraCloudHub::on_mqtt_message(int size) {
         return;
       }
 
-      // reset the stored twin and then update it
+      // reset the stored twin and then populate it
       twin = {0};
       twin.desired.version = desired_version;
       twin.reported.version = reported_version;
@@ -316,17 +316,12 @@ void KorraCloudHub::on_mqtt_message(int size) {
       return;
     }
 
-    const uint16_t desired_version = doc["$version"].as<uint16_t>();
-    const bool changed = desired_version != twin.desired.version;
-    if (!changed) {
-      // no changes, nothing to do
-      return;
-    }
-
+    // populate
+    twin.desired.version = doc["$version"].as<uint16_t>();
     populate_desired_props(doc, &(twin.desired));
 
     // invoke callback
-    if (changed && device_twin_updated_callback != NULL) {
+    if (device_twin_updated_callback != NULL) {
       device_twin_updated_callback(&twin, /* initial */ false);
     }
 
@@ -338,35 +333,39 @@ void KorraCloudHub::on_mqtt_message(int size) {
 
 void KorraCloudHub::populate_desired_props(const JsonVariantConst &json, struct korra_device_twin_desired *desired) {
   // firmware version
-  JsonVariantConst node_fv = json["firmware"]["version"];
-  if (!node_fv.isNull()) {
-    twin.desired.firmware.version.value = node_fv["value"].as<uint32_t>();
-    const char *semver_raw = node_fv["semver"];
-    if (semver_raw != NULL) {
-      size_t semver_raw_len = min((int)strlen(semver_raw) + 1, (int)sizeof(twin.desired.firmware.version.semver));
-      memcpy(twin.desired.firmware.version.semver, semver_raw, semver_raw_len - 1);
+  JsonVariantConst node_fw = json["firmware"];
+  if (!node_fw.isNull()) {
+    // firmware version
+    JsonVariantConst node_fw_v = node_fw["version"];
+    if (!node_fw_v.isNull()) {
+      twin.desired.firmware.version.value = node_fw_v["value"].as<uint32_t>();
+      const char *semver_raw = node_fw_v["semver"];
+      if (semver_raw != NULL) {
+        size_t semver_raw_len = min((int)strlen(semver_raw) + 1, (int)sizeof(twin.desired.firmware.version.semver));
+        memcpy(twin.desired.firmware.version.semver, semver_raw, semver_raw_len - 1);
+      }
     }
-  }
 
-  // firmware url
-  const char *url_raw = json["url"];
-  if (url_raw != NULL) {
-    size_t url_raw_len = min((int)strlen(url_raw) + 1, (int)sizeof(twin.desired.firmware.url));
-    memcpy(twin.desired.firmware.url, url_raw, url_raw_len - 1);
-  }
+    // firmware url
+    const char *url_raw = node_fw["url"];
+    if (url_raw != NULL) {
+      size_t url_raw_len = min((int)strlen(url_raw) + 1, (int)sizeof(twin.desired.firmware.url));
+      memcpy(twin.desired.firmware.url, url_raw, url_raw_len - 1);
+    }
 
-  // firmware hash
-  const char *hash_raw = json["hash"];
-  if (hash_raw != NULL) {
-    size_t hash_raw_len = min((int)strlen(hash_raw) + 1, (int)sizeof(twin.desired.firmware.hash));
-    memcpy(twin.desired.firmware.hash, hash_raw, hash_raw_len - 1);
-  }
+    // firmware hash
+    const char *hash_raw = node_fw["hash"];
+    if (hash_raw != NULL) {
+      size_t hash_raw_len = min((int)strlen(hash_raw) + 1, (int)sizeof(twin.desired.firmware.hash));
+      memcpy(twin.desired.firmware.hash, hash_raw, hash_raw_len - 1);
+    }
 
-  // firmware signature
-  const char *signature_raw = json["signature"];
-  if (signature_raw != NULL) {
-    size_t signature_raw_len = min((int)strlen(signature_raw) + 1, (int)sizeof(twin.desired.firmware.signature));
-    memcpy(twin.desired.firmware.signature, signature_raw, signature_raw_len - 1);
+    // firmware signature
+    const char *signature_raw = node_fw["signature"];
+    if (signature_raw != NULL) {
+      size_t signature_raw_len = min((int)strlen(signature_raw) + 1, (int)sizeof(twin.desired.firmware.signature));
+      memcpy(twin.desired.firmware.signature, signature_raw, signature_raw_len - 1);
+    }
   }
 
   // actuator
