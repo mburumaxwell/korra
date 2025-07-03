@@ -269,8 +269,10 @@ void KorraCloudHub::on_mqtt_message(int size) {
         return;
       }
 
-      const uint16_t desired_version = doc["desired"]["$version"].as<uint16_t>();
-      const uint16_t reported_version = doc["reported"]["$version"].as<uint16_t>();
+      const auto node_desired = doc["desired"];
+      const auto node_reported = doc["reported"];
+      const uint16_t desired_version = node_desired["$version"].as<uint16_t>();
+      const uint16_t reported_version = node_reported["$version"].as<uint16_t>();
       const bool changed = desired_version != twin.desired.version || reported_version != twin.reported.version;
       const bool initial = twin.desired.version == 0 || twin.reported.version == 0;
       if (!changed) {
@@ -282,8 +284,8 @@ void KorraCloudHub::on_mqtt_message(int size) {
       twin = {0};
       twin.desired.version = desired_version;
       twin.reported.version = reported_version;
-      populate_desired_props(doc, &(twin.desired));
-      populate_reported_props(doc, &(twin.reported));
+      populate_desired_props(node_desired, &(twin.desired));
+      populate_reported_props(node_reported, &(twin.reported));
 
       // invoke callback
       if (changed && device_twin_updated_callback != NULL) {
@@ -314,7 +316,7 @@ void KorraCloudHub::on_mqtt_message(int size) {
       return;
     }
 
-    const uint16_t desired_version = doc["desired"]["$version"].as<uint16_t>();
+    const uint16_t desired_version = doc["$version"].as<uint16_t>();
     const bool changed = desired_version != twin.desired.version;
     if (!changed) {
       // no changes, nothing to do
@@ -334,57 +336,64 @@ void KorraCloudHub::on_mqtt_message(int size) {
   Serial.printf("Unknown topic.\n");
 }
 
-void KorraCloudHub::populate_desired_props(const JsonDocument &doc, struct korra_device_twin_desired *desired) {
+void KorraCloudHub::populate_desired_props(const JsonVariantConst &json, struct korra_device_twin_desired *desired) {
   // firmware version
-  auto node = doc["desired"]["firmware"]["version"];
-  twin.desired.firmware.version.value = node["value"].as<uint32_t>();
-  const char *semver_raw = node["semver"];
-  if (semver_raw != NULL) {
-    size_t semver_raw_len = min((int)strlen(semver_raw) + 1, (int)sizeof(twin.desired.firmware.version.semver));
-    memcpy(twin.desired.firmware.version.semver, semver_raw, semver_raw_len - 1);
+  JsonVariantConst node_fv = json["firmware"]["version"];
+  if (!node_fv.isNull()) {
+    twin.desired.firmware.version.value = node_fv["value"].as<uint32_t>();
+    const char *semver_raw = node_fv["semver"];
+    if (semver_raw != NULL) {
+      size_t semver_raw_len = min((int)strlen(semver_raw) + 1, (int)sizeof(twin.desired.firmware.version.semver));
+      memcpy(twin.desired.firmware.version.semver, semver_raw, semver_raw_len - 1);
+    }
   }
 
   // firmware url
-  const char *url_raw = node["url"];
+  const char *url_raw = json["url"];
   if (url_raw != NULL) {
     size_t url_raw_len = min((int)strlen(url_raw) + 1, (int)sizeof(twin.desired.firmware.url));
     memcpy(twin.desired.firmware.url, url_raw, url_raw_len - 1);
   }
 
   // firmware hash
-  const char *hash_raw = node["hash"];
+  const char *hash_raw = json["hash"];
   if (hash_raw != NULL) {
     size_t hash_raw_len = min((int)strlen(hash_raw) + 1, (int)sizeof(twin.desired.firmware.hash));
     memcpy(twin.desired.firmware.hash, hash_raw, hash_raw_len - 1);
   }
 
   // firmware signature
-  const char *signature_raw = node["signature"];
+  const char *signature_raw = json["signature"];
   if (signature_raw != NULL) {
     size_t signature_raw_len = min((int)strlen(signature_raw) + 1, (int)sizeof(twin.desired.firmware.signature));
     memcpy(twin.desired.firmware.signature, signature_raw, signature_raw_len - 1);
   }
 
   // actuator
-  node = doc["desired"]["actuator"];
-  twin.desired.actuator.enabled = node["enabled"].as<bool>();
-  twin.desired.actuator.duration = node["duration"].as<uint16_t>();
-  twin.desired.actuator.equilibrium_time = node["equilibrium_time"].as<uint16_t>();
-  twin.desired.actuator.target_min = node["target_min"].as<float>();
-  twin.desired.actuator.target_max = node["target_max"].as<float>();
+  JsonVariantConst node_acc = json["actuator"];
+  if (!node_acc.isNull()) {
+    twin.desired.actuator.enabled = node_acc["enabled"].as<bool>();
+    twin.desired.actuator.duration = node_acc["duration"].as<uint16_t>();
+    twin.desired.actuator.equilibrium_time = node_acc["equilibrium_time"].as<uint16_t>();
+    twin.desired.actuator.target_min = node_acc["target_min"].as<float>();
+    twin.desired.actuator.target_max = node_acc["target_max"].as<float>();
 
-  // clamp actuator values
-  twin.desired.actuator.duration = (uint16_t)std::ranges::clamp((int)twin.desired.actuator.duration, 5, 15);
-  twin.desired.actuator.equilibrium_time = (uint16_t)std::ranges::clamp((int)twin.desired.actuator.equilibrium_time, 5, 60);
+    // clamp actuator values
+    twin.desired.actuator.duration = (uint16_t)std::ranges::clamp((int)twin.desired.actuator.duration, 5, 15);
+    twin.desired.actuator.equilibrium_time =
+        (uint16_t)std::ranges::clamp((int)twin.desired.actuator.equilibrium_time, 5, 60);
+  }
 }
 
-void KorraCloudHub::populate_reported_props(const JsonDocument &doc, struct korra_device_twin_reported *reported) {
+void KorraCloudHub::populate_reported_props(const JsonVariantConst &json, struct korra_device_twin_reported *reported) {
   // firmware version
-  auto node = doc["reported"]["firmware"]["version"];
-  twin.reported.firmware.version.value = node["value"].as<uint32_t>();
-  const char *semver_raw = node["semver"];
-  if (semver_raw != NULL) {
-    size_t semver_raw_len = min((int)strlen(semver_raw) + 1, (int)sizeof(twin.reported.firmware.version.semver));
-    memcpy(twin.reported.firmware.version.semver, semver_raw, semver_raw_len - 1);
+  JsonVariantConst node_fv = json["firmware"]["version"];
+  if (!node_fv.isNull()) {
+    twin.reported.firmware.version.value = node_fv["value"].as<uint32_t>();
+    const char *semver_raw = node_fv["semver"];
+    if (semver_raw != NULL) {
+      size_t semver_raw_len = min((int)strlen(semver_raw) + 1, (int)sizeof(twin.reported.firmware.version.semver));
+      memcpy(twin.reported.firmware.version.semver, semver_raw, semver_raw_len - 1);
+    }
   }
 }

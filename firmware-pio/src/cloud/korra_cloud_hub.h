@@ -138,8 +138,8 @@ private:
 private:
   void connect(int retries = 3, int delay_ms = 5000);
   void query_device_twin();
-  void populate_desired_props(const JsonDocument &doc, struct korra_device_twin_desired *desired);
-  void populate_reported_props(const JsonDocument &doc, struct korra_device_twin_reported *reported);
+  void populate_desired_props(const JsonVariantConst &json, struct korra_device_twin_desired *desired);
+  void populate_reported_props(const JsonVariantConst &json, struct korra_device_twin_reported *reported);
 
 private:
   MqttClient mqtt;
