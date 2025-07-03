@@ -35,21 +35,10 @@ struct korra_device_twin_reported_firmware {
   struct korra_device_twin_firmware_version version; // version
 };
 
-struct korra_device_twin_reported_actuator {
-  /** Number of times the actuator was activated */
-  uint16_t count;
-
-  /** Last time the actuator was activated */
-  time_t last_time;
-
-  /** Total time the actuator was active */
-  uint32_t total_duration;
-};
-
 struct korra_device_twin_reported {
   uint32_t version; // $version
   struct korra_device_twin_reported_firmware firmware;
-  struct korra_device_twin_reported_actuator actuator;
+  struct korra_actuator_state actuator;
 };
 
 struct korra_device_twin {

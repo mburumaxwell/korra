@@ -74,6 +74,12 @@ public:
   void set_config(const struct korra_actuator_config *value);
 
   /**
+   * Update the state for the actuator.
+   * This should only be called for the first time to preserve state.
+   */
+  void set_state(const struct korra_actuator_state *value);
+
+  /**
    * Registers callback that will be called each time the actuator state is updated.
    *
    * @param callback

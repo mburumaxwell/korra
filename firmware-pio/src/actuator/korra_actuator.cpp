@@ -71,6 +71,10 @@ void KorraActuator::set_config(const struct korra_actuator_config *value) {
   print_config();
 }
 
+void KorraActuator::set_state(const struct korra_actuator_state *value) {
+  memcpy(&current_state, value, sizeof(struct korra_actuator_state));
+}
+
 void KorraActuator::actuate(uint32_t duration_ms) {
 #ifdef CONFIG_APP_KIND_KEEPER
 

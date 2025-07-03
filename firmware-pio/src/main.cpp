@@ -219,6 +219,10 @@ static void device_twin_updated(struct korra_device_twin *twin, bool initial) {
 
   // for the first time, trigger an update in 5 seconds (it will check if there needs to be a push)
   if (initial) {
+    // update in-memory state so that we continue from where we left off
+    actuator.set_state(&(twin->reported.actuator));
+
+    // update twin in 5 seconds (should set properties of what we are currently running)
     timer.in((5 * 1000) /* 5 seconds, in millis */, [](void *) -> bool {
       update_device_twin(NULL);
       return false; // true to repeat the action, false to stop
