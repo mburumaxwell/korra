@@ -23,16 +23,12 @@ KorraActuator::KorraActuator() {
 }
 
 KorraActuator::~KorraActuator() {
-#ifdef CONFIG_APP_KIND_KEEPER
-  fan.detach();
-#endif // CONFIG_APP_KIND_KEEPER
-
   state_updated_callback = nullptr;
 }
 
 void KorraActuator::begin() {
 #ifdef CONFIG_APP_KIND_KEEPER
-  fan.attach(CONFIG_ACTUATORS_FAN_PIN);
+  pinMode(CONFIG_ACTUATORS_FAN_PIN, OUTPUT);
 #endif // CONFIG_APP_KIND_KEEPER
 
 #ifdef CONFIG_APP_KIND_POT
@@ -80,17 +76,14 @@ void KorraActuator::set_config(const struct korra_actuator_config *value) {
 
 void KorraActuator::actuate() {
   // Actuating for a given duration
-  // 0 is full speed forward
-  // 90 is stopped
-  // 180 is full speed reverse
   const uint32_t duration = current_config.duration * 1000;
   Serial.printf("Actuating for %d ms\n", duration);
 
 #ifdef CONFIG_APP_KIND_KEEPER
 
-  fan.write(0); // full speed forward
+  digitalWrite(CONFIG_ACTUATORS_FAN_PIN, HIGH); // on
   delay(duration);
-  fan.write(90); // stop
+  digitalWrite(CONFIG_ACTUATORS_FAN_PIN, LOW); // off
 
 #endif // CONFIG_APP_KIND_KEEPER
 

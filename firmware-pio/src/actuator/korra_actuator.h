@@ -4,11 +4,6 @@
 #include "korra_config.h"
 #include "sensors/korra_sensors.h"
 
-#ifdef CONFIG_APP_KIND_KEEPER
-#include <ESP32Servo.h>
-// #include <Servo.h>
-#endif // CONFIG_APP_KIND_KEEPER
-
 struct korra_actuator_config {
   /** Whether or not the actuator is allowed */
   bool enabled;
@@ -71,17 +66,13 @@ public:
   inline const struct korra_actuator_config *config() { return &current_config; }
 
 private:
-  korra_actuator_config current_config = {0};
-  korra_actuator_state current_state = {0};
+  struct korra_actuator_config current_config = {0};
+  struct korra_actuator_state current_state = {0};
   void (*state_updated_callback)(const struct korra_actuator_state *value) = NULL;
 
   unsigned long timepoint = 0;
   bool current_value_consumed = false;
   float current_value = 0;
-
-#ifdef CONFIG_APP_KIND_KEEPER
-  Servo fan;
-#endif // CONFIG_APP_KIND_KEEPER
 
 private:
   void actuate();
