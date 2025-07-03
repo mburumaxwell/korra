@@ -36,8 +36,8 @@ static struct korra_credential credentials[] = {
     {
         .tag = KORRA_CREDENTIAL_WIFI_CA_TAG,
         .type = TLS_CREDENTIAL_CA_CERTIFICATE,
-        .data = (char *)wifi_ca_cert,
-        .len = ARRAY_SIZE(wifi_ca_cert),
+        .data = (char *)user_trust_cert,
+        .len = ARRAY_SIZE(user_trust_cert),
     },
     {
         .tag = KORRA_CREDENTIAL_WIFI_CLIENT_TAG,

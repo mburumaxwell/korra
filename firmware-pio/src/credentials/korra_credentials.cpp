@@ -7,9 +7,18 @@
 
 #include "korra_credentials.h"
 
+/**
+ * user_trust_rsa.cer = USERTrust RSA Certification Authority
+ * Discovered as the root on EAP for ASK4 Wireless (CN=wifi.ask4.com)
+ * Works for eduroam at LJMU (CN=ljmurad2.ljmu.ac.uk)
+ *
+ * user_trust_ecc.cer = USERTrust ECC Certification Authority
+ * Discovered as the root for github.com (needed for OTA updates from *.github.com or github.com)
+ */
 static const unsigned char ca_certs[] = {
 #include "ca_azure.cer"
-    // #include "ca_sectigo.cer"
+#include "user_trust_ecc.cer"
+#include "user_trust_rsa.cer"
 };
 
 #define PREFERENCES_KEY_DEVICE_CERT "device-cert"
