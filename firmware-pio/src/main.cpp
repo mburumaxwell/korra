@@ -203,23 +203,24 @@ static void device_twin_updated(struct korra_device_twin *twin, bool initial) {
   acc.target = twin->desired.actuator.target;
   actuator.set_config(&acc);
 
+  // check for firmware updates
+  if ((twin->desired.firmware.version.value && twin->desired.firmware.version.value != APP_VERSION_NUMBER) ||
+      (strlen(twin->desired.firmware.version.semver) &&
+       strcmp(twin->desired.firmware.version.semver, APP_VERSION_STRING) != 0)) {
+    Serial.printf("We have a new firmware version: %s (%d)", twin->desired.firmware.version.semver,
+                  twin->desired.firmware.version.value);
+
+    // initialize the firmware update
+    ota.update(twin->desired.firmware.url, twin->desired.firmware.hash, twin->desired.firmware.signature);
+    return;
+  }
+
   // for the first time, trigger an update in 5 seconds (it will check if there needs to be a push)
   if (initial) {
     timer.in((5 * 1000) /* 5 seconds, in millis */, [](void *) -> bool {
       update_device_twin(NULL);
       return false; // true to repeat the action, false to stop
     });
-    return;
-  }
-
-  // check for firmware updates
-  if (twin->desired.firmware.version.value != APP_VERSION_NUMBER ||
-      strcmp(twin->desired.firmware.version.semver, APP_VERSION_STRING) != 0) {
-    Serial.printf("We have a new firmware version: %s (%d)", twin->desired.firmware.version.semver,
-                  twin->desired.firmware.version.value);
-
-    // initialize the firmware update
-    ota.update(twin->desired.firmware.url, twin->desired.firmware.hash, twin->desired.firmware.signature);
   }
 }
 
