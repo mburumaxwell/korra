@@ -98,7 +98,7 @@ private:
   void (*state_updated_callback)(const struct korra_actuator_state *value) = NULL;
 
   unsigned long timepoint = 0;
-  bool current_value_consumed = false;
+  bool current_value_consumed = true; // prevents early actuation
   float current_value = 0;
 
 private:
