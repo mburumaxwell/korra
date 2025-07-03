@@ -144,16 +144,49 @@ void KorraCloudHub::push(const struct korra_sensors_data *source, const struct k
 }
 
 void KorraCloudHub::update(struct korra_device_twin_reported *props) {
-  JsonDocument doc;
-
   // The request message body contains a JSON document that contains new values for reported properties.
   // Each member in the JSON document updates or add the corresponding member in the device twin's document.
   // A member set to null deletes the member from the containing object.
-  doc["firmware"]["version"]["value"] = props->firmware.version.value;
-  doc["firmware"]["version"]["semver"] = props->firmware.version.semver;
-  doc["actuator"]["count"] = props->actuator.count;
-  doc["actuator"]["last_time"] = props->actuator.last_time;
-  doc["actuator"]["total_duration"] = props->actuator.total_duration;
+  JsonDocument doc;
+
+  // check if the values we have reported need updating then update
+  bool update = false;
+
+  // check the firmware version (either value or semver)
+  if (props->firmware.version.value != twin.reported.firmware.version.value ||
+      strcmp(props->firmware.version.semver, twin.reported.firmware.version.semver) != 0) {
+
+    twin.reported.firmware.version.value = props->firmware.version.value;
+    snprintf((char *)twin.reported.firmware.version.semver, sizeof(twin.reported.firmware.version.semver),
+             props->firmware.version.semver);
+
+    doc["firmware"]["version"]["value"] = props->firmware.version.value;
+    doc["firmware"]["version"]["semver"] = props->firmware.version.semver;
+    update |= true;
+  }
+
+  // check the actuator state
+  if (props->actuator.count != twin.reported.actuator.count) {
+    twin.reported.actuator.count = props->actuator.count;
+    doc["actuator"]["count"] = props->actuator.count;
+    update |= true;
+  }
+  if (props->actuator.last_time != twin.reported.actuator.last_time) {
+    twin.reported.actuator.last_time = props->actuator.last_time;
+    doc["actuator"]["last_time"] = props->actuator.last_time;
+    update |= true;
+  }
+  if (props->actuator.total_duration != twin.reported.actuator.total_duration) {
+    twin.reported.actuator.total_duration = props->actuator.total_duration;
+    doc["actuator"]["total_duration"] = props->actuator.total_duration;
+    update |= true;
+  }
+
+  // if we have nothing to update, return
+  if (!update) {
+    Serial.println("No update required for the reported properties in the device twin");
+    return;
+  }
 
   // prepare topic
   size_t topic_len = snprintf(NULL, 0, TOPIC_FORMAT_TWIN_PATCH_REPORTED, request_id);

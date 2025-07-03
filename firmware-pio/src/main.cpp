@@ -177,44 +177,21 @@ static bool update_device_twin(void *) {
   // check if hub is connected
   if (!hub.connected()) return true; // true to repeat the action, false to stop
 
-  // check if the values we have reported need updating
-  bool update = false;
+  // prepare the props to report
   struct korra_device_twin_reported props = {0};
-  memcpy(&props, &(hub.device_twin()->reported), sizeof(struct korra_device_twin_reported));
 
-  // check firmware version (value)
-  if (props.firmware.version.value != APP_VERSION_NUMBER) {
-    props.firmware.version.value = APP_VERSION_NUMBER;
-    update |= true;
-  }
+  // set the firmware version (value and semver)
+  props.firmware.version.value = APP_VERSION_NUMBER;
+  snprintf((char *)props.firmware.version.semver, sizeof(props.firmware.version.semver), APP_VERSION_STRING);
 
-  // check firmware version (semver)
-  if (strcmp(props.firmware.version.semver, APP_VERSION_STRING) != 0) {
-    snprintf((char *)props.firmware.version.semver, sizeof(props.firmware.version.semver), APP_VERSION_STRING);
-    update |= true;
-  }
-
-  // check the actuator state
+  // set the actuator state
   const struct korra_actuator_state *actuator_state = actuator.state();
-  if (props.actuator.count != actuator_state->count) {
-    props.actuator.count = actuator_state->count;
-    update |= true;
-  }
-  if (props.actuator.last_time != actuator_state->last_time) {
-    props.actuator.last_time = actuator_state->last_time;
-    update |= true;
-  }
-  if (props.actuator.total_duration != actuator_state->total_duration) {
-    props.actuator.total_duration = actuator_state->total_duration;
-    update |= true;
-  }
+  props.actuator.count = actuator_state->count;
+  props.actuator.last_time = actuator_state->last_time;
+  props.actuator.total_duration = actuator_state->total_duration;
 
   // push the update to the hub
-  if (update) {
-    hub.update(&props);
-  } else {
-    Serial.println("No update required for the reported properties in the device twin");
-  }
+  hub.update(&props);
 
   return true; // true to repeat the action, false to stop
 }
