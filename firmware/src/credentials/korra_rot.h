@@ -15,8 +15,8 @@
  */
 
 static const unsigned char user_trust_cert[] = {
-#include "user_trust_rsa.cer"
 #include "user_trust_ecc.cer"
+#include "user_trust_rsa.cer"
 };
 
 static const unsigned char azure_ca_cert[] = {
