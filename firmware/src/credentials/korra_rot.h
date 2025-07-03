@@ -5,7 +5,7 @@
 
 #ifdef CONFIG_WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE
 static const unsigned char wifi_ca_cert[] = {
-#include "ca_wifi.cer"
+#include "ca_sectigo.cer"
 };
 #endif // CONFIG_WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE
 
