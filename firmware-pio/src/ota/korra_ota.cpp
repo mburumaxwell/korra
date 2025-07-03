@@ -96,6 +96,10 @@ void KorraOta::begin(const char *ca_cert) {
 
 void KorraOta::update(const struct korra_ota_info *value) {
   memcpy(&info, value, sizeof(struct korra_ota_info));
+  if (strlen(info.url) == 0) {
+    Serial.println("Cannot initiate firmware update from empty URL");
+    return;
+  }
   Serial.println("Starting firmware update ...");
   Serial.printf("URL: %s\n", info.url);
   Serial.printf("Hash: %s\n", info.hash);
@@ -107,7 +111,7 @@ void KorraOta::update(const struct korra_ota_info *value) {
 
   config.url = info.url;
   config.cert_pem = ca_cert;
-  config.skip_cert_common_name_check = true; // change to false if need be
+  config.skip_cert_common_name_check = false;
   config.event_handler = http_event_handler;
   // config.buffer_size = 2048;
   config.buffer_size_tx = 2048;
