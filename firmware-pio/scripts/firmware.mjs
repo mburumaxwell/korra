@@ -4,25 +4,29 @@ import chalk from 'chalk';
 import { Command, Option } from 'commander';
 import { execSync, spawn } from 'node:child_process';
 import { existsSync } from 'node:fs';
-import { mkdir, copyFile, rm, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import process from 'node:process';
 import readline from 'node:readline';
 import * as semver from 'semver';
 
-import packageJson from '../package.json' with { type: "json" };
+import packageJson from '../package.json' with { type: 'json' };
 
 const isCI = Boolean(process.env['CI'] || process.env['GITHUB_ACTIONS']);
 const KNOWN_ENVIRONMENTS = [
   'arduino-keeper-esp32-s3-devkitc',
   'arduino-pot-esp32-s3-devkitc',
+  // 'esp-idf-keeper-esp32-s3-devkitc',
+  // 'esp-idf-pot-esp32-s3-devkitc',
+
+  // add other board targets here
 ];
 
 const version = new Command('version')
   .description('Generate VERSION file for PlatformIO.')
   .option('--dev', 'Whether in dev mode.')
   .action(async (...args) => {
-    const [options/*, command*/] = args;
+    const [options /*, command*/] = args;
     const { dev } = options;
 
     let version = semver.parse(packageJson.version);
@@ -30,8 +34,8 @@ const version = new Command('version')
       throw new Error('Invalid version in package.json');
     }
 
-    const contents = `${version}\n`
-    const destination = join(process.cwd(), './version.txt')
+    const contents = `${version}\n`;
+    const destination = join(process.cwd(), './version.txt');
     if (existsSync(destination)) await rm(destination);
     await writeFile(destination, contents, 'utf-8');
     console.log(`✅ Generated VERSION file for ${version} at ${destination}`);
@@ -39,12 +43,17 @@ const version = new Command('version')
 
 const build = new Command('build')
   .description('Build firmware.')
-  .addOption(new Option('--environment [environment...]', 'The target(s) to build.').choices(KNOWN_ENVIRONMENTS).default(KNOWN_ENVIRONMENTS))
+  .addOption(
+    new Option('--environment [environment...]', 'The target(s) to build.')
+      .choices(KNOWN_ENVIRONMENTS)
+      .default(KNOWN_ENVIRONMENTS),
+  )
   .action(async (...args) => {
-    const [options/*, command*/] = args;
+    const [options /*, command*/] = args;
     const { environment: environments } = options;
 
     const colors = [
+      // enough colors, if more we repeat
       chalk.cyan,
       chalk.magenta,
       chalk.yellow,
@@ -60,7 +69,7 @@ const build = new Command('build')
     const results = []; // NEW: keep success/failure per task
     const startTime = Date.now(); // NEW: track elapsed time
 
-    ['SIGINT', 'SIGTERM'].forEach(signal => {
+    ['SIGINT', 'SIGTERM'].forEach((signal) => {
       process.on(signal, () => {
         childProcs.forEach((cp) => cp.kill('SIGINT'));
         process.exit(1);
@@ -68,7 +77,7 @@ const build = new Command('build')
     });
 
     for (const environment of environments) {
-      const color = colors[(colorIndex++) % colors.length];
+      const color = colors[colorIndex++ % colors.length];
       const id = `[${environment}]`;
       const prefix = !isCI ? color(id) : id;
 
@@ -82,61 +91,69 @@ const build = new Command('build')
       const cmd = [
         'pio run',
         `--environment ${environment}`,
-        '--project-dir ../'
-      ].filter(Boolean).join(' ');
+        '--project-dir ../', // point to the outer dir because this is run in a nested folder
+      ]
+        .filter(Boolean)
+        .join(' ');
 
       const proc = spawn(cmd, { shell: true });
       childProcs.push(proc);
-      procs.push(new Promise((resolve) => {
-        const procStart = Date.now();
+      procs.push(
+        new Promise((resolve) => {
+          const procStart = Date.now();
 
-        const finish = (code) => {
-          const success = code === 0;
-          const elapsed = ((Date.now() - procStart) / 1000).toFixed(1);
-          results.push({ id, success, duration: elapsed });
-          resolve();
-        };
+          const finish = (code) => {
+            const success = code === 0;
+            const elapsed = ((Date.now() - procStart) / 1000).toFixed(1);
+            results.push({ id, success, duration: elapsed });
+            resolve();
+          };
 
-        if (isCI) {
-          console.log(`::group::Build ${prefix}`);
-          console.log(`${prefix} 🏗️ Running: ${cmd}`);
-          // Buffer mode for CI
-          let stdout = '';
-          let stderr = '';
+          if (isCI) {
+            console.log(`::group::Build ${prefix}`);
+            console.log(`${prefix} 🏗️ Running: ${cmd}`);
+            // Buffer mode for CI
+            let stdout = '';
+            let stderr = '';
 
-          proc.stdout.on('data', data => { stdout += data.toString(); });
-          proc.stderr.on('data', data => { stderr += data.toString(); });
+            proc.stdout.on('data', (data) => {
+              stdout += data.toString();
+            });
+            proc.stderr.on('data', (data) => {
+              stderr += data.toString();
+            });
 
-          proc.on('close', (code) => {
-            console.log(stdout.trim());
-            console.error(stderr.trim());
-            console.log(`::endgroup::`);
-            finish(code);
-          });
-        } else {
-          // Local: stream with prefix
-          console.log(`${prefix} 🏗️ Running: ${cmd}`);
-          const rlOut = readline.createInterface({ input: proc.stdout });
-          rlOut.on('line', line => console.log(`${prefix} ${line}`));
+            proc.on('close', (code) => {
+              console.log(stdout.trim());
+              console.error(stderr.trim());
+              console.log(`::endgroup::`);
+              finish(code);
+            });
+          } else {
+            // Local: stream with prefix
+            console.log(`${prefix} 🏗️ Running: ${cmd}`);
+            const rlOut = readline.createInterface({ input: proc.stdout });
+            rlOut.on('line', (line) => console.log(`${prefix} ${line}`));
 
-          const rlErr = readline.createInterface({ input: proc.stderr });
-          rlErr.on('line', line => console.error(`${prefix} ${line}`));
+            const rlErr = readline.createInterface({ input: proc.stderr });
+            rlErr.on('line', (line) => console.error(`${prefix} ${line}`));
 
-          proc.on('close', (code) => {
-            finish(code);
-          });
-        }
-      }));
+            proc.on('close', (code) => {
+              finish(code);
+            });
+          }
+        }),
+      );
     }
 
     await Promise.all(procs);
 
     const duration = ((Date.now() - startTime) / 1000).toFixed(1);
-    const succeeded = results.filter(r => r.success);
-    const failed = results.filter(r => !r.success);
+    const succeeded = results.filter((r) => r.success);
+    const failed = results.filter((r) => !r.success);
     console.log(`\n📊 Build Summary (${duration}s):`);
-    succeeded.forEach(r => console.log(`✅ ${r.id} (${r.duration}s)`));
-    failed.forEach(r => console.log(`❌ ${r.id} (${r.duration}s)`));
+    succeeded.forEach((r) => console.log(`✅ ${r.id} (${r.duration}s)`));
+    failed.forEach((r) => console.log(`❌ ${r.id} (${r.duration}s)`));
 
     if (failed.length > 0) {
       process.exit(1);
@@ -147,9 +164,11 @@ const build = new Command('build')
 
 const flash = new Command('flash')
   .description('Flash firmware.')
-  .addOption(new Option('--environment <environment>', 'The target to flash.').choices(KNOWN_ENVIRONMENTS).makeOptionMandatory())
+  .addOption(
+    new Option('--environment <environment>', 'The target to flash.').choices(KNOWN_ENVIRONMENTS).makeOptionMandatory(),
+  )
   .action(async (...args) => {
-    const [options/*, command*/] = args;
+    const [options /*, command*/] = args;
     const { environment } = options;
     console.log(`🚀 Flashing ${environment}`);
 
@@ -157,8 +176,10 @@ const flash = new Command('flash')
       'pio run',
       `--environment ${environment}`,
       '--target flash',
-      '--project-dir ../'
-    ].filter(Boolean).join(' ');
+      '--project-dir ../', // point to the outer dir because this is run in a nested folder
+    ]
+      .filter(Boolean)
+      .join(' ');
     console.log(`🏗️ Running: ${cmd}`);
 
     try {
@@ -172,9 +193,13 @@ const flash = new Command('flash')
 
 const collect = new Command('collect')
   .description('Collect firmware binaries.')
-  .addOption(new Option('--environment [environment...]', 'The target(s) to build.').choices(KNOWN_ENVIRONMENTS).default(KNOWN_ENVIRONMENTS))
+  .addOption(
+    new Option('--environment [environment...]', 'The target(s) to build.')
+      .choices(KNOWN_ENVIRONMENTS)
+      .default(KNOWN_ENVIRONMENTS),
+  )
   .action(async (...args) => {
-    const [options/*, command*/] = args;
+    const [options /*, command*/] = args;
     const { environment: environments } = options;
     console.log(`📦 Collecting build artifacts ...`);
     const outputDir = 'binaries';

@@ -4,13 +4,13 @@ import chalk from 'chalk';
 import { Command, Option } from 'commander';
 import { execSync, spawn } from 'node:child_process';
 import { existsSync } from 'node:fs';
-import { mkdir, copyFile, rm, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import process from 'node:process';
 import readline from 'node:readline';
 import * as semver from 'semver';
 
-import packageJson from '../package.json' with { type: "json" };
+import packageJson from '../package.json' with { type: 'json' };
 
 // There might be lots of overlap in this file/tool with west or scripts in a west manifest.
 // However, this is more readable/maintainable than Python scripts, has things like parallelism and versioning.
@@ -22,11 +22,13 @@ const KNOWN_BOARDS = [
   'esp32s3_devkitc/esp32s3/procpu',
   'frdm_rw612',
   'nrf7002dk/nrf5340/cpuapp',
+  // add other board targets here
 ];
 const KNOWN_BLOBS_MODULES = [
   'hal_espressif',
   'hal_nxp',
   'nrf_wifi',
+  // add other blobs needed here
 ];
 
 const makeBuildDir = ({ app, board }) => `build/${app}/${board}`;
@@ -35,7 +37,7 @@ const version = new Command('version')
   .description('Generate VERSION file for zephyr.')
   .option('--dev', 'Whether in dev mode.')
   .action(async (...args) => {
-    const [options/*, command*/] = args;
+    const [options /*, command*/] = args;
     const { dev } = options;
 
     let version = semver.parse(packageJson.version);
@@ -43,7 +45,11 @@ const version = new Command('version')
       throw new Error('Invalid version in package.json');
     }
 
-    const validateByte = (num, label) => (num >= 0 && num <= 255) || (() => { throw new Error(`${label} must be in range 0-255`); })();
+    const validateByte = (num, label) =>
+      (num >= 0 && num <= 255) ||
+      (() => {
+        throw new Error(`${label} must be in range 0-255`);
+      })();
 
     let tweak = version.build.length > 0 ? parseInt(version.build[0], 10) : 0;
     let extraversion =
@@ -76,7 +82,7 @@ const version = new Command('version')
     ];
 
     const contents = lines.join('\n');
-    const destination = join(process.cwd(), './VERSION')
+    const destination = join(process.cwd(), './VERSION');
     if (existsSync(destination)) await rm(destination);
     await writeFile(destination, contents, 'utf-8');
     console.log(`✅ Generated VERSION file for ${version} at ${destination}`);
@@ -85,15 +91,20 @@ const version = new Command('version')
 const build = new Command('build')
   .description('Build firmware.')
   .addOption(new Option('--app [app...]', 'The app kind(s).').choices(KNOWN_APPS).default(KNOWN_APPS))
-  .addOption(new Option('--board [board...]', 'Board(s) to build for with optional board revision.').choices(KNOWN_BOARDS).default(KNOWN_BOARDS))
+  .addOption(
+    new Option('--board [board...]', 'Board(s) to build for with optional board revision.')
+      .choices(KNOWN_BOARDS)
+      .default(KNOWN_BOARDS),
+  )
   .option('-p, --pristine', 'Whether to build pristine (from scratch).')
   .action(async (...args) => {
-    const [options/*, command*/] = args;
+    const [options /*, command*/] = args;
     const { app: apps, board: boards, pristine } = options;
 
     // if we are not in CI and the local file exists, mark it for inclusion
     const local = !isCI && existsSync('local.conf');
     const colors = [
+      // enough colors, if more we repeat
       chalk.cyan,
       chalk.magenta,
       chalk.yellow,
@@ -109,7 +120,7 @@ const build = new Command('build')
     const results = []; // NEW: keep success/failure per task
     const startTime = Date.now(); // NEW: track elapsed time
 
-    ['SIGINT', 'SIGTERM'].forEach(signal => {
+    ['SIGINT', 'SIGTERM'].forEach((signal) => {
       process.on(signal, () => {
         childProcs.forEach((cp) => cp.kill('SIGINT'));
         process.exit(1);
@@ -119,7 +130,7 @@ const build = new Command('build')
     for (const app of apps) {
       for (const board of boards) {
         const buildDir = makeBuildDir({ app, board });
-        const color = colors[(colorIndex++) % colors.length];
+        const color = colors[colorIndex++ % colors.length];
         const id = `[${app}@${board}]`;
         const prefix = !isCI ? color(id) : id;
 
@@ -134,65 +145,73 @@ const build = new Command('build')
           'west build',
           `--board ${board}`,
           `--build-dir ${buildDir}`,
-          (pristine && '--pristine'),
-          (pristine && `--extra-dtc-overlay apps/${app}.overlay`),
-          (pristine && `--extra-conf apps/${app}.conf`),
-          (pristine && local && '--extra-conf local.conf'),
-        ].filter(Boolean).join(' ');
+          pristine && '--pristine',
+          pristine && `--extra-dtc-overlay apps/${app}.overlay`,
+          pristine && `--extra-conf apps/${app}.conf`,
+          pristine && local && '--extra-conf local.conf',
+        ]
+          .filter(Boolean)
+          .join(' ');
 
         const proc = spawn(cmd, { shell: true });
         childProcs.push(proc);
-        procs.push(new Promise((resolve) => {
-          const procStart = Date.now();
+        procs.push(
+          new Promise((resolve) => {
+            const procStart = Date.now();
 
-          const finish = (code) => {
-            const success = code === 0;
-            const elapsed = ((Date.now() - procStart) / 1000).toFixed(1);
-            results.push({ id, success, duration: elapsed });
-            resolve();
-          };
+            const finish = (code) => {
+              const success = code === 0;
+              const elapsed = ((Date.now() - procStart) / 1000).toFixed(1);
+              results.push({ id, success, duration: elapsed });
+              resolve();
+            };
 
-          if (isCI) {
-            console.log(`::group::Build ${prefix}`);
-            console.log(`${prefix} 🏗️ Running: ${cmd}`);
-            // Buffer mode for CI
-            let stdout = '';
-            let stderr = '';
+            if (isCI) {
+              console.log(`::group::Build ${prefix}`);
+              console.log(`${prefix} 🏗️ Running: ${cmd}`);
+              // Buffer mode for CI
+              let stdout = '';
+              let stderr = '';
 
-            proc.stdout.on('data', data => { stdout += data.toString(); });
-            proc.stderr.on('data', data => { stderr += data.toString(); });
+              proc.stdout.on('data', (data) => {
+                stdout += data.toString();
+              });
+              proc.stderr.on('data', (data) => {
+                stderr += data.toString();
+              });
 
-            proc.on('close', (code) => {
-              console.log(stdout.trim());
-              console.error(stderr.trim());
-              console.log(`::endgroup::`);
-              finish(code);
-            });
-          } else {
-            // Local: stream with prefix
-            console.log(`${prefix} 🏗️ Running: ${cmd}`);
-            const rlOut = readline.createInterface({ input: proc.stdout });
-            rlOut.on('line', line => console.log(`${prefix} ${line}`));
+              proc.on('close', (code) => {
+                console.log(stdout.trim());
+                console.error(stderr.trim());
+                console.log(`::endgroup::`);
+                finish(code);
+              });
+            } else {
+              // Local: stream with prefix
+              console.log(`${prefix} 🏗️ Running: ${cmd}`);
+              const rlOut = readline.createInterface({ input: proc.stdout });
+              rlOut.on('line', (line) => console.log(`${prefix} ${line}`));
 
-            const rlErr = readline.createInterface({ input: proc.stderr });
-            rlErr.on('line', line => console.error(`${prefix} ${line}`));
+              const rlErr = readline.createInterface({ input: proc.stderr });
+              rlErr.on('line', (line) => console.error(`${prefix} ${line}`));
 
-            proc.on('close', (code) => {
-              finish(code);
-            });
-          }
-        }));
+              proc.on('close', (code) => {
+                finish(code);
+              });
+            }
+          }),
+        );
       }
     }
 
     await Promise.all(procs);
 
     const duration = ((Date.now() - startTime) / 1000).toFixed(1);
-    const succeeded = results.filter(r => r.success);
-    const failed = results.filter(r => !r.success);
+    const succeeded = results.filter((r) => r.success);
+    const failed = results.filter((r) => !r.success);
     console.log(`\n📊 Build Summary (${duration}s):`);
-    succeeded.forEach(r => console.log(`✅ ${r.id} (${r.duration}s)`));
-    failed.forEach(r => console.log(`❌ ${r.id} (${r.duration}s)`));
+    succeeded.forEach((r) => console.log(`✅ ${r.id} (${r.duration}s)`));
+    failed.forEach((r) => console.log(`❌ ${r.id} (${r.duration}s)`));
 
     if (failed.length > 0) {
       process.exit(1);
@@ -204,17 +223,18 @@ const build = new Command('build')
 const flash = new Command('flash')
   .description('Flash firmware.')
   .addOption(new Option('--app <app>', 'The app kind(s).').choices(KNOWN_APPS).makeOptionMandatory())
-  .addOption(new Option('--board <board>', 'Board(s) to build for with optional board revision.').choices(KNOWN_BOARDS).makeOptionMandatory())
+  .addOption(
+    new Option('--board <board>', 'Board(s) to build for with optional board revision.')
+      .choices(KNOWN_BOARDS)
+      .makeOptionMandatory(),
+  )
   .action(async (...args) => {
-    const [options/*, command*/] = args;
+    const [options /*, command*/] = args;
     const { app, board } = options;
     const buildDir = makeBuildDir({ app, board });
     console.log(`🚀 Flashing app ${app} to ${board}`);
 
-    const cmd = [
-      'west flash',
-      `--build-dir ${buildDir}`,
-    ].filter(Boolean).join(' ');
+    const cmd = ['west flash', `--build-dir ${buildDir}`].filter(Boolean).join(' ');
     console.log(`🏗️ Running: ${cmd}`);
 
     try {
@@ -229,9 +249,13 @@ const flash = new Command('flash')
 const collect = new Command('collect')
   .description('Collect firmware binaries.')
   .addOption(new Option('--app [app...]', 'The app kind(s).').choices(KNOWN_APPS).default(KNOWN_APPS))
-  .addOption(new Option('--board [board...]', 'Board(s) to collect for with optional board revision.').choices(KNOWN_BOARDS).default(KNOWN_BOARDS))
+  .addOption(
+    new Option('--board [board...]', 'Board(s) to collect for with optional board revision.')
+      .choices(KNOWN_BOARDS)
+      .default(KNOWN_BOARDS),
+  )
   .action(async (...args) => {
-    const [options/*, command*/] = args;
+    const [options /*, command*/] = args;
     const { app: apps, board: boards } = options;
     console.log(`📦 Collecting build artifacts ...`);
     const outputDir = 'binaries';
@@ -262,18 +286,22 @@ const blobs = new Command('blobs')
   .addCommand(
     new Command('fetch')
       .description('Fetch blobs')
-      .addOption(new Option('--module [module...]', 'The blob module.').choices(KNOWN_BLOBS_MODULES).default(KNOWN_BLOBS_MODULES))
-      .addOption(new Option('-a, --auto-accept [module]', 'auto accept license if the fetching needs click-through').default(true))
+      .addOption(
+        new Option('--module [module...]', 'The blob module.')
+          .choices(KNOWN_BLOBS_MODULES)
+          .default(KNOWN_BLOBS_MODULES),
+      )
+      .addOption(
+        new Option('-a, --auto-accept [module]', 'auto accept license if the fetching needs click-through').default(
+          true,
+        ),
+      )
       .action(async (...args) => {
-        const [options/*, command*/] = args;
+        const [options /*, command*/] = args;
         const { module: modules, autoAccept } = options;
 
         for (const module of modules) {
-          const cmd = [
-            'west blobs fetch',
-            module,
-            (autoAccept && '--auto-accept')
-          ].filter(Boolean).join(' ');
+          const cmd = ['west blobs fetch', module, autoAccept && '--auto-accept'].filter(Boolean).join(' ');
           console.log(`🏗️ Running: ${cmd}`);
 
           try {
@@ -284,24 +312,22 @@ const blobs = new Command('blobs')
             process.exit(1);
           }
         }
-      })
+      }),
   )
   .addCommand(
-    new Command('clean')
-      .description('Clean blobs')
-      .action(async (...args) => {
-        const cmd = ['west blobs clean'].filter(Boolean).join(' ');
-        console.log(`🏗️ Running: ${cmd}`);
+    new Command('clean').description('Clean blobs').action(async (...args) => {
+      const cmd = ['west blobs clean'].filter(Boolean).join(' ');
+      console.log(`🏗️ Running: ${cmd}`);
 
-        try {
-          execSync(cmd, { stdio: 'inherit' });
-          console.log(`✅ Blobs cleaned`);
-        } catch (error) {
-          console.error(`❌ Blobs clean failed:`, error.message);
-          process.exit(1);
-        }
-      })
-  )
+      try {
+        execSync(cmd, { stdio: 'inherit' });
+        console.log(`✅ Blobs cleaned`);
+      } catch (error) {
+        console.error(`❌ Blobs clean failed:`, error.message);
+        process.exit(1);
+      }
+    }),
+  );
 
 const root = new Command();
 root.name('korra-firmware').description('CLI too for running firmware tasks for Korra.');
