@@ -184,10 +184,7 @@ static bool update_device_twin(void *) {
   snprintf((char *)props.firmware.version.semver, sizeof(props.firmware.version.semver), APP_VERSION_STRING);
 
   // set the actuator state
-  const struct korra_actuator_state *actuator_state = actuator.state();
-  props.actuator.count = actuator_state->count;
-  props.actuator.last_time = actuator_state->last_time;
-  props.actuator.total_duration = actuator_state->total_duration;
+  memcpy(&(props.actuator), actuator.state(), sizeof(struct korra_actuator_state));
 
   // push the update to the hub
   hub.update(&props);

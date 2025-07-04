@@ -120,6 +120,7 @@ private:
 private:
   void actuate(uint32_t duration_ms);
   void print_config();
+  void print_state();
 };
 
 #endif // KORRA_ACTUATOR_H

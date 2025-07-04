@@ -394,4 +394,12 @@ void KorraCloudHub::populate_reported_props(const JsonVariantConst &json, struct
       memcpy(twin.reported.firmware.version.semver, semver_raw, semver_raw_len - 1);
     }
   }
+
+  // actuator
+  JsonVariantConst node_acc = json["actuator"];
+  if (!node_acc.isNull()) {
+    twin.reported.actuator.count = node_acc["count"].as<uint16_t>();
+    twin.reported.actuator.last_time = node_acc["last_time"].as<time_t>();
+    twin.reported.actuator.total_duration = node_acc["total_duration"].as<uint32_t>();
+  }
 }

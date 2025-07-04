@@ -73,6 +73,8 @@ void KorraActuator::set_config(const struct korra_actuator_config *value) {
 
 void KorraActuator::set_state(const struct korra_actuator_state *value) {
   memcpy(&current_state, value, sizeof(struct korra_actuator_state));
+  Serial.println("Actuator State set");
+  print_state();
 }
 
 void KorraActuator::actuate(uint32_t duration_ms) {
@@ -107,4 +109,10 @@ void KorraActuator::print_config() {
   Serial.printf("Actuator Config: Equilibrium Time: %d seconds\n", current_config.equilibrium_time);
   Serial.printf("Actuator Config: Target Min: %.2f\n", current_config.target_min);
   Serial.printf("Actuator Config: Target Max: %.2f\n", current_config.target_max);
+}
+
+void KorraActuator::print_state() {
+  Serial.printf("Actuator State: Count: %d\n", current_state.count);
+  Serial.printf("Actuator State: Last Time: %d\n", current_state.last_time);
+  Serial.printf("Actuator State: Total Duration: %d seconds\n", current_state.total_duration);
 }
