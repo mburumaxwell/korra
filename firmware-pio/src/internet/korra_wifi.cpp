@@ -283,7 +283,8 @@ void KorraWiFi::on_wifi_event(WiFiEvent_t event, WiFiEventInfo_t info) {
     Serial.printf("Channel: %d\n", WiFi.channel());
     // Serial.printf("Security: %s\n", encryptionTypeToString(WiFi.encryptionType()));
     Serial.printf("RSSI: %d\n", WiFi.RSSI());
-    Serial.printf("IP Address: %s\n", WiFi.localIP().toString());
+    Serial.printf("IP Address: %s\n", WiFi.localIP().toString().c_str());
+    Serial.printf("MAC Address: %s\n", WiFi.macAddress().c_str());
 
     // populate net_props
     snprintf(net_props.kind, sizeof(net_props.kind), KORRA_NETWORK_KIND_WIFI);
