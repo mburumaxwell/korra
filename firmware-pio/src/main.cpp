@@ -53,6 +53,7 @@ static int shell_command_internet_cred_clear(int argc, char **argv);
 static int shell_command_wifi_cred_set_open(int argc, char **argv);
 static int shell_command_wifi_cred_set_personal(int argc, char **argv);
 static int shell_command_wifi_cred_set_ent(int argc, char **argv);
+static int shell_command_actuator_reset_state(int argc, char **argv);
 
 void setup() {
   delay(MAX(1, CONFIG_INITIAL_BOOT_DELAY_SECONDS) * 1000);
@@ -125,6 +126,7 @@ void setup() {
   shell.addCommand(F("wifi-cred-set-open <ssid>"), shell_command_wifi_cred_set_open);
   shell.addCommand(F("wifi-cred-set-personal <ssid> <passphrase>"), shell_command_wifi_cred_set_personal);
   shell.addCommand(F("wifi-cred-set-ent <ssid> <identity> <username> <password>"), shell_command_wifi_cred_set_ent);
+  shell.addCommand(F("actuator-reset-state"), shell_command_actuator_reset_state);
 }
 
 void loop() {
@@ -317,4 +319,12 @@ static int shell_command_wifi_cred_set_ent(int argc, char **argv) {
   Serial.printf("Setting internet credentials (enterprise). SSID: '%s'\n", credentials.ssid);
   if (!internet.credentials_clear()) return EXIT_FAILURE;
   return internet.credentials_save_wifi(&credentials) ? EXIT_SUCCESS : EXIT_FAILURE;
+}
+
+static int shell_command_actuator_reset_state(int argc, char **argv) {
+  // command format: actuator-reset-state
+  struct korra_actuator_state state = {0};
+  actuator.set_state(&state);
+  update_device_twin(NULL);
+  return EXIT_SUCCESS;
 }
