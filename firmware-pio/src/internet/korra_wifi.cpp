@@ -100,7 +100,6 @@ void KorraWiFi::credentials_load() {
     const size_t payload_len = prefs.getBytesLength(PREFERENCES_KEY_WIFI_CREDS);
     char payload[payload_len + 1];
     prefs.getBytes(PREFERENCES_KEY_WIFI_CREDS, payload, payload_len);
-    // Serial.printf("Read %d bytes from %s key:\n%s\n", payload_len, PREFERENCES_KEY_WIFI_CREDS, payload);
 
     // parse JSON
     JsonDocument doc;
@@ -297,7 +296,7 @@ void KorraWiFi::on_wifi_event(WiFiEvent_t event, WiFiEventInfo_t info) {
     // For the first time, set the hostname using the mac address.
     // Change the hostname to a more useful name. E.g. a default value like "esp32s3-594E40" changes to "korra-594E40"
     // The WiFi stack needs to have been activated by scanning or connecting hence why this is done last.
-    // Otherwise just zeros.
+    // Otherwise, just zeros.
     if (strlen(net_props.hostname) == 0) {
       snprintf(net_props.hostname, sizeof(net_props.hostname), "korra-" FMT_LL_ADDR_6_LOWER_NO_COLONS,
                PRINT_LL_ADDR_6(net_props.mac_addr));
