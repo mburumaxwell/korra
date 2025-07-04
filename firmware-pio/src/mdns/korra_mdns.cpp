@@ -1,4 +1,4 @@
-#include <sys/reboot.h>
+#include <esp_system.h>
 
 #include "korra_mdns.h"
 
@@ -15,7 +15,7 @@ void KorraMdns::maintain(const struct korra_network_props *props) {
     if (!mdns.begin(props->local_ipaddr, props->hostname)) {
       Serial.println("Error setting up mDNS! Rebooting in 5 sec ....");
       delay(5000);
-      sys_reboot();
+      esp_restart();
     }
 
     // We register a service to aid with checking if the device is on the network. This aids troubleshooting

@@ -1,5 +1,5 @@
 #include <app_version.h>
-#include <sys/reboot.h>
+#include <esp_system.h>
 
 #include <SimpleSerialShell.h>
 
@@ -239,7 +239,7 @@ static int shell_command_info(int argc, char **argv) // info
 static int shell_command_reboot(int argc, char **argv) {
   // command format: reboot
 
-  sys_reboot();
+  esp_restart();
   return EXIT_SUCCESS;
 }
 
@@ -251,7 +251,7 @@ static int shell_command_prefs_clear(int argc, char **argv) {
   // reboot after 10 sec
   Serial.println("Rebooting in 10 sec ...");
   delay(10 * 1000);
-  sys_reboot();
+  esp_restart();
 
   return EXIT_SUCCESS;
 }
@@ -267,7 +267,7 @@ static int shell_command_device_cred_clear(int argc, char **argv) {
   // reboot after 10 sec
   Serial.println("Rebooting in 10 sec ...");
   delay(10 * 1000);
-  sys_reboot();
+  esp_restart();
 
   return EXIT_SUCCESS;
 }

@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <sys/reboot.h>
+#include <esp_system.h>
 
 #include "korra_ota.h"
 
@@ -134,7 +134,7 @@ void KorraOta::maintain() {
   if (status == https_ota_status::HTTPS_OTA_STATUS_SUCCESS) {
     Serial.println("Firmware written successfully. Rebooting in 5 sec ...");
     delay(5 * 1000);
-    sys_reboot();
+    esp_restart();
   } else if (status == https_ota_status::HTTPS_OTA_STATUS_FAIL) {
     if (!printed_fail) {
       Serial.println("Firmware upgrade failed");
