@@ -1,5 +1,14 @@
 # firmware-pio
 
+## 0.3.1
+
+### Patch Changes
+
+- 38dc256: Reported props for actuator should be updated to prevent reseting
+- f18fdee: Refactor actuator duration handling to use seconds instead of milliseconds
+- 323f8af: Print MAC address on connecting to WiFi to make it easier to add to firewall
+- c52cb1b: Bump platform-espressif32 from `54.03.20` to `54.03.21`
+
 ## 0.3.0
 
 ### Minor Changes
