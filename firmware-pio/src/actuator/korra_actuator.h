@@ -39,10 +39,10 @@ struct korra_actuator_state {
   /** Number of times the actuator was activated */
   uint16_t count;
 
-  /** Last time the actuator was activated */
+  /** Last time (UNIX since Epoch) the actuator was activated */
   time_t last_time;
 
-  /** Total time the actuator was active */
+  /** Total seconds the actuator was active */
   uint32_t total_duration;
 };
 
@@ -118,7 +118,7 @@ private:
   float current_value = 0;
 
 private:
-  void actuate(uint32_t duration_ms);
+  void actuate(uint32_t duration_sec);
   void print_config();
   void print_state();
 };

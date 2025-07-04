@@ -53,10 +53,10 @@ void KorraActuator::maintain() {
     const unsigned long elapsed_time = (millis() - timepoint) / 1000;
     if (elapsed_time > current_config.equilibrium_time) {
       // Actuating for a given duration
-      const uint32_t duration = current_config.duration * 1000;
-      Serial.printf("Actuating for %d ms, targeting [%.2f, %.2f] " TARGET_UNIT_STR ", currently %.2f\n", duration,
+      const uint32_t duration = current_config.duration;
+      Serial.printf("Actuating for %d sec, targeting [%.2f, %.2f] " TARGET_UNIT_STR ", currently %.2f\n", duration,
                     current_config.target_min, current_config.target_max, current_value);
-      actuate(current_config.duration * 1000);
+      actuate(duration);
       timepoint = millis(); // reset the timepoint (must be done after actuation)
       current_value_consumed = true;
       Serial.println(F("Actuation completed"));
@@ -77,11 +77,11 @@ void KorraActuator::set_state(const struct korra_actuator_state *value) {
   print_state();
 }
 
-void KorraActuator::actuate(uint32_t duration_ms) {
+void KorraActuator::actuate(uint32_t duration_sec) {
 #ifdef CONFIG_APP_KIND_KEEPER
 
   digitalWrite(CONFIG_ACTUATORS_FAN_PIN, HIGH); // on
-  delay(duration_ms);
+  delay(duration_sec * 1000);
   digitalWrite(CONFIG_ACTUATORS_FAN_PIN, LOW); // off
 
 #endif // CONFIG_APP_KIND_KEEPER
@@ -89,7 +89,7 @@ void KorraActuator::actuate(uint32_t duration_ms) {
 #ifdef CONFIG_APP_KIND_POT
 
   digitalWrite(CONFIG_ACTUATORS_PUMP_PIN, HIGH); // on
-  delay(duration_ms);
+  delay(duration_sec * 1000);
   digitalWrite(CONFIG_ACTUATORS_PUMP_PIN, LOW); // off
 
 #endif // CONFIG_APP_KIND_POT
@@ -97,7 +97,7 @@ void KorraActuator::actuate(uint32_t duration_ms) {
   // update the state
   current_state.count++;
   current_state.last_time = time(NULL);
-  current_state.total_duration += duration_ms;
+  current_state.total_duration += duration_sec;
   if (state_updated_callback) {
     state_updated_callback(&current_state);
   }
