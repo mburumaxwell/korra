@@ -21,37 +21,7 @@ importers:
         specifier: 6.0.1
         version: 6.0.1
 
-  firmware:
-    devDependencies:
-      '@types/semver':
-        specifier: 7.7.0
-        version: 7.7.0
-      chalk:
-        specifier: 5.4.1
-        version: 5.4.1
-      commander:
-        specifier: 14.0.0
-        version: 14.0.0
-      semver:
-        specifier: 7.7.2
-        version: 7.7.2
-
-  firmware-pio:
-    devDependencies:
-      '@types/semver':
-        specifier: 7.7.0
-        version: 7.7.0
-      chalk:
-        specifier: 5.4.1
-        version: 5.4.1
-      commander:
-        specifier: 14.0.0
-        version: 14.0.0
-      semver:
-        specifier: 7.7.2
-        version: 7.7.2
-
-  website:
+  backend/website:
     dependencies:
       next:
         specifier: 15.3.4
@@ -90,6 +60,36 @@ importers:
       typescript:
         specifier: 5.8.3
         version: 5.8.3
+
+  firmware:
+    devDependencies:
+      '@types/semver':
+        specifier: 7.7.0
+        version: 7.7.0
+      chalk:
+        specifier: 5.4.1
+        version: 5.4.1
+      commander:
+        specifier: 14.0.0
+        version: 14.0.0
+      semver:
+        specifier: 7.7.2
+        version: 7.7.2
+
+  firmware-pio:
+    devDependencies:
+      '@types/semver':
+        specifier: 7.7.0
+        version: 7.7.0
+      chalk:
+        specifier: 5.4.1
+        version: 5.4.1
+      commander:
+        specifier: 14.0.0
+        version: 14.0.0
+      semver:
+        specifier: 7.7.2
+        version: 7.7.2
 
 packages:
 
