@@ -16,6 +16,5 @@
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #define CLAMP(val, low, high) (((val) <= (low)) ? (low) : MIN(val, high))
-#define IN_RANGE(val, min, max) ((val) >= (min) && (val) <= (max))
 
 #endif // CONFIG_H

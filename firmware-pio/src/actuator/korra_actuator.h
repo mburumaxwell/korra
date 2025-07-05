@@ -19,20 +19,12 @@ struct korra_actuator_config {
   uint16_t equilibrium_time;
 
   /**
-   * The target minimum value.
+   * The target value.
    * @note This depends on the application.
-   * @note For pot, it is moisture (percentage).
-   * @note For keeper, it is temperature (Celsius).
+   * @note For keeper, it is temperature (Celsius); we target to not be above this.
+   * @note For pot, it is moisture (percentage); we target to not be below this.
    */
-  float target_min;
-
-  /**
-   * The target maximum value.
-   * @note This depends on the application.
-   * @note For pot, it is moisture (percentage).
-   * @note For keeper, it is temperature (Celsius).
-   */
-  float target_max;
+  float target;
 };
 
 struct korra_actuator_state {
