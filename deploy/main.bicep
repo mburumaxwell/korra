@@ -54,15 +54,7 @@ resource iotHub 'Microsoft.Devices/IotHubs@2023-06-30' = {
     features: 'GWV2, RootCertificateV2'
     eventHubEndpoints: { events: { retentionTimeInDays: 1, partitionCount: 2 } }
     routing: {
-      enrichments: [{ key: 'deviceId', value: '$twin.tags.deviceId', endpointNames: ['events'] }]
       routes: [
-        {
-          name: 'DeviceLifecycleEvents'
-          source: 'DeviceLifecycleEvents'
-          condition: 'true'
-          endpointNames: ['events']
-          isEnabled: true
-        }
         {
           name: 'DeviceTwinEvents'
           source: 'TwinChangeEvents'
