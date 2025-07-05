@@ -6,10 +6,44 @@ param location string = resourceGroup().location
 @maxLength(23)
 param name string = 'korra'
 
+type BlobContainerDefinition = { name: string, public: bool?, nameDev: string? }
+
+param blobContainers BlobContainerDefinition[] = [
+  { name: 'iothub-checkpoints' }
+  { name: 'iothub-checkpoints-dev' }
+]
+
 /* Managed Identity */
 resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: name
   location: location
+}
+
+/* Storage Account */
+resource storageAccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
+  name: name
+  location: location
+  kind: 'StorageV2'
+  properties: {
+    accessTier: 'Hot'
+    supportsHttpsTrafficOnly: true
+    allowBlobPublicAccess: true // FrontDoor does not work without this
+    networkAcls: { bypass: 'AzureServices', defaultAction: 'Allow' }
+  }
+  sku: { name: 'Standard_LRS' }
+
+  resource blobServices 'blobServices' existing = {
+    name: 'default'
+
+    resource containers 'containers' = [for bc in blobContainers: {
+      name: bc.name
+      properties: {
+        defaultEncryptionScope: '$account-encryption-key'
+        denyEncryptionScopeOverride: false
+        publicAccess: (bc.?public ?? false) ? 'Blob' : 'None'
+      }
+    }]
+  }
 }
 
 /* IoT Hub */
@@ -134,6 +168,7 @@ var roles = [
   { name: 'IoT Hub Data Contributor', id: '4fc6c259-987e-4a07-842e-c321cc9d413f' } // Allows for full access to IoT Hub data plane operations.
   { name: 'Device Provisioning Service Data Contributor', id: 'dfce44e4-17b7-4bd1-a6d1-04996ec95633' } // Allows for full access to Device Provisioning Service data-plane operations.
   { name: 'Device Update Administrator', id: '02ca0879-e8e4-47a5-a61e-5c618b76e64a' } // Gives you full access to management and content operations
+  { name: 'Storage Blob Data Contributor', id: 'ba92f5b4-2d11-453d-a403-e96b0029c9fe' } // Read, write, and delete Azure Storage containers and blobs.
 ]
 
 resource roleAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [
