@@ -23,7 +23,7 @@ struct korra_sensors_data {
 #endif // CONFIG_APP_KIND_KEEPER
 
 #ifdef CONFIG_APP_KIND_POT
-  /** Percentage (%) of water in a substance */
+  /** Percentage (%) of water in the soil */
   uint8_t moisture;
 
   float ph;

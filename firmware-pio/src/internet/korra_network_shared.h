@@ -19,14 +19,14 @@ struct korra_network_props {
   char kind[sizeof(KORRA_NETWORK_KIND_CELLULAR) + 1];
 
   /**
-   * The MAC address of the network.
+   * The MAC address of the device.
    *
    * @note WiFi is 6 bytes but cellular may add 2 more.
    */
   uint8_t mac_addr[8];
 
   /**
-   * The MAC address of the network formatted.
+   * The MAC address of the device formatted.
    *
    * @note longest is XX:XX:XX:XX:XX:XX:XX:XX
    */
