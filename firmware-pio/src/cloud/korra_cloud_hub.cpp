@@ -164,26 +164,22 @@ void KorraCloudHub::update(struct korra_device_twin_reported *props) {
 
   // check the network props
   if (strcmp(props->network.kind, twin.reported.network.kind) != 0) {
-    snprintf((char *)twin.reported.network.kind, sizeof(twin.reported.network.kind),
-             props->network.kind);
+    snprintf((char *)twin.reported.network.kind, sizeof(twin.reported.network.kind), props->network.kind);
     doc["network"]["kind"] = props->network.kind;
     update |= true;
   }
   if (strcmp(props->network.mac, twin.reported.network.mac) != 0) {
-    snprintf((char *)twin.reported.network.mac, sizeof(twin.reported.network.mac),
-             props->network.mac);
+    snprintf((char *)twin.reported.network.mac, sizeof(twin.reported.network.mac), props->network.mac);
     doc["network"]["mac"] = props->network.mac;
     update |= true;
   }
   if (strcmp(props->network.name, twin.reported.network.name) != 0) {
-    snprintf((char *)twin.reported.network.name, sizeof(twin.reported.network.name),
-             props->network.name);
+    snprintf((char *)twin.reported.network.name, sizeof(twin.reported.network.name), props->network.name);
     doc["network"]["name"] = props->network.name;
     update |= true;
   }
   if (strcmp(props->network.local_ip, twin.reported.network.local_ip) != 0) {
-    snprintf((char *)twin.reported.network.local_ip, sizeof(twin.reported.network.local_ip),
-             props->network.local_ip);
+    snprintf((char *)twin.reported.network.local_ip, sizeof(twin.reported.network.local_ip), props->network.local_ip);
     doc["network"]["local_ip"] = props->network.local_ip;
     update |= true;
   }
