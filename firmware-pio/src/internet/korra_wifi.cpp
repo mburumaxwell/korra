@@ -290,7 +290,7 @@ void KorraWiFi::on_wifi_event(WiFiEvent_t event, WiFiEventInfo_t info) {
     snprintf(net_props.kind, sizeof(net_props.kind), KORRA_NETWORK_KIND_WIFI);
     WiFi.macAddress(net_props.mac_addr);
     snprintf(net_props.mac, sizeof(net_props.mac), WiFi.macAddress().c_str());
-    snprintf(net_props.network, sizeof(net_props.network), WiFi.SSID().c_str());
+    snprintf(net_props.name, sizeof(net_props.name), WiFi.SSID().c_str());
     net_props.local_ipaddr = WiFi.localIP();
     snprintf(net_props.local_ip, sizeof(net_props.local_ip), WiFi.localIP().toString().c_str());
 

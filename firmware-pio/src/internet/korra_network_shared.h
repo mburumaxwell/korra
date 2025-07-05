@@ -33,11 +33,11 @@ struct korra_network_props {
   char mac[23 + 1];
 
   /**
-   * The network name.
+   * The name of the network.
    *
    * @note WiFi SSID is 32 max, other are less or not there
    */
-  char network[32 + 1];
+  char name[32 + 1];
 
   /** The local IP address. */
   IPAddress local_ipaddr;

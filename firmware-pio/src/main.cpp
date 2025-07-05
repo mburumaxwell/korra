@@ -163,8 +163,8 @@ static bool collect_data(void *) {
     return true; // true to repeat the action, false to stop
   }
 
-  hub.push(&sensors_data, internet.props()); // update the hub
-  actuator.update(&sensors_data);            // update the actuator
+  hub.push(&sensors_data);        // update the hub
+  actuator.update(&sensors_data); // update the actuator
 
   return true; // true to repeat the action, false to stop
 }
@@ -184,6 +184,9 @@ static bool update_device_twin(void *) {
   // set the firmware version (value and semver)
   props.firmware.version.value = APP_VERSION_NUMBER;
   snprintf((char *)props.firmware.version.semver, sizeof(props.firmware.version.semver), APP_VERSION_STRING);
+
+  // set the network props
+  memcpy(&(props.network), internet.props(), sizeof(struct korra_network_props));
 
   // set the actuator state
   memcpy(&(props.actuator), actuator.state(), sizeof(struct korra_actuator_state));
