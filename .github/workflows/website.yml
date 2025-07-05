@@ -1,4 +1,4 @@
-name: Backend (Website)
+name: Website
 
 on:
   workflow_dispatch:
@@ -6,13 +6,13 @@ on:
     branches: [main]
     tags: ['website@*']
     paths:
-      - 'backend/website/**'
-      - '.github/workflows/backend-website.yml'
+      - 'website/**'
+      - '.github/workflows/website.yml'
   pull_request:
     branches: [main]
     paths:
-      - 'backend/website/**'
-      - '.github/workflows/backend-website.yml'
+      - 'website/**'
+      - '.github/workflows/website.yml'
 
 permissions:
   contents: read
@@ -51,35 +51,35 @@ jobs:
 
       - name: Download deps
         run: pnpm install
-        working-directory: '${{ github.workspace }}/backend/website'
+        working-directory: '${{ github.workspace }}/website'
 
       - name: Restore .next/cache
         id: cache-next-restore
         uses: actions/cache/restore@v4
         with:
-          path: ${{ github.workspace }}/backend/website/.next/cache
-          key: ${{ runner.os }}-next-backend-website-${{ github.sha }}
+          path: ${{ github.workspace }}/website/.next/cache
+          key: ${{ runner.os }}-next-website-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-next-backend-website
+            ${{ runner.os }}-next-website
 
       - name: Build
         run: pnpm build
-        working-directory: '${{ github.workspace }}/backend/website'
+        working-directory: '${{ github.workspace }}/website'
 
       - name: Lint
         run: pnpm lint
-        working-directory: '${{ github.workspace }}/backend/website'
+        working-directory: '${{ github.workspace }}/website'
 
       # https://github.com/Azure/static-web-apps/issues/1059#issuecomment-1638817705
       # https://learn.microsoft.com/en-us/azure/static-web-apps/deploy-nextjs-hybrid#enable-standalone-feature
       # https://medium.com/@wdedweliwaththa/the-ultimate-guide-to-deploying-next-js-a1501de3e4d0
       - name: Copy standalone output files
         run: |
-          cp -r .next/standalone/backend/website/. .next/standalone && \
+          cp -r .next/standalone/website/. .next/standalone && \
           cp -r .next/static .next/standalone/.next/ && \
           cp -r public .next/standalone/ && \
           echo 'Done'
-        working-directory: backend/website
+        working-directory: website
 
       - name: Deploy to SWA
         if: ${{ !contains(github.actor, '[bot]') }}
@@ -89,7 +89,7 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_SWA_TOKEN_WEBSITE }}
           # repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for GitHub integrations (i.e. PR comments)
           action: 'upload'
-          app_location: 'backend/website'
+          app_location: 'website'
           deployment_environment: ${{ env.SWA_ENVIRONMENT_FOR_PR }}
           skip_app_build: true
           skip_api_build: true
@@ -109,5 +109,5 @@ jobs:
         if: always() && steps.cache-next-restore.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
-          path: ${{ github.workspace }}/backend/website/.next/cache
+          path: ${{ github.workspace }}/website/.next/cache
           key: ${{ steps.cache-next-restore.outputs.cache-primary-key }}

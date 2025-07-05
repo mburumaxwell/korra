@@ -1,4 +1,4 @@
 packages:
   - 'firmware'
   - 'firmware-pio'
-  - 'backend/website'
+  - 'website'
