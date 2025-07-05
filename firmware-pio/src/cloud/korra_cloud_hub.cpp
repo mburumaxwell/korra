@@ -95,14 +95,8 @@ void KorraCloudHub::maintain(struct korra_cloud_provisioning_info *info) {
   }
 }
 
-void KorraCloudHub::push(const struct korra_sensors_data *source, const struct korra_network_props *net_props) {
+void KorraCloudHub::push(const struct korra_sensors_data *source) {
   JsonDocument doc;
-
-  // network telemetry should ideally go to twin reported properties but for now this is easier.
-  doc["network"]["kind"] = net_props->kind;
-  doc["network"]["mac"] = net_props->mac;
-  doc["network"]["network"] = net_props->network;
-  doc["network"]["local_ip"] = net_props->local_ip;
 
   // set timestamp (though it exists in the properties of the message, this ensures it is also in the body)
   time_t now = time(NULL);
@@ -165,6 +159,32 @@ void KorraCloudHub::update(struct korra_device_twin_reported *props) {
 
     doc["firmware"]["version"]["value"] = props->firmware.version.value;
     doc["firmware"]["version"]["semver"] = props->firmware.version.semver;
+    update |= true;
+  }
+
+  // check the network props
+  if (strcmp(props->network.kind, twin.reported.network.kind) != 0) {
+    snprintf((char *)twin.reported.network.kind, sizeof(twin.reported.network.kind),
+             props->network.kind);
+    doc["network"]["kind"] = props->network.kind;
+    update |= true;
+  }
+  if (strcmp(props->network.mac, twin.reported.network.mac) != 0) {
+    snprintf((char *)twin.reported.network.mac, sizeof(twin.reported.network.mac),
+             props->network.mac);
+    doc["network"]["mac"] = props->network.mac;
+    update |= true;
+  }
+  if (strcmp(props->network.name, twin.reported.network.name) != 0) {
+    snprintf((char *)twin.reported.network.name, sizeof(twin.reported.network.name),
+             props->network.name);
+    doc["network"]["name"] = props->network.name;
+    update |= true;
+  }
+  if (strcmp(props->network.local_ip, twin.reported.network.local_ip) != 0) {
+    snprintf((char *)twin.reported.network.local_ip, sizeof(twin.reported.network.local_ip),
+             props->network.local_ip);
+    doc["network"]["local_ip"] = props->network.local_ip;
     update |= true;
   }
 
@@ -394,6 +414,31 @@ void KorraCloudHub::populate_reported_props(const JsonVariantConst &json, struct
     if (semver_raw != NULL) {
       size_t semver_raw_len = MIN((int)strlen(semver_raw) + 1, (int)sizeof(twin.reported.firmware.version.semver));
       memcpy(twin.reported.firmware.version.semver, semver_raw, semver_raw_len - 1);
+    }
+  }
+
+  // network
+  JsonVariantConst node_net = json["network"];
+  if (!node_net.isNull()) {
+    const char *kind_raw = node_net["kind"];
+    if (kind_raw != NULL) {
+      size_t kind_raw_len = MIN((int)strlen(kind_raw) + 1, (int)sizeof(twin.reported.network.kind));
+      memcpy(twin.reported.network.kind, kind_raw, kind_raw_len - 1);
+    }
+    const char *mac_raw = node_net["mac"];
+    if (mac_raw != NULL) {
+      size_t mac_raw_len = MIN((int)strlen(mac_raw) + 1, (int)sizeof(twin.reported.network.mac));
+      memcpy(twin.reported.network.mac, mac_raw, mac_raw_len - 1);
+    }
+    const char *name_raw = node_net["name"];
+    if (name_raw != NULL) {
+      size_t name_raw_len = MIN((int)strlen(name_raw) + 1, (int)sizeof(twin.reported.network.name));
+      memcpy(twin.reported.network.name, name_raw, name_raw_len - 1);
+    }
+    const char *local_ip_raw = node_net["local_ip"];
+    if (local_ip_raw != NULL) {
+      size_t local_ip_raw_len = MIN((int)strlen(local_ip_raw) + 1, (int)sizeof(twin.reported.network.local_ip));
+      memcpy(twin.reported.network.local_ip, local_ip_raw, local_ip_raw_len - 1);
     }
   }
 
