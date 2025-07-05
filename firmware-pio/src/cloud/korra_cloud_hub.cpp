@@ -116,12 +116,14 @@ void KorraCloudHub::push(const struct korra_sensors_data *source, const struct k
   doc["created"] = time_str;
 
 #ifdef CONFIG_APP_KIND_KEEPER
+  doc["app_kind"] = "keeper";
   doc["temperature"]["unit"] = "C";
   doc["temperature"]["value"] = source->temperature;
   doc["humidity"]["unit"] = "%";
   doc["humidity"]["value"] = source->humidity;
 #endif // CONFIG_APP_KIND_KEEPER
 #ifdef CONFIG_APP_KIND_POT
+  doc["app_kind"] = "pot";
   doc["moisture"]["unit"] = "%";
   doc["moisture"]["value"] = source->moisture;
   doc["ph"]["value"] = source->ph;
