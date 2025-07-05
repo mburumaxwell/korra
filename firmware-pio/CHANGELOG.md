@@ -1,5 +1,12 @@
 # firmware-pio
 
+## 0.4.0
+
+### Minor Changes
+
+- 8769ba8: Move network props from telemetry to the device twin since it does not change often
+- e995ef3: Refactor actuator target logic
+
 ## 0.3.1
 
 ### Patch Changes
