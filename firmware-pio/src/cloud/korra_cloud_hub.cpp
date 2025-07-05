@@ -396,8 +396,7 @@ void KorraCloudHub::populate_desired_props(const JsonVariantConst &json, struct 
     twin.desired.actuator.enabled = node_acc["enabled"].as<bool>();
     twin.desired.actuator.duration = node_acc["duration"].as<uint16_t>();
     twin.desired.actuator.equilibrium_time = node_acc["equilibrium_time"].as<uint16_t>();
-    twin.desired.actuator.target_min = node_acc["target_min"].as<float>();
-    twin.desired.actuator.target_max = node_acc["target_max"].as<float>();
+    twin.desired.actuator.target = node_acc["target"].as<float>();
 
     // clamp actuator values
     twin.desired.actuator.duration = CLAMP(twin.desired.actuator.duration, 5, 15);

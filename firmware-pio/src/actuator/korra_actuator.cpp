@@ -44,18 +44,26 @@ void KorraActuator::maintain() {
   // if actuator is disabled return
   if (!current_config.enabled) return;
 
-  // if we have not consumed current values, the current value is less than the target value,
+  // if we have not consumed current values, the current value is less/greater than the target value,
   // and the time since the last actuation is greater than the equilibrium time then actuate
 
-  // check if the current value is less than the target value
-  if (!current_value_consumed && !IN_RANGE(current_value, current_config.target_min, current_config.target_max)) {
+  // for keeper, we target to not be above the current value (temperature)
+  // for pot, we target to not be below the current value (moisture)
+#ifdef CONFIG_APP_KIND_KEEPER
+  bool should_actuate = (current_value > current_config.target);
+#endif // CONFIG_APP_KIND_KEEPER
+#ifdef CONFIG_APP_KIND_POT
+  bool should_actuate = (current_value < current_config.target);
+#endif // CONFIG_APP_KIND_POT
+
+  if (!current_value_consumed && should_actuate) {
     // check if the time since the last actuation is greater than the equilibrium time
     const unsigned long elapsed_time = (millis() - timepoint) / 1000;
     if (elapsed_time > current_config.equilibrium_time) {
       // Actuating for a given duration
       const uint32_t duration = current_config.duration;
-      Serial.printf("Actuating for %d sec, targeting [%.2f, %.2f] " TARGET_UNIT_STR ", currently %.2f\n", duration,
-                    current_config.target_min, current_config.target_max, current_value);
+      Serial.printf("Actuating for %d sec, targeting %.2f " TARGET_UNIT_STR ", currently %.2f\n", duration,
+                    current_config.target, current_value);
       actuate(duration);
       timepoint = millis(); // reset the timepoint (must be done after actuation)
       current_value_consumed = true;
@@ -107,8 +115,7 @@ void KorraActuator::print_config() {
   Serial.printf("Actuator Config: Enabled: %s\n", current_config.enabled ? "yes" : "no");
   Serial.printf("Actuator Config: Duration: %d seconds\n", current_config.duration);
   Serial.printf("Actuator Config: Equilibrium Time: %d seconds\n", current_config.equilibrium_time);
-  Serial.printf("Actuator Config: Target Min: %.2f\n", current_config.target_min);
-  Serial.printf("Actuator Config: Target Max: %.2f\n", current_config.target_max);
+  Serial.printf("Actuator Config: Target: %.2f\n", current_config.target);
 }
 
 void KorraActuator::print_state() {
