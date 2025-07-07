@@ -304,7 +304,7 @@ jobs:
       - name: Provenance Attestation
         uses: actions/attest-build-provenance@v2
         with:
-          subject-checksums: ${{ github.workspace }}/releases/checksum.txt
+          subject-path: ${{ github.workspace }}/releases/*.*
 
       - name: Upload Release Artifact
         uses: ncipollo/release-action@v1
