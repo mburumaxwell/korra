@@ -31,3 +31,4 @@ src/components/ui/*
 .clang-format
 LICENSE.md
 firmware-pio/*/README
+Korra.Processor*

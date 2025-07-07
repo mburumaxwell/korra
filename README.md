@@ -5,6 +5,7 @@
 ![Firmware](https://img.shields.io/github/actions/workflow/status/mburumaxwell/korra/firmware.yml?branch=main&label=Firmware&style=flat-square)
 ![Firmware (PIO)](https://img.shields.io/github/actions/workflow/status/mburumaxwell/korra/firmware-pio.yml?branch=main&label=Firmware%20%28PIO%29&style=flat-square)
 ![Website](https://img.shields.io/github/actions/workflow/status/mburumaxwell/korra/website.yml?branch=main&label=Website&style=flat-square)
+![Processor](https://img.shields.io/github/actions/workflow/status/mburumaxwell/korra/processor.yml?branch=main&label=Processor&style=flat-square)
 ![Infra](https://img.shields.io/github/actions/workflow/status/mburumaxwell/korra/iac.yml?branch=main&label=Infra&style=flat-square)
 [![license](https://img.shields.io/github/license/mburumaxwell/korra.svg?style=flat-square)](LICENSE.md)
 

@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/processor/">
+    <Project Path="processor/Korra.Processor/Korra.Processor.csproj" />
+    <Project Path="processor/Korra.Processor.Tests/Korra.Processor.Tests.csproj" />
+  </Folder>
+</Solution>
