@@ -20,11 +20,6 @@ config DEVICE_CERTIFICATE_VALIDITY_YEARS
     int "Number of years the device certificate generated will be valid for"
     default 3
 
-config AZURE_IOT_DPS_HOSTNAME
-    string "Azure IoT DPS Global device endpoint"
-    default "global.azure-devices-provisioning.net"
-    depends on BOARD_HAS_INTERNET
-
 config AZURE_IOT_DPS_ID_SCOPE
     string "Azure IoT DPS ID Scope"
     default "0ne00F7ADA0"

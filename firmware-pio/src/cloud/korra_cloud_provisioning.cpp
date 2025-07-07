@@ -4,6 +4,7 @@
 
 #define PREFERENCES_KEY_HOSTNAME "azure-hub"
 #define PREFERENCES_KEY_DEVICEID "azure-deviceid"
+#define DPS_HOSTNAME "global.azure-devices-provisioning.net"
 
 // Username format -> {idScope}/registrations/{registration_id}/api-version=2019-03-31
 #define USERNAME_FORMAT "%s/registrations/%s/api-version=2019-03-31"
@@ -130,7 +131,7 @@ void KorraCloudProvisioning::connect(int retries, int delay_ms) {
   for (int i = 0; i < retries; i++) {
     // connect with retries
     Serial.printf("Connecting to DPS server... (%d/%d)\n", i + 1, retries);
-    mqtt.connect(CONFIG_AZURE_IOT_DPS_HOSTNAME, 8883);
+    mqtt.connect(DPS_HOSTNAME, 8883);
     if (connected()) {
       Serial.println("Connected to DPS server.");
       break;
