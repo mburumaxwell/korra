@@ -119,8 +119,10 @@ void KorraCloudHub::push(const struct korra_sensors_data *source) {
 #ifdef CONFIG_APP_KIND_POT
   doc["app_kind"] = "pot";
   doc["moisture"]["unit"] = "%";
-  doc["moisture"]["value"] = source->moisture;
-  doc["ph"]["value"] = source->ph;
+  doc["moisture"]["value"] = source->moisture.value;
+  doc["moisture"]["millivolts"] = source->moisture.millivolts;
+  doc["ph"]["value"] = source->ph.value;
+  doc["ph"]["millivolts"] = source->ph.millivolts;
 #endif // CONFIG_APP_KIND_POT
 
   // prepare topic

@@ -22,25 +22,25 @@ void KorraSensors::read(struct korra_sensors_data *dest) {
 #endif // CONFIG_APP_KIND_KEEPER
 
 #ifdef CONFIG_APP_KIND_POT
-  dest->moisture = read_moisture();
-  dest->ph = read_ph();
+  read_moisture(&(dest->moisture));
+  read_ph(&(dest->ph));
 #endif // CONFIG_APP_KIND_POT
 }
 
 #ifdef CONFIG_APP_KIND_POT
-float KorraSensors::read_ph() {
+void KorraSensors::read_ph(struct korra_analog_sensor_reading *reading) {
   // TODO: implement this once we have the soil sensor selected
-  return -1;
+  reading->millivolts = -1;
+  reading->value = -1;
 }
 
-uint8_t KorraSensors::read_moisture() {
+void KorraSensors::read_moisture(struct korra_analog_sensor_reading *reading) {
   // TODO: May need to recalibrate this from time to time or sensor to sensor, if too much move it to device twin
   // There is an inverse ratio between the sensor output value and soil moisture.
   // https://wiki.dfrobot.com/Capacitive_Soil_Moisture_Sensor_SKU_SEN0193
   static const uint32_t dry = 2565;
   static const uint32_t wet = 1263;
-  uint32_t reading = analogReadMilliVolts(CONFIG_SENSORS_MOISTURE_PIN);
-  uint8_t value = (uint8_t)(100.0 * (dry - reading) / (dry - wet));
-  return CLAMP(value, 0, 100);
+  uint32_t millivolts = reading->millivolts = analogReadMilliVolts(CONFIG_SENSORS_MOISTURE_PIN);
+  float value = reading->value = CLAMP((100.0 * (dry - millivolts) / (dry - wet)), 0, 100);
 }
 #endif // CONFIG_APP_KIND_POT

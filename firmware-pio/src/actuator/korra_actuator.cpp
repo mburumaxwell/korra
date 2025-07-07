@@ -34,7 +34,7 @@ void KorraActuator::update(const struct korra_sensors_data *value) {
 #endif // CONFIG_APP_KIND_KEEPER
 
 #ifdef CONFIG_APP_KIND_POT
-  current_value = value->moisture;
+  current_value = value->moisture.value;
 #endif // CONFIG_APP_KIND_POT
 
   current_value_consumed = false;

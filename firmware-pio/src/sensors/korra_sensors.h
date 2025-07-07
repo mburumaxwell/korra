@@ -13,6 +13,22 @@
 // #include <DFRobot_PH.h>
 #endif // CONFIG_APP_KIND_POT
 
+struct korra_analog_sensor_reading {
+  /**
+   * The raw value read from the analog sensor.
+   * This is the raw value read from the analog pin, typically in millivolts.
+   * It can be used to calculate the percentage or other derived values.
+   */
+  uint32_t millivolts;
+
+  /**
+   * The unit of the sensor reading.
+   * This is a string that describes the unit of the value, such as "C" for Celsius,
+   * "%" for percentage, etc.
+   */
+  float value;
+};
+
 struct korra_sensors_data {
 #ifdef CONFIG_APP_KIND_KEEPER
   /** Measured in °C */
@@ -24,9 +40,9 @@ struct korra_sensors_data {
 
 #ifdef CONFIG_APP_KIND_POT
   /** Percentage (%) of water in the soil */
-  uint8_t moisture;
+  struct korra_analog_sensor_reading moisture;
 
-  float ph;
+  struct korra_analog_sensor_reading ph;
 #endif // CONFIG_APP_KIND_POT
 };
 
@@ -72,8 +88,8 @@ private:
 
 private:
 #ifdef CONFIG_APP_KIND_POT
-  float read_ph();
-  uint8_t read_moisture();
+  void read_ph(struct korra_analog_sensor_reading *reading);
+  void read_moisture(struct korra_analog_sensor_reading *reading);
 #endif // CONFIG_APP_KIND_POT
 };
 
