@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <Deterministic>true</Deterministic>
+    <PublishAot>true</PublishAot>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(PublishAot)' == 'true'">
+    <SelfContained>true</SelfContained>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <OptimizationPreference>Size</OptimizationPreference>
+    <EventSourceSupport>false</EventSourceSupport>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="KorraProcessor.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Azure.Identity" Version="1.14.1" />
+    <PackageReference Include="Azure.Messaging.EventHubs.Processor" Version="5.12.2" /> <!-- Allows for faster updates -->
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.6" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.6" />
+    <PackageReference Include="System.Net.Http.Json" Version="9.0.6" />
+    <PackageReference Include="System.Memory.Data" Version="9.0.6" /> <!-- Transient, later version supports AoT -->
+    <PackageReference Include="Tingle.EventBus.Transports.Azure.EventHubs" Version="0.24.0" />
+    <PackageReference Include="Tingle.EventBus.Transports.InMemory" Version="0.24.0" />
+    <PackageReference Include="Tingle.Extensions.Http" Version="5.2.0" />
+    <PackageReference Include="Tingle.Extensions.Http.Authentication" Version="5.2.0" />
+    <PackageReference Include="Tingle.Extensions.Primitives" Version="5.2.0" />
+  </ItemGroup>
+
+</Project>

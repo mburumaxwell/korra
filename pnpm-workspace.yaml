@@ -1,4 +1,5 @@
 packages:
   - 'firmware'
   - 'firmware-pio'
+  - 'processor'
   - 'website'

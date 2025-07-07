@@ -1,0 +1,48 @@
+﻿using Azure.Identity;
+using Korra.Processor;
+using Tingle.EventBus.Configuration;
+using SC = Korra.Processor.KorraProcessorSerializerContext;
+
+var builder = Host.CreateApplicationBuilder();
+
+builder.Services.AddHttpApiClient<KorraDashboardClient, KorraDashboardClientOptions>()
+                .AddApiKeyHeaderAuthenticationHandler(builder.Configuration["Dashboard:ApiKey"]!)
+                .ConfigureHttpClient(client =>
+                {
+                    client.BaseAddress = new Uri(builder.Configuration["Dashboard:Endpoint"]!, UriKind.Absolute);
+                });
+
+builder.Services.AddSlimEventBus(eb =>
+{
+    eb.ConfigureSerialization(options => options.SerializerOptions.TypeInfoResolverChain.Insert(0, SC.Default));
+
+    eb.Configure(o => o.ConfigureEvent<KorraIotHubEvent>(reg =>
+    {
+        reg.ConfigureAsIotHubEvent(builder.Configuration["IotHub:EventHubs:HubName"]!)
+           .UseIotHubEventSerializer();
+    }));
+
+    eb.AddConsumer<KorraIotHubEvent, KorraIotEventsConsumer>();
+
+    // Transport specific configuration
+    eb.AddAzureEventHubsTransport(options =>
+    {
+        options.Credentials = builder.Configuration["IotHub:EventHubs:ConnectionString"]!;
+        var blobUrl = builder.Configuration["BlobStorage:Endpoint"]!;
+        var isLocal = !blobUrl.Contains(".core.windows.net");
+        options.BlobStorageCredentials = !isLocal
+            ? new AzureBlobStorageCredentials { ServiceUrl = new Uri(blobUrl), TokenCredential = new DefaultAzureCredential(), }
+            : blobUrl;
+        options.BlobContainerName = builder.Configuration["IotHub:EventHubs:Checkpoints:BlobContainerName"]!;
+    });
+});
+
+var app = builder.Build();
+
+// run continuously or for a given duration, if provided
+if (int.TryParse(builder.Configuration["JOB_DURATION_SECONDS"], out var jobDurationSeconds))
+{
+    var cts = new CancellationTokenSource(TimeSpan.FromSeconds(jobDurationSeconds));
+    await app.RunAsync(cts.Token);
+}
+else await app.RunAsync();
