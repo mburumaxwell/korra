@@ -26,8 +26,8 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' && !startsWith(github.ref, 'refs/tags/') }}
 
 env:
-  SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }} # not discovered by default
-  RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }} # not discovered by default
+  AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }} # not discovered by default
+  AZURE_RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }} # not discovered by default
   REVIEW_APP_NAME_SUFFIX: ${{ (github.event_name == 'pull_request' && format('-ra{0}', github.event.number)) || '' }}
 
 jobs:
@@ -279,8 +279,8 @@ jobs:
         id: aca
         uses: azure/arm-deploy@v2
         with:
-          subscriptionId: ${{ env.SUBSCRIPTION_ID }}
-          resourceGroupName: ${{ env.RESOURCE_GROUP }}
+          subscriptionId: ${{ env.AZURE_SUBSCRIPTION_ID }}
+          resourceGroupName: ${{ env.AZURE_RESOURCE_GROUP }}
           template: 'processor/app.json'
           parameters: >
             reviewAppNameSuffix=${{ env.REVIEW_APP_NAME_SUFFIX }}
