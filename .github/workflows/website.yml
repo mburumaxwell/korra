@@ -71,6 +71,12 @@ jobs:
         run: pnpm lint
         working-directory: '${{ github.workspace }}/website'
 
+      - name: Azure Login
+        if: ${{ !contains(github.actor, '[bot]') }}
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
       # https://github.com/Azure/static-web-apps/issues/1059#issuecomment-1638817705
       # https://learn.microsoft.com/en-us/azure/static-web-apps/deploy-nextjs-hybrid#enable-standalone-feature
       # https://medium.com/@wdedweliwaththa/the-ultimate-guide-to-deploying-next-js-a1501de3e4d0
