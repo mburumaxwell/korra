@@ -3,7 +3,7 @@ param location string = resourceGroup().location
 
 @description('Name of the resources.')
 @minLength(4)
-@maxLength(23)
+@maxLength(15)
 param name string = 'korra'
 
 type BlobContainerDefinition = { name: string, public: bool?, nameDev: string? }
@@ -21,7 +21,7 @@ resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-
 
 /* Storage Account */
 resource storageAccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
-  name: name
+  name: '${name}store' // korra is already taken
   location: location
   kind: 'StorageV2'
   properties: {
