@@ -1,5 +1,11 @@
 # firmware
 
+## 0.2.2
+
+### Patch Changes
+
+- 4347a1f: Change sensor read duration from 5min to 1 min so that the actuators can act better
+
 ## 0.2.1
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # website
 
+## 0.3.0
+
+### Minor Changes
+
+- 206ac88: Add endpoints for receiving iot hub data
+
 ## 0.2.0
 
 ### Minor Changes

@@ -1,5 +1,12 @@
 # firmware-pio
 
+## 0.4.1
+
+### Patch Changes
+
+- 4347a1f: Change sensor read duration from 5min to 1 min so that the actuators can act better
+- ebec8fa: Send raw millivolts readings for analog sensors to help debug
+
 ## 0.4.0
 
 ### Minor Changes
