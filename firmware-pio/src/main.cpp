@@ -56,7 +56,7 @@ static int shell_command_wifi_cred_set_ent(int argc, char **argv);
 static int shell_command_actuator_reset_state(int argc, char **argv);
 
 void setup() {
-  delay(MAX(1, CONFIG_INITIAL_BOOT_DELAY_SECONDS) * 1000);
+  delay(3000); // allow time for the serial monitor to connect
 
   uint64_t raw_devid = ESP.getEfuseMac();
   devid_len = snprintf(devid, sizeof(devid), "%llx", (unsigned long long)raw_devid);
