@@ -1,0 +1,104 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum BoardType {
+  esp32s3_devkitc
+  frdm_rw612
+  nrf7002dk
+}
+
+enum DeviceUsage {
+  pot
+  keeper
+}
+
+enum FirmwareFramework {
+  zephyr
+  arduino
+  espidf
+}
+
+// list of known firmware
+model AvailableFirmware {
+  id             String            @id
+  board          BoardType
+  usage          DeviceUsage
+  framework      FirmwareFramework
+  versionValue   Int
+  versionSemver  String
+  url            String
+  hash           String
+  signature      String
+  DeviceFirmware DeviceFirmware[]
+
+  @@unique([board, framework, usage, versionSemver])
+}
+
+model Device {
+  id              String             @id
+  created         DateTime           @default(now())
+  updated         DateTime           @updatedAt
+  board           BoardType
+  usage           DeviceUsage
+  framework       FirmwareFramework?
+  label           String             @db.VarChar(20) // e.g. W1, K1, D2
+  enrollmentId    String
+  certificatePem  String?
+  provisioned     Boolean            @default(false)
+  connected       Boolean            @default(false)
+  lastSeen        DateTime?
+  actuator        DeviceActuator?
+  firmware        DeviceFirmware?
+  DeviceTelemetry DeviceTelemetry[]
+}
+
+model DeviceActuator {
+  device          Device    @relation(fields: [deviceId], references: [id])
+  deviceId        String    @id
+  enabled         Boolean   @default(false)
+  duration        Int?
+  equilibriumTime Int?
+  target          Int?
+  count           Int?
+  lastTime        DateTime?
+  totalDuration   Int?
+}
+
+model DeviceFirmware {
+  device            Device             @relation(fields: [deviceId], references: [id])
+  deviceId          String             @id
+  currentVersion    String?
+  desiredVersion    String?
+  updateRequested   Boolean            @default(false)
+  desiredFirmwareId String?
+  desiredFirmware   AvailableFirmware? @relation(fields: [desiredFirmwareId], references: [id])
+}
+
+model DeviceTelemetry {
+  id          String      @id
+  device      Device      @relation(fields: [deviceId], references: [id])
+  deviceId    String
+  usage       DeviceUsage
+  created     DateTime
+  received    DateTime?
+  temperature Float?
+  humidity    Float?
+  moisture    Float?
+  ph          Float?
+
+  @@index([deviceId, created])
+  @@index([deviceId, received])
+  @@index([usage, created])
+}

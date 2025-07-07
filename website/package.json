@@ -4,6 +4,12 @@
   "private": true,
   "license": "AGPL-3.0-later",
   "scripts": {
+    "prisma:generate": "npx prisma generate --schema=./prisma",
+    "prisma:studio": "npx prisma studio --schema=./prisma",
+    "prisma:push": "npx prisma push --schema=./prisma",
+    "prisma:format": "npx prisma format --schema=./prisma",
+    "prebuild": "pnpm run prisma:generate",
+    "predev": "pnpm run prisma:generate",
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
@@ -11,9 +17,16 @@
     "clean": "rimraf .next .turbo out"
   },
   "dependencies": {
+    "@neondatabase/serverless": "1.0.1",
+    "@prisma/adapter-neon": "6.11.1",
+    "@prisma/adapter-pg": "6.11.1",
+    "@prisma/client": "6.11.1",
+    "azure-iothub": "1.16.5",
+    "hono": "4.8.4",
     "next": "15.3.4",
     "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "zod": "3.25.74"
   },
   "devDependencies": {
     "@eslint/eslintrc": "3.3.1",
@@ -23,6 +36,7 @@
     "@types/react-dom": "19.1.6",
     "eslint": "9.30.0",
     "eslint-config-next": "15.3.4",
+    "prisma": "6.11.1",
     "tailwindcss": "4.1.11",
     "typescript": "5.8.3"
   }

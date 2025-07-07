@@ -1,0 +1,162 @@
+import { OperationalEventRequestBodySchema, TelemetryRequestBodySchema } from '@/lib/schemas';
+import { Hono } from 'hono';
+import { bearerAuth } from 'hono/bearer-auth';
+import { validator } from 'hono/validator';
+import { handle } from 'hono/vercel';
+
+import { getDeviceTwin } from '@/lib/iot-hub';
+import { prisma } from '@/lib/prisma';
+
+export const dynamic = 'force-dynamic';
+
+const app = new Hono().basePath('/api/processor');
+
+app.use('/*', bearerAuth({ token: `${process.env.PROCESSOR_API_KEY}` }));
+
+app.post(
+  '/telemetry',
+  validator('json', async (value, context) => {
+    const parsed = await TelemetryRequestBodySchema.safeParseAsync(value);
+    if (parsed.success) return parsed.data;
+    return context.json(
+      {
+        type: 'validation_error',
+        detail: parsed.error.message,
+        ...parsed.error.issues,
+      },
+      400,
+    );
+  }),
+  async (context) => {
+    const telemetry = context.req.valid('json');
+    console.log('Received telemetry', telemetry);
+
+    const { id, device_id: deviceId, app_kind: kind } = telemetry;
+    const device = await prisma.device.findUnique({ where: { id: deviceId } });
+    if (!device) {
+      // technically this should not happen, but it might for existing test devices
+      // we log then fail silently
+      console.warn(`Device with ID ${deviceId} not found. Telemetry will not be processed.`);
+      return context.status(204);
+    }
+
+    // if we receive telemetry for a device that is not of the expected kind, we ignore it
+    if (kind !== device.usage) {
+      console.warn(
+        `Received telemetry for device ${deviceId} of kind ${kind}, but expected ${device.usage}. Ignoring telemetry.`,
+      );
+      return context.status(204);
+    }
+
+    // store telemetry in the database, if it does not already exist
+    const values = {
+      usage: kind,
+      created: telemetry.created,
+      received: telemetry.received ?? new Date(),
+      temperature: kind == 'keeper' ? telemetry.temperature : undefined,
+      humidity: kind == 'keeper' ? telemetry.humidity : undefined,
+      moisture: kind == 'pot' ? telemetry.moisture : undefined,
+      ph: kind == 'pot' ? telemetry.ph : undefined,
+    };
+    await prisma.deviceTelemetry.upsert({
+      where: { id: id },
+      create: { id, deviceId, ...values },
+      update: { deviceId, ...values },
+    });
+
+    return context.json({}, 201);
+  },
+);
+
+app.post(
+  '/operational-event',
+  validator('json', async (value, context) => {
+    const parsed = await OperationalEventRequestBodySchema.safeParseAsync(value);
+    if (parsed.success) return parsed.data;
+    return context.json(
+      {
+        type: 'validation_error',
+        detail: parsed.error.message,
+        ...parsed.error.issues,
+      },
+      400,
+    );
+  }),
+  async (context) => {
+    const event = context.req.valid('json');
+    console.log('Received operational event', event);
+
+    const { device_id: deviceId, type } = event;
+    const device = await prisma.device.findUnique({ where: { id: deviceId } });
+    if (!device) {
+      // technically this should not happen, but it might for existing test devices
+      // we log then fail silently
+      console.warn(`Device with ID ${deviceId} not found. Operational event will not be processed.`);
+      return context.status(204);
+    }
+
+    if (type === 'connected') {
+      if (!device.connected) {
+        await prisma.device.update({
+          where: { id: deviceId },
+          data: { connected: true, lastSeen: new Date() },
+        });
+      }
+    } else if (type === 'disconnected') {
+      if (device.connected) {
+        await prisma.device.update({
+          where: { id: deviceId },
+          data: { connected: false },
+        });
+      }
+    } else if (type === 'twin.updated') {
+      // for twin updates, we pull the device twin and update the database
+      const twin = await getDeviceTwin(deviceId);
+      if (twin) {
+        const { reported } = twin;
+        await prisma.deviceFirmware.upsert({
+          where: { deviceId },
+          create: {
+            deviceId,
+            currentVersion: reported.firmware?.version?.semver ?? null,
+            desiredVersion: null,
+            updateRequested: false,
+            desiredFirmwareId: null,
+          },
+          update: {
+            currentVersion: reported.firmware?.version?.semver ?? null,
+          },
+        });
+        await prisma.deviceActuator.upsert({
+          where: { deviceId },
+          create: {
+            deviceId,
+
+            enabled: false,
+            duration: null,
+            equilibriumTime: null,
+            target: null,
+
+            count: reported.actuator?.count ?? 0,
+            lastTime: reported.actuator?.last_time ? new Date(reported.actuator?.last_time) : null,
+            totalDuration: reported.actuator?.total_duration ?? null,
+          },
+          update: {
+            count: reported.actuator?.count ?? 0,
+            lastTime: reported.actuator?.last_time ? new Date(reported.actuator?.last_time) : null,
+            totalDuration: reported.actuator?.total_duration ?? null,
+          },
+        });
+      }
+    }
+
+    return context.json({}, 201);
+  },
+);
+
+export const OPTIONS = handle(app);
+export const GET = handle(app);
+export const POST = handle(app);
+export const PUT = handle(app);
+export const PATCH = handle(app);
+export const DELETE = handle(app);

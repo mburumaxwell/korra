@@ -31,6 +31,7 @@ env:
 
   GITHUB_SHA: ${{ github.sha }} # not discovered by default
   GITHUB_REF_NAME: ${{ github.ref_name }} # not discovered by default
+  RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
 
 jobs:
   Website:
@@ -95,6 +96,25 @@ jobs:
           skip_api_build: true
         env:
           NODE_VERSION: 22
+
+      - name: Set app settings for SWA # bear in mind that this creates or updates but does not remove
+        uses: azure/cli@v2
+        if: ${{ !contains(github.actor, '[bot]') }}
+        with:
+          inlineScript: >
+            az staticwebapp appsettings set
+            --resource-group ${{ env. RESOURCE_GROUP }}
+            --name korra
+            --environment-name '${{ env.SWA_ENVIRONMENT_FOR_PR }}'
+            --setting-names ${{ env.SWA_SETTINGS }}
+        env:
+          # Some settings are here because we cannot use Managed Identity on the free tier of SWA
+          SWA_SETTINGS: >
+            GITHUB_SHA="${{ github.sha }}"
+            GITHUB_REF_NAME="${{ github.ref_name }}"
+            PROCESSOR_API_KEY="${{ secrets.PROCESSOR_API_KEY }}"
+            DATABASE_URL="${{ secrets.DATABASE_URL }}"
+            IOT_HUB_CONNECTION_STRING="${{ secrets.IOT_HUB_CONNECTION_STRING }}"
 
       - name: Publish review app URLs
         uses: thollander/actions-comment-pull-request@v3
