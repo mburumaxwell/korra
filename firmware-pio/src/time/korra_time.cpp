@@ -1,13 +1,16 @@
 #include "korra_time.h"
 
-KorraTime::KorraTime(UDP &client) : client(client, CONFIG_SNTP_SERVER_ADDRESS) {
+#define SYNC_SERVER_ADDRESS CONFIG_SNTP_SERVER_ADDRESS
+#define SYNC_SERVER_PORT 123
+
+KorraTime::KorraTime(UDP &client) : client(client, SYNC_SERVER_ADDRESS) {
 }
 
 KorraTime::~KorraTime() {
 }
 
 void KorraTime::begin(uint32_t update_interval_sec) {
-  client.begin(CONFIG_SNTP_SERVER_PORT);
+  client.begin(SYNC_SERVER_PORT);
   client.setUpdateInterval(update_interval_sec * 1000);
 }
 

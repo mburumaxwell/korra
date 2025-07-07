@@ -34,11 +34,6 @@ config SNTP_SERVER_ADDRESS
     default "uk.pool.ntp.org"
     depends on SNTP
 
-config SNTP_SERVER_PORT
-	int "SNTP server port"
-	default 123
-    depends on SNTP
-
 config SNTP_SERVER_TIMEOUT_SECONDS
 	int "Duration to wait for response in seconds"
 	default 4
