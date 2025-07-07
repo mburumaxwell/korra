@@ -46,29 +46,44 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # This steps exists as a workaround for https://github.com/Azure/azure-cli/issues/31581
-      - name: Azure CLI script
+      # - name: Validate Azure Resources
+      #   if: ${{ github.event_name == 'pull_request' }}
+      #   uses: azure/arm-deploy@v2
+      #   with:
+      #     subscriptionId: ${{ env.AZURE_SUBSCRIPTION_ID }}
+      #     resourceGroupName: ${{ env.RESOURCE_GROUP }}
+      #     template: '${{ github.workspace }}/deploy/main.bicep'
+      #     scope: 'resourcegroup'
+      #     deploymentMode: 'Validate'
+      #     deploymentName: 'main-pr${{ github.event.number }}' # allows for concurrent validation
+
+      # - name: Deploy Azure Resources
+      #   if: ${{ github.event_name != 'pull_request' }}
+      #   uses: azure/arm-deploy@v2
+      #   with:
+      #     subscriptionId: ${{ env.AZURE_SUBSCRIPTION_ID }}
+      #     resourceGroupName: ${{ env.RESOURCE_GROUP }}
+      #     template: '${{ github.workspace }}/deploy/main.bicep'
+      #     scope: 'resourcegroup'
+
+      # Restore the use of azure/arm-deploy once https://github.com/Azure/azure-cli/issues/31581 is fixed
+      - name: Validate Azure Resources
+        if: ${{ github.event_name == 'pull_request' }}
         uses: azure/cli@v2
         with:
           azcliversion: '2.72.0'
-          inlineScript: 'az account show'
-
-      - name: Validate Azure Resources
-        if: ${{ github.event_name == 'pull_request' }}
-        uses: azure/arm-deploy@v2
-        with:
-          subscriptionId: ${{ env.AZURE_SUBSCRIPTION_ID }}
-          resourceGroupName: ${{ env.RESOURCE_GROUP }}
-          template: '${{ github.workspace }}/deploy/main.bicep'
-          scope: 'resourcegroup'
-          deploymentMode: 'Validate'
-          deploymentName: 'main-pr${{ github.event.number }}' # allows for concurrent validation
+          inlineScript: >
+            az deployment group validate
+            --resource-group ${{ env.RESOURCE_GROUP }}
+            --template-file '${{ github.workspace }}/deploy/main.bicep'
+            --name 'main-pr${{ github.event.number }}'
 
       - name: Deploy Azure Resources
         if: ${{ github.event_name != 'pull_request' }}
-        uses: azure/arm-deploy@v2
+        uses: azure/cli@v2
         with:
-          subscriptionId: ${{ env.AZURE_SUBSCRIPTION_ID }}
-          resourceGroupName: ${{ env.RESOURCE_GROUP }}
-          template: '${{ github.workspace }}/deploy/main.bicep'
-          scope: 'resourcegroup'
+          azcliversion: '2.72.0'
+          inlineScript: >
+            az deployment group create
+            --resource-group ${{ env.RESOURCE_GROUP }}
+            --template-file '${{ github.workspace }}/deploy/main.bicep'
