@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "license": "AGPL-3.0-later",
-  "devDependencies": {
-    "typescript": "5.8.3"
+  "scripts": {
+    "build": "dotnet build Korra.Processor/Korra.Processor.csproj",
+    "dev": "dotnet run --project Korra.Processor/Korra.Processor.csproj",
+    "start": "dotnet run --project Korra.Processor/Korra.Processor.csproj",
+    "test": "dotnet test Korra.Processor.Tests/Korra.Processor.Tests.csproj"
   }
 }
