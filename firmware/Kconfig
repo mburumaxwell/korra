@@ -27,7 +27,7 @@ config AZURE_IOT_DPS_ID_SCOPE
 
 config SENSORS_READ_PERIOD_SECONDS
     int "Interval for collecting sensor data in seconds"
-    default 300
+    default 60
 
 config SNTP_SERVER_ADDRESS
     string "SNTP server address"
