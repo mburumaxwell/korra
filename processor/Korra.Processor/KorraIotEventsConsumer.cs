@@ -68,15 +68,7 @@ internal class KorraIotEventsConsumer(KorraDashboardClient client, ILogger<Korra
                             deviceId,
                             JsonSerializer.Serialize(telemetry, SC.Default.KorraTelemetry));
         }
-
-        try
-        {
-            await client.SendTelemetryAsync(telemetry, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            logger.LogInformation(ex, "Forwarding telemetry failed. Shall safely proceed");
-        }
+        await client.SendTelemetryAsync(telemetry, cancellationToken);
     }
 
     internal virtual async Task HandleOperationalEventAsync(EventContext context,
@@ -107,14 +99,6 @@ internal class KorraIotEventsConsumer(KorraDashboardClient client, ILogger<Korra
                             ope.DeviceId,
                             JsonSerializer.Serialize(@event, SC.Default.KorraOperationalEvent));
         }
-
-        try
-        {
-            await client.SendOperationalEventAsync(@event, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            logger.LogInformation(ex, "Forwarding operational event failed. Shall safely proceed");
-        }
+        await client.SendOperationalEventAsync(@event, cancellationToken);
     }
 }
