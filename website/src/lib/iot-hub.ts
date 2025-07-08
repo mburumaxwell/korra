@@ -11,7 +11,7 @@ let defaultRegistry: iothub.Registry | undefined = undefined;
 export function getRegistry(connectionString?: string): iothub.Registry {
   if (defaultRegistry) return defaultRegistry;
   if (!connectionString) {
-    return defaultRegistry = Registry.fromConnectionString(process.env.IOT_HUB_CONNECTION_STRING!);
+    return (defaultRegistry = Registry.fromConnectionString(process.env.IOT_HUB_CONNECTION_STRING!));
   }
   return Registry.fromConnectionString(connectionString);
 }
