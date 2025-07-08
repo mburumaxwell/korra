@@ -17,4 +17,4 @@ app_version.h
 .idea
 .DS_Store
 
-website/src/scripts/provisioning
+website/scripts/provisioning

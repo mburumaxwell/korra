@@ -2,8 +2,8 @@ import path from 'node:path';
 import * as semver from 'semver';
 import { z } from 'zod/v4';
 
-import { prisma } from '../lib/prisma/index.ts';
-import { type KorraBoardType, type KorraFirmwareFramework, type KorraUsageType } from '../lib/schemas.ts';
+import { prisma } from '../src/lib/prisma/index.ts';
+import { type KorraBoardType, type KorraFirmwareFramework, type KorraUsageType } from '../src/lib/schemas.ts';
 
 const GithubReleaseSchema = z.object({
   tag_name: z.string(),
@@ -28,16 +28,17 @@ function getAppVersionNumber(value: string) {
 }
 
 async function importFirmware() {
-  const url = 'https://api.github.com/repos/mburumaxwell/korra/releases';
-  const response = await fetch(url);
+  const response = await fetch('https://api.github.com/repos/mburumaxwell/korra/releases');
   const releasesData = await response.json();
   const releases = GithubReleaseSchema.array().parse(releasesData);
 
   for (const release of releases) {
-    const [folder, versionSemver] = release.tag_name.split('@');
+    const { created_at: created, tag_name } = release;
+    const [folder, versionSemver] = tag_name.split('@');
     if (!folder.includes('firmware')) continue;
+
+    console.log('working on', tag_name);
     const versionValue = getAppVersionNumber(versionSemver);
-    const { created_at: created } = release;
 
     for (const asset of release.assets) {
       const { browser_download_url } = asset;

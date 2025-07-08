@@ -1,11 +1,12 @@
 import { readFile } from 'node:fs/promises';
 
-import { registry } from '../lib/iot-hub.ts';
-import { type AvailableFirmware } from '../lib/prisma/client.ts';
-import { prisma } from '../lib/prisma/index.ts';
-import { type KorraBoardType, KorraDeviceTwinSchema, type KorraFirmwareFramework } from '../lib/schemas.ts';
+import { getRegistry } from '../src/lib/iot-hub.ts';
+import { type AvailableFirmware } from '../src/lib/prisma/client.ts';
+import { prisma } from '../src/lib/prisma/index.ts';
+import { type KorraBoardType, KorraDeviceTwinSchema, type KorraFirmwareFramework } from '../src/lib/schemas.ts';
 
 async function run() {
+  const registry = getRegistry();
   const devices = (await registry.list()).responseBody;
   console.log(`Found ${devices.length} devices in the IoT Hub.`);
 
@@ -22,7 +23,7 @@ async function run() {
     }
 
     // Read the certificate PEM file based on the label
-    const certificatePem = await readFile(`src/scripts/provisioning/certs/${label?.toLowerCase()}.cer`, 'utf-8');
+    const certificatePem = await readFile(`scripts/provisioning/certs/${label?.toLowerCase()}.cer`, 'utf-8');
 
     // if the lastActivityTime is more than one month ago, set to null
     let lastSeen = device.lastActivityTime ? new Date(device.lastActivityTime) : null;

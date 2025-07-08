@@ -3,5 +3,15 @@
 import iothub from 'azure-iothub';
 const { Registry } = iothub;
 
-const connectionString = process.env.IOT_HUB_CONNECTION_STRING!;
-export const registry = Registry.fromConnectionString(connectionString);
+let defaultRegistry: iothub.Registry | undefined = undefined;
+
+// we have a function instead of a constant because
+// when loading from scripts, we want to lowe only when need it (necessary when not under src folder)
+// when UI mode, we do not want it compiled
+export function getRegistry(connectionString?: string): iothub.Registry {
+  if (defaultRegistry) return defaultRegistry;
+  if (!connectionString) {
+    return defaultRegistry = Registry.fromConnectionString(process.env.IOT_HUB_CONNECTION_STRING!);
+  }
+  return Registry.fromConnectionString(connectionString);
+}

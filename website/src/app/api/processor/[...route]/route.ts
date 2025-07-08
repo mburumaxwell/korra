@@ -4,7 +4,7 @@ import { Hono } from 'hono';
 import { bearerAuth } from 'hono/bearer-auth';
 import { handle } from 'hono/vercel';
 
-import { registry } from '@/lib/iot-hub';
+import { getRegistry } from '@/lib/iot-hub';
 import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
@@ -65,6 +65,8 @@ app.post('/operational-event', zValidator('json', OperationalEventRequestBodySch
     console.warn(`Device with ID ${deviceId} not found. Operational event will not be processed.`);
     return context.body(null, 204);
   }
+
+  const registry = getRegistry();
 
   if (type === 'connected') {
     if (!device.connected) {
