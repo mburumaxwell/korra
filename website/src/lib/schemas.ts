@@ -1,5 +1,81 @@
 import { z } from 'zod/v4';
 
+export const KorraActuatorConfigSchema = z.object({
+  enabled: z.boolean(), // Whether or not the actuator is allowed
+  duration: z.number().min(5).max(15), // Seconds for which the actuator should be active at a given time (range: 5-15)
+  equilibrium_time: z.number().min(5).max(60), // Seconds to wait before the next actuation (range: 5-60)
+  target: z.number(),
+});
+export type KorraActuatorConfig = z.infer<typeof KorraActuatorConfigSchema>;
+
+export const KorraActuatorStateSchema = z.object({
+  count: z.number().int(), // Number of times the actuator was activated
+  last_time: z.number(), // Last time (UNIX since Epoch) the actuator was activated
+  total_duration: z.number().int(), // Total seconds the actuator was active
+});
+export type KorraActuatorState = z.infer<typeof KorraActuatorStateSchema>;
+
+export const KorraNetworkInfoSchema = z.object({
+  kind: z.enum(['wifi', 'ethernet', 'cellular']),
+  mac: z.string(), // The MAC address of the device.
+  name: z.string().nullish(), // The name of the network.
+  local_ip: z.string(), // The local IP address.
+});
+export type KorraNetworkInfo = z.infer<typeof KorraNetworkInfoSchema>;
+
+export const KorraFirmwareVersionSchema = z.object({
+  value: z.number(),
+  semver: z.string(),
+});
+export type KorraFirmwareVersion = z.infer<typeof KorraFirmwareVersionSchema>;
+
+export const KorraDeviceTwinDesiredFirmwareSchema = z.object({
+  version: KorraFirmwareVersionSchema.nullish(), // version
+  url: z.url(), // firmware binary URL
+  hash: z.string(), // SHA-256 hash in hex
+  signature: z.string().nullish(), // signature (e.g., base64 or hex)
+});
+export type KorraDeviceTwinDesiredFirmware = z.infer<typeof KorraDeviceTwinDesiredFirmwareSchema>;
+
+export const KorraDeviceTwinDesiredSchema = z.object({
+  $version: z.number().int(),
+  firmware: KorraDeviceTwinDesiredFirmwareSchema.nullish(),
+  actuator: KorraActuatorConfigSchema.nullish(),
+});
+export type KorraDeviceTwinDesired = z.infer<typeof KorraDeviceTwinDesiredSchema>;
+
+export const KorraDeviceTwinReportedFirmwareSchema = z.object({
+  version: KorraFirmwareVersionSchema.nullish(), // version
+});
+export type KorraDeviceTwinReportedFirmware = z.infer<typeof KorraDeviceTwinReportedFirmwareSchema>;
+
+export const KorraDeviceTwinReportedSchema = z.object({
+  $version: z.number().int(),
+  firmware: KorraDeviceTwinReportedFirmwareSchema.nullish(),
+  actuator: KorraActuatorStateSchema.nullish(),
+  network: KorraNetworkInfoSchema.nullish(),
+});
+export type KorraDeviceTwinReported = z.infer<typeof KorraDeviceTwinReportedSchema>;
+
+export const KorraUsageTypeSchema = z.enum(['keeper', 'pot']);
+export type KorraUsageType = z.infer<typeof KorraUsageTypeSchema>;
+
+export const KorraDeviceTwinTagsSchema = z.object({
+  usage: KorraUsageTypeSchema.nullish(),
+  label: z.enum(['D1', 'D2', 'D3', 'M1', 'M2', 'M3', 'W1', 'W2', 'W3']).or(z.string()).nullish(),
+});
+export type KorraDeviceTwinTags = z.infer<typeof KorraDeviceTwinTagsSchema>;
+
+export const KorraDeviceTwinSchema = z.object({
+  deviceId: z.string(),
+  tags: KorraDeviceTwinTagsSchema,
+  properties: z.object({
+    desired: KorraDeviceTwinDesiredSchema,
+    reported: KorraDeviceTwinReportedSchema,
+  }),
+});
+export type KorraDeviceTwin = z.infer<typeof KorraDeviceTwinSchema>;
+
 export const KorraTelemetryKeeperSchema = z.object({
   app_kind: z.literal('keeper'),
   temperature: z.number(), // °C
@@ -38,39 +114,16 @@ export const OperationalEventRequestBodySchema = z.object({
 });
 export type OperationalEventRequestBody = z.infer<typeof OperationalEventRequestBodySchema>;
 
-export const KorraActuatorConfigSchema = z.object({
-  enabled: z.boolean(), // Whether or not the actuator is allowed
-  duration: z.number().min(5).max(15), // Seconds for which the actuator should be active at a given time (range: 5-15)
-  equilibrium_time: z.number().min(5).max(60), // Seconds to wait before the next actuation (range: 5-60)
-  target: z.number(),
-});
-export type KorraActuatorConfig = z.infer<typeof KorraActuatorConfigSchema>;
+export const KorraBoardTypeSchema = z.enum(['esp32s3_devkitc', 'frdm_rw612', 'nrf7002dk']);
+export type KorraBoardType = z.infer<typeof KorraBoardTypeSchema>;
 
-export const KorraActuatorStateSchema = z.object({
-  count: z.number().int(), // Number of times the actuator was activated
-  last_time: z.number(), // Last time (UNIX since Epoch) the actuator was activated
-  total_duration: z.number().int(), // Total seconds the actuator was active
-});
-export type KorraActuatorState = z.infer<typeof KorraActuatorStateSchema>;
-
-export const KorraNetworkInfoSchema = z.object({
-  kind: z.enum(['wifi', 'ethernet', 'cellular']),
-  mac: z.string(), // The MAC address of the device.
-  name: z.string().nullish(), // The name of the network.
-  local_ip: z.string(), // The local IP address.
-});
-export type KorraNetworkInfo = z.infer<typeof KorraNetworkInfoSchema>;
-
-export const KorraFirmwareVersionSchema = z.object({
-  value: z.number(),
-  semver: z.string(),
-});
-export type KorraFirmwareVersion = z.infer<typeof KorraFirmwareVersionSchema>;
+export const KorraFirmwareFrameworkSchema = z.enum(['zephyr', 'arduino', 'espidf']);
+export type KorraFirmwareFramework = z.infer<typeof KorraFirmwareFrameworkSchema>;
 
 export const AvailableFirmwareRequestBodySchema = z.object({
-  board: z.enum(['esp32s3_devkitc', 'frdm_rw612', 'nrf7002dk']),
-  usage: z.enum(['keeper', 'pot']), // Device usage type
-  framework: z.enum(['zephyr', 'arduino', 'espidf']),
+  board: KorraBoardTypeSchema,
+  usage: KorraUsageTypeSchema,
+  framework: KorraFirmwareFrameworkSchema,
   version: KorraFirmwareVersionSchema, // version
   url: z.url(), // firmware binary URL
   attestation: z.url(), // attestation URL (signature shall be pulled from this)

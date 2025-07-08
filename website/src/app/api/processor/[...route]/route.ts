@@ -1,10 +1,10 @@
-import { OperationalEventRequestBodySchema, TelemetryRequestBodySchema } from '@/lib/schemas';
+import { KorraDeviceTwinSchema, OperationalEventRequestBodySchema, TelemetryRequestBodySchema } from '@/lib/schemas';
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import { bearerAuth } from 'hono/bearer-auth';
 import { handle } from 'hono/vercel';
 
-import { getDeviceTwin } from '@/lib/iot-hub';
+import { registry } from '@/lib/iot-hub';
 import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
@@ -82,9 +82,9 @@ app.post('/operational-event', zValidator('json', OperationalEventRequestBodySch
     }
   } else if (type === 'twin.updated') {
     // for twin updates, we pull the device twin and update the database
-    const twin = await getDeviceTwin(deviceId);
+    const twin = KorraDeviceTwinSchema.parse((await registry.getTwin(deviceId)).responseBody);
     if (twin) {
-      const { reported } = twin;
+      const reported = twin.properties.reported;
       await prisma.deviceFirmware.upsert({
         where: { deviceId },
         create: {
