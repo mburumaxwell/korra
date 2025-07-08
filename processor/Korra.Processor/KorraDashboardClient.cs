@@ -15,7 +15,7 @@ public class KorraTelemetry
     public required string DeviceId { get; set; }
 
     [JsonPropertyName("created")]
-    public required DateTimeOffset? Created { get; set; }
+    public required DateTimeOffset Created { get; set; }
 
     [JsonPropertyName("received")]
     public required DateTimeOffset? Received { get; set; }
