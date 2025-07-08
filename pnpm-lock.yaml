@@ -38,6 +38,9 @@ importers:
       semver:
         specifier: 7.7.2
         version: 7.7.2
+      typescript:
+        specifier: 5.8.3
+        version: 5.8.3
 
   firmware-pio:
     devDependencies:
@@ -53,8 +56,15 @@ importers:
       semver:
         specifier: 7.7.2
         version: 7.7.2
+      typescript:
+        specifier: 5.8.3
+        version: 5.8.3
 
-  processor: {}
+  processor:
+    devDependencies:
+      typescript:
+        specifier: 5.8.3
+        version: 5.8.3
 
   website:
     dependencies:
