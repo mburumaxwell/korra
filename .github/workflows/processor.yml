@@ -270,7 +270,7 @@ jobs:
           PROCESSOR_API_KEY: ${{ secrets.PROCESSOR_API_KEY }}
 
       - name: Azure Login
-        if: ${{ !github.event.repository.fork }}
+        if: ${{ !contains(github.head_ref, 'changeset-release/') && !contains(github.head_ref, 'dependabot/') }}
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
