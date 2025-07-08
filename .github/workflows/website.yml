@@ -47,7 +47,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: pnpm
 
       - name: Download deps
@@ -101,7 +101,7 @@ jobs:
           skip_app_build: true
           skip_api_build: true
         env:
-          NODE_VERSION: 22
+          NODE_VERSION: 24
 
       - name: Set app settings for SWA # bear in mind that this creates or updates but does not remove
         uses: azure/cli@v2
