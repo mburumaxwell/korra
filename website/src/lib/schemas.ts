@@ -34,7 +34,7 @@ export type TelemetryRequestBody = z.infer<typeof TelemetryRequestBodySchema>;
 export const OperationalEventRequestBodySchema = z.object({
   type: z.enum(['connected', 'disconnected', 'twin.updated']),
   device_id: z.string(),
-  sequence_number: z.string().optional(),
+  sequence_number: z.string().nullish(),
 });
 export type OperationalEventRequestBody = z.infer<typeof OperationalEventRequestBodySchema>;
 
@@ -60,3 +60,19 @@ export const KorraNetworkInfoSchema = z.object({
   local_ip: z.string(), // The local IP address.
 });
 export type KorraNetworkInfo = z.infer<typeof KorraNetworkInfoSchema>;
+
+export const KorraFirmwareVersionSchema = z.object({
+  value: z.number(),
+  semver: z.string(),
+});
+export type KorraFirmwareVersion = z.infer<typeof KorraFirmwareVersionSchema>;
+
+export const AvailableFirmwareRequestBodySchema = z.object({
+  board: z.enum(['esp32s3_devkitc', 'frdm_rw612', 'nrf7002dk']),
+  usage: z.enum(['keeper', 'pot']), // Device usage type
+  framework: z.enum(['zephyr', 'arduino', 'espidf']),
+  version: KorraFirmwareVersionSchema, // version
+  url: z.url(), // firmware binary URL
+  attestation: z.url(), // attestation URL (signature shall be pulled from this)
+});
+export type AvailableFirmwareRequestBody = z.infer<typeof AvailableFirmwareRequestBodySchema>;

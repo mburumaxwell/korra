@@ -13,6 +13,7 @@
         "devkitc",
         "eduroam",
         "esp32s3_devkitc",
+        "espidf",
         "espressif",
         "frdm_rw612",
         "JTAG",

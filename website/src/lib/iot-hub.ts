@@ -1,18 +1,17 @@
 import { Registry } from 'azure-iothub';
 import { z } from 'zod/v4';
-import { KorraActuatorConfigSchema, KorraActuatorStateSchema, KorraNetworkInfoSchema } from './schemas';
-
-export const KorraDeviceTwinFirmwareVersionSchema = z.object({
-  value: z.number(),
-  semver: z.string(),
-});
-export type KorraDeviceTwinFirmwareVersion = z.infer<typeof KorraDeviceTwinFirmwareVersionSchema>;
+import {
+  KorraActuatorConfigSchema,
+  KorraActuatorStateSchema,
+  KorraFirmwareVersionSchema,
+  KorraNetworkInfoSchema,
+} from './schemas';
 
 export const KorraDeviceTwinDesiredFirmwareSchema = z.object({
-  version: KorraDeviceTwinFirmwareVersionSchema.nullish(), // version
+  version: KorraFirmwareVersionSchema.nullish(), // version
   url: z.url(), // firmware binary URL
   hash: z.string(), // SHA-256 hash in hex
-  signature: z.string().nullish(), // Signature (e.g., base64 or hex)
+  signature: z.string().nullish(), // signature (e.g., base64 or hex)
 });
 export type KorraDeviceTwinDesiredFirmware = z.infer<typeof KorraDeviceTwinDesiredFirmwareSchema>;
 
@@ -24,7 +23,7 @@ export const KorraDeviceTwinDesiredSchema = z.object({
 export type KorraDeviceTwinDesired = z.infer<typeof KorraDeviceTwinDesiredSchema>;
 
 export const KorraDeviceTwinReportedFirmwareSchema = z.object({
-  version: KorraDeviceTwinFirmwareVersionSchema.nullish(), // version
+  version: KorraFirmwareVersionSchema.nullish(), // version
 });
 export type KorraDeviceTwinReportedFirmware = z.infer<typeof KorraDeviceTwinReportedFirmwareSchema>;
 

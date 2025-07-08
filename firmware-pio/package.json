@@ -5,12 +5,13 @@
   "license": "AGPL-3.0-later",
   "scripts": {
     "build": "node scripts/firmware.mjs build",
-    "build:keeper": "pnpm build --environment keeper-esp32-s3-devkitc",
-    "build:pot": "pnpm build --environment pot-esp32-s3-devkitc",
-    "collect": "node scripts/firmware.mjs collect",
+    "build:keeper": "pnpm build --environment keeper-esp32s3_devkitc",
+    "build:pot": "pnpm build --environment pot-esp32s3_devkitc",
     "flash": "node scripts/firmware.mjs flash",
-    "flash:keeper": "pnpm flash --environment keeper-esp32-s3-devkitc",
-    "flash:pot": "pnpm flash --environment pot-esp32-s3-devkitc",
+    "flash:keeper": "pnpm flash --environment keeper-esp32s3_devkitc",
+    "flash:pot": "pnpm flash --environment pot-esp32s3_devkitc",
+    "collect": "node scripts/firmware.mjs collect",
+    "avail": "node scripts/firmware.mjs avail",
     "clean": "rimraf .pio binaries",
     "packages:version": "node scripts/firmware.mjs version"
   },

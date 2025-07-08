@@ -32,18 +32,21 @@ enum FirmwareFramework {
 
 // list of known firmware
 model AvailableFirmware {
-  id             String            @id
+  id             String            @id @default(cuid())
+  created        DateTime          @default(now())
+  updated        DateTime          @updatedAt
   board          BoardType
   usage          DeviceUsage
   framework      FirmwareFramework
   versionValue   Int
   versionSemver  String
   url            String
+  attestation    String
   hash           String
   signature      String
   DeviceFirmware DeviceFirmware[]
 
-  @@unique([board, framework, usage, versionSemver])
+  @@unique([board, usage, framework, versionSemver])
 }
 
 model Device {
