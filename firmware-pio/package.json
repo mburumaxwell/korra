@@ -3,17 +3,18 @@
   "version": "0.4.1",
   "private": true,
   "license": "AGPL-3.0-later",
+  "type": "module",
   "scripts": {
-    "build": "node scripts/firmware.mjs build",
+    "build": "NODE_NO_WARNINGS=1 ts-node scripts/firmware.ts build",
     "build:keeper": "pnpm build --environment keeper-esp32s3_devkitc",
     "build:pot": "pnpm build --environment pot-esp32s3_devkitc",
-    "flash": "node scripts/firmware.mjs flash",
+    "flash": "NODE_NO_WARNINGS=1 ts-node scripts/firmware.ts flash",
     "flash:keeper": "pnpm flash --environment keeper-esp32s3_devkitc",
     "flash:pot": "pnpm flash --environment pot-esp32s3_devkitc",
-    "collect": "node scripts/firmware.mjs collect",
-    "avail": "node scripts/firmware.mjs avail",
+    "collect": "NODE_NO_WARNINGS=1 ts-node scripts/firmware.ts collect",
+    "avail": "NODE_NO_WARNINGS=1 ts-node scripts/firmware.ts avail",
     "clean": "rimraf .pio binaries",
-    "packages:version": "node scripts/firmware.mjs version"
+    "packages:version": "NODE_NO_WARNINGS=1 ts-node scripts/firmware.ts version"
   },
   "devDependencies": {
     "@types/semver": "7.7.0",

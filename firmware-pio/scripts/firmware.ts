@@ -2,7 +2,7 @@
 
 import chalk from 'chalk';
 import { Command, Option } from 'commander';
-import { execSync, spawn } from 'node:child_process';
+import { type ChildProcessWithoutNullStreams, execSync, spawn } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { copyFile, mkdir, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -68,10 +68,10 @@ const build = new Command('build')
     ];
     let colorIndex = 0;
 
-    const procs = [];
-    const childProcs = [];
-    const results = []; // NEW: keep success/failure per task
-    const startTime = Date.now(); // NEW: track elapsed time
+    const procs: Promise<unknown>[] = [];
+    const childProcs: ChildProcessWithoutNullStreams[] = [];
+    const results: { id: string; success: boolean; duration: string }[] = [];
+    const startTime = Date.now();
 
     ['SIGINT', 'SIGTERM'].forEach((signal) => {
       process.on(signal, () => {
@@ -106,11 +106,11 @@ const build = new Command('build')
         new Promise((resolve) => {
           const procStart = Date.now();
 
-          const finish = (code) => {
+          const finish = (code: number | null) => {
             const success = code === 0;
             const elapsed = ((Date.now() - procStart) / 1000).toFixed(1);
             results.push({ id, success, duration: elapsed });
-            resolve();
+            resolve(undefined);
           };
 
           if (isCI) {
