@@ -6,7 +6,7 @@
   "scripts": {
     "prisma:generate": "npx prisma generate --schema=./prisma",
     "prisma:studio": "npx prisma studio --schema=./prisma",
-    "prisma:push": "npx prisma push --schema=./prisma",
+    "prisma:push": "npx prisma db push --schema=./prisma",
     "prisma:format": "npx prisma format --schema=./prisma",
     "prebuild": "pnpm run prisma:generate",
     "predev": "pnpm run prisma:generate",
@@ -17,6 +17,7 @@
     "clean": "rimraf .next .turbo out"
   },
   "dependencies": {
+    "@hono/zod-validator": "0.7.0",
     "@neondatabase/serverless": "1.0.1",
     "@prisma/adapter-neon": "6.11.1",
     "@prisma/adapter-pg": "6.11.1",

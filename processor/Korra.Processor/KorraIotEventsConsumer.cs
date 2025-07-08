@@ -25,7 +25,7 @@ internal class KorraIotEventsConsumer(KorraDashboardClient client, ILogger<Korra
             case IotHubEventMessageSource.DeviceLifecycleEvents:
             case IotHubEventMessageSource.DeviceConnectionStateEvents:
                 {
-                    await HandleTwinChangeAsync(context, evt.Source, evt.Event!, cancellationToken);
+                    await HandleOperationalEventAsync(context, evt.Source, evt.Event!, cancellationToken);
                     break;
                 }
         }
@@ -38,14 +38,6 @@ internal class KorraIotEventsConsumer(KorraDashboardClient client, ILogger<Korra
         var deviceId = context.GetIotHubDeviceId() ?? throw new InvalidOperationException("device id cannot be null");
         var enqueued = context.GetIotHubEnqueuedTime();
 
-        if (logger.IsEnabled(LogLevel.Debug))
-        {
-            logger.LogDebug("Received Telemetry from {DeviceId}\r\nEnqueued: {EnqueuedTime}\r\nTelemetry:{Telemetry}",
-                            deviceId,
-                            enqueued,
-                            JsonSerializer.Serialize(incoming, SC.Default.KorraIotHubTelemetry));
-        }
-
         var appKind = incoming.AppKind switch
         {
             KorraIotHubTelemetryAppKind.Keeper => KorraAppKind.Keeper,
@@ -53,12 +45,14 @@ internal class KorraIotEventsConsumer(KorraDashboardClient client, ILogger<Korra
             null => incoming.PH is not null ? KorraAppKind.Pot : KorraAppKind.Keeper,
             _ => throw new NotImplementedException(),
         };
-        var telemetryId = context.GetIotHubMessageId() ?? Tingle.Extensions.Primitives.Ksuid.Generate(incoming.Created);
+        // var telemetryId = Tingle.Extensions.Primitives.Ksuid.Generate(incoming.Created);
+        var telemetryId = $"{context.GetEventData().SequenceNumber}";
 
         var telemetry = new KorraTelemetry
         {
             Id = telemetryId,
             DeviceId = deviceId,
+            Created = incoming.Created,
             Received = enqueued?.ToUniversalTime(),
             AppKind = appKind,
             // we assume the units for this do not vary, otherwise we would need to convert
@@ -67,6 +61,13 @@ internal class KorraIotEventsConsumer(KorraDashboardClient client, ILogger<Korra
             Moisture = incoming.Moisture?.Value,
             PH = incoming.PH?.Value,
         };
+
+        if (logger.IsEnabled(LogLevel.Debug))
+        {
+            logger.LogDebug("Forwarding Telemetry from {DeviceId}\r\n{Telemetry}",
+                            deviceId,
+                            JsonSerializer.Serialize(telemetry, SC.Default.KorraTelemetry));
+        }
 
         try
         {
@@ -78,19 +79,11 @@ internal class KorraIotEventsConsumer(KorraDashboardClient client, ILogger<Korra
         }
     }
 
-    internal virtual async Task HandleTwinChangeAsync(EventContext context,
-                                                      IotHubEventMessageSource source,
-                                                      IotHubOperationalEvent ope,
-                                                      CancellationToken cancellationToken = default)
+    internal virtual async Task HandleOperationalEventAsync(EventContext context,
+                                                            IotHubEventMessageSource source,
+                                                            IotHubOperationalEvent ope,
+                                                            CancellationToken cancellationToken = default)
     {
-        if (logger.IsEnabled(LogLevel.Debug))
-        {
-            logger.LogDebug("{Source} event received of type '{Type}' from '{DeviceId}'",
-                            source,
-                            ope.Type,
-                            ope.DeviceId);
-        }
-
         KorraOperationalEventType? type = ope.Type switch
         {
             IotHubOperationalEventType.UpdateTwin => KorraOperationalEventType.TwinUpdated,
@@ -107,6 +100,13 @@ internal class KorraIotEventsConsumer(KorraDashboardClient client, ILogger<Korra
             DeviceId = ope.DeviceId,
             SequenceNumber = ope.Payload.SequenceNumber,
         };
+
+        if (logger.IsEnabled(LogLevel.Debug))
+        {
+            logger.LogDebug("Forwarding Operational Event for {DeviceId}\r\n{Event}",
+                            ope.DeviceId,
+                            JsonSerializer.Serialize(@event, SC.Default.KorraOperationalEvent));
+        }
 
         try
         {

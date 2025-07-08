@@ -6,7 +6,7 @@ using SC = Korra.Processor.KorraProcessorSerializerContext;
 var builder = Host.CreateApplicationBuilder();
 
 builder.Services.AddHttpApiClient<KorraDashboardClient, KorraDashboardClientOptions>()
-                .AddApiKeyHeaderAuthenticationHandler(builder.Configuration["Dashboard:ApiKey"]!)
+                .AddApiKeyHeaderAuthenticationHandler(builder.Configuration["Dashboard:ApiKey"]!, "Bearer")
                 .ConfigureHttpClient(client =>
                 {
                     client.BaseAddress = new Uri(builder.Configuration["Dashboard:Endpoint"]!, UriKind.Absolute);
@@ -32,7 +32,7 @@ builder.Services.AddSlimEventBus(eb =>
         var isLocal = !blobUrl.Contains(".core.windows.net");
         options.BlobStorageCredentials = !isLocal
             ? new AzureBlobStorageCredentials { ServiceUrl = new Uri(blobUrl), TokenCredential = new DefaultAzureCredential(), }
-            : blobUrl;
+            : "UseDevelopmentStorage=true";
         options.BlobContainerName = builder.Configuration["IotHub:EventHubs:Checkpoints:BlobContainerName"]!;
     });
 });

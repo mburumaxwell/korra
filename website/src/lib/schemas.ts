@@ -34,7 +34,7 @@ export type TelemetryRequestBody = z.infer<typeof TelemetryRequestBodySchema>;
 export const OperationalEventRequestBodySchema = z.object({
   type: z.enum(['connected', 'disconnected', 'twin.updated']),
   device_id: z.string(),
-  sequence_number: z.string(),
+  sequence_number: z.string().optional(),
 });
 export type OperationalEventRequestBody = z.infer<typeof OperationalEventRequestBodySchema>;
 

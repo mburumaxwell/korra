@@ -4,6 +4,7 @@
     <OutputType>Exe</OutputType>
     <Deterministic>true</Deterministic>
     <PublishAot>true</PublishAot>
+    <UserSecretsId>5593def3-8a4d-42b5-bd64-076e9891a1ec</UserSecretsId>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(PublishAot)' == 'true'">
@@ -20,12 +21,12 @@
   <ItemGroup>
     <PackageReference Include="Azure.Identity" Version="1.14.1" />
     <PackageReference Include="Azure.Messaging.EventHubs.Processor" Version="5.12.2" /> <!-- Allows for faster updates -->
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.24.1" /> <!-- Allows for faster updates -->
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.6" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.6" />
     <PackageReference Include="System.Net.Http.Json" Version="9.0.6" />
     <PackageReference Include="System.Memory.Data" Version="9.0.6" /> <!-- Transient, later version supports AoT -->
-    <PackageReference Include="Tingle.EventBus.Transports.Azure.EventHubs" Version="0.25.0" />
-    <PackageReference Include="Tingle.EventBus.Transports.InMemory" Version="0.25.0" />
+    <PackageReference Include="Tingle.EventBus.Transports.Azure.EventHubs" Version="0.25.1" />
     <PackageReference Include="Tingle.Extensions.Http" Version="5.2.0" />
     <PackageReference Include="Tingle.Extensions.Http.Authentication" Version="5.2.0" />
     <PackageReference Include="Tingle.Extensions.Primitives" Version="5.2.0" />
