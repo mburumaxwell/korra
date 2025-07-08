@@ -57,9 +57,7 @@ model Device {
   usage           DeviceUsage
   framework       FirmwareFramework?
   label           String             @db.VarChar(20) // e.g. W1, K1, D2
-  enrollmentId    String
   certificatePem  String?
-  provisioned     Boolean            @default(false)
   connected       Boolean            @default(false)
   lastSeen        DateTime?
   actuator        DeviceActuator?
@@ -84,7 +82,6 @@ model DeviceFirmware {
   deviceId          String             @id
   currentVersion    String?
   desiredVersion    String?
-  updateRequested   Boolean            @default(false)
   desiredFirmwareId String?
   desiredFirmware   AvailableFirmware? @relation(fields: [desiredFirmwareId], references: [id])
 }

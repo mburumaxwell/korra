@@ -15,7 +15,7 @@ struct korra_actuator_config {
    */
   uint16_t duration;
 
-  /** Seconds to wait before the next actuation (range: 5-60) */
+  /** Seconds to wait before the next actuation (range: 3-60) */
   uint16_t equilibrium_time;
 
   /**

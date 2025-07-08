@@ -34,9 +34,7 @@ CREATE TABLE "Device" (
     "usage" "DeviceUsage" NOT NULL,
     "framework" "FirmwareFramework",
     "label" VARCHAR(20) NOT NULL,
-    "enrollmentId" TEXT NOT NULL,
     "certificatePem" TEXT,
-    "provisioned" BOOLEAN NOT NULL DEFAULT false,
     "connected" BOOLEAN NOT NULL DEFAULT false,
     "lastSeen" TIMESTAMP(3),
 
@@ -62,7 +60,6 @@ CREATE TABLE "DeviceFirmware" (
     "deviceId" TEXT NOT NULL,
     "currentVersion" TEXT,
     "desiredVersion" TEXT,
-    "updateRequested" BOOLEAN NOT NULL DEFAULT false,
     "desiredFirmwareId" TEXT,
 
     CONSTRAINT "DeviceFirmware_pkey" PRIMARY KEY ("deviceId")

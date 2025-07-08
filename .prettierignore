@@ -32,3 +32,4 @@ src/components/ui/*
 LICENSE.md
 firmware-pio/*/README
 Korra.Processor*
+website/src/scripts/provisioning

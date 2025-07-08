@@ -89,15 +89,15 @@ app.post('/operational-event', zValidator('json', OperationalEventRequestBodySch
         where: { deviceId },
         create: {
           deviceId,
-          currentVersion: reported.firmware?.version?.semver ?? null,
+          currentVersion: reported.firmware?.version?.semver,
           desiredVersion: null,
-          updateRequested: false,
           desiredFirmwareId: null,
         },
         update: {
-          currentVersion: reported.firmware?.version?.semver ?? null,
+          currentVersion: reported.firmware?.version?.semver,
         },
       });
+      const lastTime = reported.actuator?.last_time ? new Date(reported.actuator?.last_time) : null;
       await prisma.deviceActuator.upsert({
         where: { deviceId },
         create: {
@@ -109,13 +109,13 @@ app.post('/operational-event', zValidator('json', OperationalEventRequestBodySch
           target: null,
 
           count: reported.actuator?.count ?? 0,
-          lastTime: reported.actuator?.last_time ? new Date(reported.actuator?.last_time) : null,
-          totalDuration: reported.actuator?.total_duration ?? null,
+          lastTime,
+          totalDuration: reported.actuator?.total_duration,
         },
         update: {
           count: reported.actuator?.count ?? 0,
-          lastTime: reported.actuator?.last_time ? new Date(reported.actuator?.last_time) : null,
-          totalDuration: reported.actuator?.total_duration ?? null,
+          lastTime,
+          totalDuration: reported.actuator?.total_duration,
         },
       });
     }
