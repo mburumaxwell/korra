@@ -19,6 +19,9 @@ updates:
     groups:
       npm:
         patterns: ['*'] # grouping all to avoid PR noise
+        exclude-patterns: ['@microsoft/applicationinsights-*'] # these are often buggy so we keep them separate below
+      application-insights:
+        patterns: ['@microsoft/applicationinsights-*']
 
   - package-ecosystem: 'dotnet-sdk'
     directory: '/'

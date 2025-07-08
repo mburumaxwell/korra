@@ -131,6 +131,26 @@ resource iotUpdateAccount 'Microsoft.DeviceUpdate/accounts@2023-07-01' = {
   identity: { type: 'UserAssigned', userAssignedIdentities: { '${managedIdentity.id}': {} } }
 }
 
+/* LogAnalytics */
+resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
+  name: name
+  location: location
+  properties: {
+    sku: { name: 'PerGB2018' }
+    workspaceCapping: {
+      dailyQuotaGb: json('0.167') // low so as not to pass the 5GB limit per subscription
+    }
+  }
+}
+
+/* Application Insights */
+resource appInsightsWebsite 'Microsoft.Insights/components@2020-02-02' = {
+  name: name
+  location: location
+  kind: 'web'
+  properties: { Application_Type: 'web', WorkspaceResourceId: logAnalyticsWorkspace.id }
+}
+
 /* Static WebApp */
 resource staticWebApp 'Microsoft.Web/staticSites@2024-11-01' = {
   name: name
@@ -154,18 +174,6 @@ resource staticWebApp 'Microsoft.Web/staticSites@2024-11-01' = {
 }
 
 // custom domain is not mapped here because DNS for maxwellweru.com is controlled in another repo
-
-/* LogAnalytics */
-resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
-  name: name
-  location: location
-  properties: {
-    sku: { name: 'PerGB2018' }
-    workspaceCapping: {
-      dailyQuotaGb: json('0.167') // low so as not to pass the 5GB limit per subscription
-    }
-  }
-}
 
 /* Container App Environment */
 resource appEnvironment 'Microsoft.App/managedEnvironments@2023-05-01' = {
