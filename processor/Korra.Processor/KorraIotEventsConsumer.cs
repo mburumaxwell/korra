@@ -8,7 +8,9 @@ using SC = Korra.Processor.KorraProcessorSerializerContext;
 namespace Korra.Processor;
 
 [ConsumerName(EventHubConsumerClient.DefaultConsumerGroupName)]
-internal class KorraIotEventsConsumer(KorraDashboardClient client, ILogger<KorraIotEventsConsumer> logger) : IEventConsumer<KorraIotHubEvent>
+internal class KorraIotEventsConsumer(KorraDashboardClient dashboardClient,
+                                      TinybirdClient tinybirdClient,
+                                      ILogger<KorraIotEventsConsumer> logger) : IEventConsumer<KorraIotHubEvent>
 {
     public async Task ConsumeAsync(EventContext<KorraIotHubEvent> context, CancellationToken cancellationToken)
     {
@@ -68,7 +70,21 @@ internal class KorraIotEventsConsumer(KorraDashboardClient client, ILogger<Korra
                             deviceId,
                             JsonSerializer.Serialize(telemetry, SC.Default.KorraTelemetry));
         }
-        await client.SendTelemetryAsync(telemetry, cancellationToken);
+        await dashboardClient.SendTelemetryAsync(telemetry, cancellationToken);
+
+        var tinybirdPayload = new System.Text.Json.Nodes.JsonObject
+        {
+            ["id"] = telemetry.Id,
+            // tinybird expects a specific format for date-time
+            ["timestamp"] = telemetry.Created.ToString("yyyy-MM-dd'T'HH:mm:ss"),
+            ["device_id"] = telemetry.DeviceId,
+            ["app_kind"] = telemetry.AppKind.GetEnumMemberAttrValueOrDefault(),
+            ["temperature"] = telemetry.Temperature,
+            ["humidity"] = telemetry.Humidity,
+            ["moisture"] = telemetry.Moisture,
+            ["ph"] = telemetry.PH,
+        };
+        await tinybirdClient.SendAsync("telemetry", tinybirdPayload, cancellationToken);
     }
 
     internal virtual async Task HandleOperationalEventAsync(EventContext context,
@@ -99,6 +115,6 @@ internal class KorraIotEventsConsumer(KorraDashboardClient client, ILogger<Korra
                             ope.DeviceId,
                             JsonSerializer.Serialize(@event, SC.Default.KorraOperationalEvent));
         }
-        await client.SendOperationalEventAsync(@event, cancellationToken);
+        await dashboardClient.SendOperationalEventAsync(@event, cancellationToken);
     }
 }
