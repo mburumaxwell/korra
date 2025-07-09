@@ -18,6 +18,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "test": "vitest",
     "clean": "rimraf .next .turbo out",
     "import-firmware": "NODE_NO_WARNINGS=1 node scripts/import-firmware.ts",
     "import-devices": "NODE_NO_WARNINGS=1 node scripts/import-devices.ts"

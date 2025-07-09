@@ -4,24 +4,33 @@ import type { Metadata, Viewport } from 'next';
 import type { TemplateString } from 'next/dist/lib/metadata/types/metadata-types';
 
 import { Provider } from '@/components';
-import './globals.css';
+import '../../globals.css';
 
 import { siteConfig } from '@/site-config';
 
 const titleTemplate: TemplateString = {
-  default: siteConfig.title,
-  template: `%s | ${siteConfig.title}`,
+  default: siteConfig.dashboard.title,
+  template: `%s | ${siteConfig.dashboard.title}`,
 };
 
 export const metadata: Metadata = {
   title: titleTemplate,
-  description: siteConfig.description,
-  metadataBase: new URL(siteConfig.siteUrl),
+  description: siteConfig.dashboard.description,
+  metadataBase: new URL(`${siteConfig.siteUrl}/dashboard`),
   openGraph: {
     type: 'website',
     title: titleTemplate,
-    description: siteConfig.description,
-    url: siteConfig.siteUrl,
+    description: siteConfig.dashboard.description,
+    url: `${siteConfig.siteUrl}/dashboard`,
+  },
+  robots: {
+    index: false,
+    follow: false,
+    googleBot: {
+      index: false,
+      follow: false,
+      noarchive: true,
+    },
   },
 };
 
