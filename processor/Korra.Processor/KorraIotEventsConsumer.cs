@@ -54,7 +54,7 @@ internal class KorraIotEventsConsumer(KorraDashboardClient dashboardClient,
         {
             Id = telemetryId,
             DeviceId = deviceId,
-            Created = incoming.Created,
+            Created = new DateTimeOffset(incoming.Created, TimeSpan.Zero),
             Received = enqueued?.ToUniversalTime(),
             AppKind = appKind,
             // we assume the units for this do not vary, otherwise we would need to convert
