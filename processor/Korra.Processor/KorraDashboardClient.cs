@@ -54,6 +54,9 @@ public class KorraOperationalEvent
 
     [JsonPropertyName("sequence_number")]
     public required string? SequenceNumber { get; set; }
+
+    [JsonPropertyName("received")]
+    public required DateTimeOffset? Received { get; set; }
 }
 
 [JsonConverter(typeof(JsonStringEnumMemberConverter<KorraOperationalEventType>))]

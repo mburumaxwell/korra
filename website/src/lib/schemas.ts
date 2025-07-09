@@ -111,6 +111,7 @@ export const OperationalEventRequestBodySchema = z.object({
   type: z.enum(['connected', 'disconnected', 'twin.updated']),
   device_id: z.string(),
   sequence_number: z.string().nullish(),
+  received: z.coerce.date().nullish(),
 });
 export type OperationalEventRequestBody = z.infer<typeof OperationalEventRequestBodySchema>;
 
