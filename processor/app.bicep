@@ -51,6 +51,9 @@ resource processor 'Microsoft.App/jobs@2025-01-01' = {
         { name: 'dashboard-endpoint', value: 'https://korra.maxwellweru.com' } // easier to override as a secret in the Azure portal
         #disable-next-line use-secure-value-for-secure-inputs
         { name: 'dashboard-api-key', value: '#{PROCESSOR_API_KEY}#' }
+
+        #disable-next-line use-secure-value-for-secure-inputs
+        { name: 'tinybird-token', value: '#{TINYBIRD_TOKEN}#' }
       ]
     }
     template: {
@@ -71,6 +74,8 @@ resource processor 'Microsoft.App/jobs@2025-01-01' = {
             { name: 'IotHub__EventHubs__Checkpoints__HubName', value: iotHub.properties.eventHubEndpoints.events.path }
             { name: 'Dashboard__Endpoint', secretRef: 'dashboard-endpoint' }
             { name: 'Dashboard__ApiKey', secretRef: 'dashboard-api-key' }
+
+            { name: 'Tinybird__Token', secretRef: 'tinybird-token' }
 
             // run for 5 seconds less than the replica timeout, to complete gracefully
             { name: 'JOB_DURATION_SECONDS', value: string(replicaTimeout - 5) }

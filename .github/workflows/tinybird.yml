@@ -1,0 +1,73 @@
+name: Tinybird
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - tinybird/**
+      - .github/workflows/tinybird.yml
+  pull_request:
+    branches: [main]
+    paths:
+      - tinybird/**
+      - .github/workflows/tinybird.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  TINYBIRD_HOST: 'https://api.europe-west2.gcp.tinybird.co'
+  TINYBIRD_TOKEN: ${{ secrets.TINYBIRD_TOKEN }}
+
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    defaults:
+      run:
+        working-directory: tinybird
+
+    services:
+      tinybird:
+        image: tinybirdco/tinybird-local:latest
+        ports:
+          - 7181:7181
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Upload Artifact (tinybird)
+        uses: actions/upload-artifact@v4
+        with:
+          path: tinybird
+          name: tinybird
+          retention-days: 1
+
+      - name: Install Tinybird CLI
+        run: curl https://tinybird.co | sh
+
+      - name: Build project
+        if: ${{ github.ref != 'refs/heads/main' }}
+        run: tb build
+
+      - name: Test project
+        if: ${{ github.ref != 'refs/heads/main' }}
+        run: tb test run
+
+      - name: Deployment check
+        if: ${{ github.ref != 'refs/heads/main' }}
+        run: tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deploy --check
+
+      - name: Deploy project
+        if: ${{ github.ref == 'refs/heads/main' }}
+        run: tb --cloud --host ${{ env.TINYBIRD_HOST }} --token ${{ env.TINYBIRD_TOKEN }} deploy
+        # run: tb --cloud deploy --allow-destructive-operations

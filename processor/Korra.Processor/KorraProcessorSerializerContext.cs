@@ -7,6 +7,7 @@ namespace Korra.Processor;
 [JsonSerializable(typeof(KorraIotHubTelemetry))]
 [JsonSerializable(typeof(KorraOperationalEvent))]
 [JsonSerializable(typeof(KorraDashboardResponse))]
+[JsonSerializable(typeof(System.Text.Json.Nodes.JsonObject))]
 
 [JsonSourceGenerationOptions(
     AllowTrailingCommas = true,

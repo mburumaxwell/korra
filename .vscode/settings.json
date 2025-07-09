@@ -26,7 +26,8 @@
         "printk",
         "procpu",
         "RSSI",
-        "SNTP"
+        "SNTP",
+        "Tinybird"
     ],
     "yaml.format.singleQuote": true
 }
