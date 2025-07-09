@@ -11,6 +11,8 @@
     "prisma:format": "pnpm prisma format",
     "prebuild": "pnpm run prisma:generate",
     "predev": "pnpm run prisma:generate",
+    "ui:diff": "shadcn diff",
+    "ui:generate": "shadcn add badge button table --overwrite",
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
