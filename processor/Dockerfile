@@ -8,11 +8,6 @@ RUN case "$TARGETPLATFORM" in \
         "linux/arm64") cp /binaries/linux-arm64/Korra.Processor /bin/Korra.Processor ;; \
         *) echo "Unsupported: $TARGETPLATFORM" && exit 1 ;; \
     esac
-RUN case "$TARGETPLATFORM" in \
-        "linux/amd64") cp /binaries/linux-x64/appsettings.json /bin/appsettings.json ;; \
-        "linux/arm64") cp /binaries/linux-arm64/appsettings.json /bin/appsettings.json ;; \
-        *) echo "Unsupported: $TARGETPLATFORM" && exit 1 ;; \
-    esac
 
 # remove binaries we don't need
 RUN rm -rf /binaries

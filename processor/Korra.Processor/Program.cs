@@ -1,28 +1,46 @@
 ﻿using Azure.Identity;
 using Korra.Processor;
+using Microsoft.Extensions.Configuration.Json;
+using Microsoft.Extensions.Configuration.Memory;
 using Tingle.EventBus.Configuration;
 using SC = Korra.Processor.KorraProcessorSerializerContext;
 
 var builder = Host.CreateApplicationBuilder();
 
-builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
+// Not using the appsettings.json file to max portability.
+// Add in memory config just after it so that secrets and ENV can override as would be the case if using it normally.
+var inMemConfigSource = new MemoryConfigurationSource
 {
-    ["Logging:LogLevel:Default"] = "Information",
-    ["Logging:LogLevel:Microsoft"] = "Warning",
-    ["Logging:LogLevel:Microsoft.Hosting.Lifetime"] = "Information",
-    ["Logging:LogLevel:System.Net.Http"] = "Warning",
-    ["Logging:LogLevel:Tingle.EventBus"] = "Warning",
-    // ["Logging:Debug:LogLevel:Default"] = "None",
+    InitialData = new Dictionary<string, string?>
+    {
+        ["Logging:LogLevel:Default"] = "Information",
+        ["Logging:LogLevel:Microsoft"] = "Warning",
+        ["Logging:LogLevel:Microsoft.Hosting.Lifetime"] = "Information",
+        ["Logging:LogLevel:System.Net.Http"] = "Warning",
+        ["Logging:LogLevel:Tingle.EventBus"] = "Warning",
+        // ["Logging:Debug:LogLevel:Default"] = "None",
 
-    ["Logging:LogLevel:Korra.Processor"] = "Information",
-    ["Logging:LogLevel:System.Net.Http.HttpClient"] = "None", // removes all, add what we need later
+        ["Logging:LogLevel:Korra.Processor"] = "Information",
+        ["Logging:LogLevel:System.Net.Http.HttpClient"] = "None", // removes all, add what we need later
 
-    ["Logging:Console:FormatterName"] = "cli",
-    ["Logging:Console:FormatterOptions:SingleLine"] = "True",
-    ["Logging:Console:FormatterOptions:IncludeCategory"] = "False",
-    ["Logging:Console:FormatterOptions:IncludeEventId"] = "False",
-    ["Logging:Console:FormatterOptions:TimestampFormat"] = "yyyy-MM-dd HH:mm:ss ",
-});
+        ["Logging:Console:FormatterName"] = "cli",
+        ["Logging:Console:FormatterOptions:SingleLine"] = "True",
+        ["Logging:Console:FormatterOptions:IncludeCategory"] = "False",
+        ["Logging:Console:FormatterOptions:IncludeEventId"] = "False",
+        ["Logging:Console:FormatterOptions:TimestampFormat"] = "yyyy-MM-dd HH:mm:ss ",
+
+        ["BlobStorage:Endpoint"] = "http://127.0.0.1:10000/devstoreaccount1",
+        ["IotHub:EventHubs:ConnectionString"] = "Endpoint=sb://abcd.servicebus.windows.net/;SharedAccessKeyName=xyz;SharedAccessKey=AAAAAAAAAAAAAAAAAAAAAA==",
+        ["IotHub:EventHubs:Checkpoints:BlobContainerName"] = "iothub-checkpoints-dev",
+        ["IotHub:EventHubs:HubName"] = "iothub-ehub-test-dev-0000000-0aaaa000aa",
+        ["Dashboard:Endpoint"] = "http://localhost:3000",
+        ["Dashboard:ApiKey"] = "overridden-in-secrets-or-env",
+        ["Tinybird:Token"] = "overridden-in-secrets-or-env",
+    },
+};
+var index = builder.Configuration.Sources.IndexOf(
+    builder.Configuration.Sources.OfType<JsonConfigurationSource>().Single(cs => cs.Path == "appsettings.json"));
+builder.Configuration.Sources.Insert(index + 1, inMemConfigSource);
 
 // Configure logging
 builder.Logging.AddCliConsole();
