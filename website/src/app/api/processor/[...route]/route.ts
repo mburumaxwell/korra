@@ -93,39 +93,44 @@ app.post('/operational-event', zValidator('json', OperationalEventRequestBodySch
     const twin = KorraDeviceTwinSchema.parse((await registry.getTwin(deviceId)).responseBody);
     if (twin) {
       const reported = twin.properties.reported;
-      await prisma.deviceFirmware.upsert({
-        where: { deviceId },
-        create: {
-          deviceId,
-          currentVersion: reported.firmware?.version?.semver,
-          desiredVersion: null,
-          desiredFirmwareId: null,
-        },
-        update: {
-          currentVersion: reported.firmware?.version?.semver,
-        },
-      });
-      const lastTime = reported.actuator?.last_time ? new Date(reported.actuator?.last_time) : null;
-      await prisma.deviceActuator.upsert({
-        where: { deviceId },
-        create: {
-          deviceId,
+      if (reported.firmware !== undefined) { // checking undefined not null because null is used to unset
+        await prisma.deviceFirmware.upsert({
+          where: { deviceId },
+          create: {
+            deviceId,
+            currentVersion: reported.firmware?.version?.semver,
+            desiredVersion: null,
+            desiredFirmwareId: null,
+          },
+          update: {
+            currentVersion: reported.firmware?.version?.semver,
+          },
+        });
+      }
 
-          enabled: false,
-          duration: null,
-          equilibriumTime: null,
-          target: null,
+      if (reported.actuator !== undefined) { // checking undefined not null because null is used to unset
+        const lastTime = reported.actuator?.last_time ? new Date(reported.actuator?.last_time) : null;
+        await prisma.deviceActuator.upsert({
+          where: { deviceId },
+          create: {
+            deviceId,
 
-          count: reported.actuator?.count ?? 0,
-          lastTime,
-          totalDuration: reported.actuator?.total_duration,
-        },
-        update: {
-          count: reported.actuator?.count ?? 0,
-          lastTime,
-          totalDuration: reported.actuator?.total_duration,
-        },
-      });
+            enabled: false,
+            duration: null,
+            equilibriumTime: null,
+            target: null,
+
+            count: reported.actuator?.count ?? 0,
+            lastTime,
+            totalDuration: reported.actuator?.total_duration,
+          },
+          update: {
+            count: reported.actuator?.count ?? 0,
+            lastTime,
+            totalDuration: reported.actuator?.total_duration,
+          },
+        });
+      }
     }
   }
 
