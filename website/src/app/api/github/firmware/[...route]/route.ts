@@ -9,7 +9,6 @@ import { AvailableFirmwareRequestBodySchema } from '@/lib/schemas';
 export const dynamic = 'force-dynamic';
 
 const app = new Hono().basePath('/api/github/firmware');
-
 app.use('/*', bearerAuth({ token: `${process.env.FIRMWARE_API_KEY}` }));
 
 app.post('', zValidator('json', AvailableFirmwareRequestBodySchema), async (context) => {

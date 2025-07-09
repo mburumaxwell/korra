@@ -10,7 +10,6 @@ import { prisma } from '@/lib/prisma';
 export const dynamic = 'force-dynamic';
 
 const app = new Hono().basePath('/api/processor');
-
 app.use('/*', bearerAuth({ token: `${process.env.PROCESSOR_API_KEY}` }));
 
 app.post('/telemetry', zValidator('json', TelemetryRequestBodySchema), async (context) => {
