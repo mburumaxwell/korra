@@ -66,6 +66,8 @@ jobs:
       - name: Build
         run: pnpm build
         working-directory: '${{ github.workspace }}/website'
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }} # needed for prebuild script (generates types)
 
       - name: Lint
         run: pnpm lint
