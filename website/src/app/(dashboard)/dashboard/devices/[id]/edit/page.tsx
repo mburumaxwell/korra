@@ -2,6 +2,8 @@ import { notFound } from 'next/navigation';
 
 import { getDevice } from '@/actions';
 
+export const revalidate = 0; // no caching
+
 interface EditDevicePageProps {
   params: Promise<{ id: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
