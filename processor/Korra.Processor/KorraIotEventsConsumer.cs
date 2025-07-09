@@ -64,11 +64,10 @@ internal class KorraIotEventsConsumer(KorraDashboardClient dashboardClient,
             PH = incoming.PH?.Value,
         };
 
+        logger.LogInformation("Forwarding Telemetry from {DeviceId} (dated: {Created:o})", deviceId, telemetry.Created);
         if (logger.IsEnabled(LogLevel.Debug))
         {
-            logger.LogDebug("Forwarding Telemetry from {DeviceId}\r\n{Telemetry}",
-                            deviceId,
-                            JsonSerializer.Serialize(telemetry, SC.Default.KorraTelemetry));
+            logger.LogDebug("{Telemetry}", JsonSerializer.Serialize(telemetry, SC.Default.KorraTelemetry));
         }
         await dashboardClient.SendTelemetryAsync(telemetry, cancellationToken);
 
@@ -109,11 +108,10 @@ internal class KorraIotEventsConsumer(KorraDashboardClient dashboardClient,
             SequenceNumber = ope.Payload.SequenceNumber,
         };
 
+        logger.LogInformation("Forwarding Operational Event for {DeviceId}", ope.DeviceId);
         if (logger.IsEnabled(LogLevel.Debug))
         {
-            logger.LogDebug("Forwarding Operational Event for {DeviceId}\r\n{Event}",
-                            ope.DeviceId,
-                            JsonSerializer.Serialize(@event, SC.Default.KorraOperationalEvent));
+            logger.LogDebug("{Event}", JsonSerializer.Serialize(@event, SC.Default.KorraOperationalEvent));
         }
         await dashboardClient.SendOperationalEventAsync(@event, cancellationToken);
     }
