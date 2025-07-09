@@ -6,22 +6,22 @@ import type { TemplateString } from 'next/dist/lib/metadata/types/metadata-types
 import { Provider } from '@/components';
 import '../../globals.css';
 
-import { siteConfig } from '@/site-config';
+import { config } from '@/site-config';
 
 const titleTemplate: TemplateString = {
-  default: siteConfig.dashboard.title,
-  template: `%s | ${siteConfig.dashboard.title}`,
+  default: config.dashboard.title,
+  template: `%s | ${config.dashboard.title}`,
 };
 
 export const metadata: Metadata = {
   title: titleTemplate,
-  description: siteConfig.dashboard.description,
-  metadataBase: new URL(`${siteConfig.siteUrl}/dashboard`),
+  description: config.dashboard.description,
+  metadataBase: new URL(`${config.siteUrl}/dashboard`),
   openGraph: {
     type: 'website',
     title: titleTemplate,
-    description: siteConfig.dashboard.description,
-    url: `${siteConfig.siteUrl}/dashboard`,
+    description: config.dashboard.description,
+    url: `${config.siteUrl}/dashboard`,
   },
   robots: {
     index: false,
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: siteConfig.themeColor,
+  themeColor: config.themeColor,
   width: 'device-width',
   initialScale: 1,
 };

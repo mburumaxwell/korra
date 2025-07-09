@@ -2,7 +2,7 @@ import { getSiteUrl } from '@/lib/environment';
 
 const siteUrl = getSiteUrl({ defaultValue: 'https://korra.maxwellweru.com' });
 
-export const siteConfig = {
+export const config = {
   siteUrl: siteUrl.replace(/\/$/, ''),
   themeColor: '#264C3F',
   title: 'Korra',

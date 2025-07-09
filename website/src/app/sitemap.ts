@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next';
 
-import { siteConfig } from '@/site-config';
+import { config } from '@/site-config';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   type Route = MetadataRoute.Sitemap[number];
@@ -10,7 +10,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/contact',
   ].map(
     (route): Route => ({
-      url: `${siteConfig.siteUrl}${route}`,
+      url: `${config.siteUrl}${route}`,
       // lastModified: new Date().toISOString(),
       changeFrequency: 'daily',
       priority: 0.5,

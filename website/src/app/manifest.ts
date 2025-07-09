@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next';
 
-import { siteConfig } from '@/site-config';
+import { config } from '@/site-config';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
@@ -8,7 +8,7 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: 'Korra',
     start_url: '/',
     background_color: '#F6F9FC',
-    theme_color: siteConfig.themeColor,
+    theme_color: config.themeColor,
     display: 'standalone',
     icons: [
       {

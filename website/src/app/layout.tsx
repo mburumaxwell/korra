@@ -6,27 +6,27 @@ import type { TemplateString } from 'next/dist/lib/metadata/types/metadata-types
 import { Provider } from '@/components';
 import './globals.css';
 
-import { siteConfig } from '@/site-config';
+import { config } from '@/site-config';
 
 const titleTemplate: TemplateString = {
-  default: siteConfig.title,
-  template: `%s | ${siteConfig.title}`,
+  default: config.title,
+  template: `%s | ${config.title}`,
 };
 
 export const metadata: Metadata = {
   title: titleTemplate,
-  description: siteConfig.description,
-  metadataBase: new URL(siteConfig.siteUrl),
+  description: config.description,
+  metadataBase: new URL(config.siteUrl),
   openGraph: {
     type: 'website',
     title: titleTemplate,
-    description: siteConfig.description,
-    url: siteConfig.siteUrl,
+    description: config.description,
+    url: config.siteUrl,
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: siteConfig.themeColor,
+  themeColor: config.themeColor,
   width: 'device-width',
   initialScale: 1,
 };
