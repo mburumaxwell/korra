@@ -6,7 +6,7 @@ import type { TemplateString } from 'next/dist/lib/metadata/types/metadata-types
 import { Provider } from '@/components';
 import './globals.css';
 
-import { config } from '@/site-config';
+import { config, socials } from '@/site-config';
 
 const titleTemplate: TemplateString = {
   default: config.title,
@@ -22,6 +22,11 @@ export const metadata: Metadata = {
     title: titleTemplate,
     description: config.description,
     url: config.siteUrl,
+  },
+  twitter: {
+    card: 'summary_large_image',
+    creator: `@${socials.twitter.username}`,
+    site: `@${socials.twitter.username}`,
   },
 };
 

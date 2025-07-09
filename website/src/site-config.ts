@@ -13,3 +13,23 @@ export const config = {
     description: 'Management dashboard for Korra',
   },
 };
+
+// just me, because this is a toy/showcase, no need for dedicated handles
+export const socials = {
+  twitter: {
+    username: 'maxwellweru',
+    url: 'https://twitter.com/maxwellweru',
+  },
+  linkedin: {
+    username: 'maxwellweru',
+    url: 'https://www.linkedin.com/in/maxwellweru',
+  },
+  youtube: {
+    channel: 'mburumaxwell',
+    url: 'https://youtube.com/c/mburumaxwell',
+  },
+  github: {
+    username: 'mburumaxwell',
+    url: 'https://github.com/mburumaxwell',
+  },
+};
