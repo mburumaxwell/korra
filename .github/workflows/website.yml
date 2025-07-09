@@ -2,12 +2,13 @@ name: Website
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    tags: ['website@*']
-    paths:
-      - 'website/**'
-      - '.github/workflows/website.yml'
+  # these is commented out because SWA turned out messy so I set up on Vercel. I might restore it when/if I have time.
+  # push:
+  #   branches: [main]
+  #   tags: ['website@*']
+  #   paths:
+  #     - 'website/**'
+  #     - '.github/workflows/website.yml'
   pull_request:
     branches: [main]
     paths:

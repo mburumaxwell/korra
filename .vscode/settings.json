@@ -27,7 +27,8 @@
         "procpu",
         "RSSI",
         "SNTP",
-        "Tinybird"
+        "Tinybird",
+        "Vercel"
     ],
     "yaml.format.singleQuote": true
 }
