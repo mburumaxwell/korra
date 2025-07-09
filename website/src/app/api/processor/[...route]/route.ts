@@ -14,7 +14,6 @@ app.use('/*', bearerAuth({ token: `${process.env.PROCESSOR_API_KEY}` }));
 
 app.post('/telemetry', zValidator('json', TelemetryRequestBodySchema), async (context) => {
   const telemetry = context.req.valid('json');
-  console.log('Received telemetry', telemetry);
 
   const { id, device_id: deviceId, app_kind: kind } = telemetry;
   const device = await prisma.device.findUnique({ where: { id: deviceId } });
