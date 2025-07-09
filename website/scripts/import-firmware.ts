@@ -1,8 +1,8 @@
 import path from 'node:path';
 import * as semver from 'semver';
 import { z } from 'zod/v4';
+import dotenv from 'dotenv-flow';
 
-import { prisma } from '../src/lib/prisma/index.ts';
 import { type KorraBoardType, type KorraFirmwareFramework, type KorraUsageType } from '../src/lib/schemas.ts';
 
 const GithubReleaseSchema = z.object({
@@ -28,6 +28,8 @@ function getAppVersionNumber(value: string) {
 }
 
 async function importFirmware() {
+  dotenv.config();
+  const { prisma } = await import('../src/lib/prisma/index.ts');
   const response = await fetch('https://api.github.com/repos/mburumaxwell/korra/releases');
   const releasesData = await response.json();
   const releases = GithubReleaseSchema.array().parse(releasesData);
