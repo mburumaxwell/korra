@@ -48,6 +48,7 @@ builder.Logging.AddCliConsole();
 // Add client for sending events to the dashboard
 builder.Services.AddHttpApiClient<KorraDashboardClient, KorraDashboardClientOptions>()
                 .AddApiKeyHeaderAuthenticationHandler(builder.Configuration["Dashboard:ApiKey"]!, "Bearer")
+                .AddUserAgentVersionHandler<KorraDashboardClient>("korra-processor", clear: true)
                 .ConfigureHttpClient(client =>
                 {
                     client.BaseAddress = new Uri(builder.Configuration["Dashboard:Endpoint"]!, UriKind.Absolute);
@@ -58,6 +59,7 @@ builder.Services.AddHttpApiClient<KorraDashboardClient, KorraDashboardClientOpti
 builder.Services.Configure<TinybirdClientOptions>(options => options.Token = builder.Configuration["Tinybird:Token"])
                 .ConfigureOptions<TinybirdClientConfigureOptions>()
                 .AddHttpApiClient<TinybirdClient, TinybirdClientOptions>()
+                .AddUserAgentVersionHandler<TinybirdClient>("korra-processor", clear: true)
                 .ConfigureHttpClient(client => client.BaseAddress = new Uri("https://api.europe-west2.gcp.tinybird.co"));
 
 builder.Services.AddSlimEventBus(eb =>
