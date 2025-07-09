@@ -1,0 +1,323 @@
+'use client';
+
+import { Copy } from 'lucide-react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+
+import type { BucketedDeviceTelemetry, DisplayableDevice } from '@/actions';
+import { getDeviceIcon, getNetworkIcon } from '@/components/devices';
+import { TelemetryChart, type TelemetryChartConfig } from '@/components/telemetry-chart';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { granularityOptions, timeRangeOptions, type Granularity, type TimeRange } from '@/lib/aggregation';
+import { copyToClipboard } from '@/lib/utils';
+import Link from 'next/link';
+
+export function DeviceViewHeader({ device }: { device: DisplayableDevice }) {
+  const DeviceIcon = getDeviceIcon(device.usage);
+  return (
+    <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-2">
+        <DeviceIcon className="w-6 h-6 text-muted-foreground" />
+        <h1 className="text-3xl font-bold">{device.label}</h1>
+        <Badge variant="outline" className="text-sm">
+          {device.usage}
+        </Badge>
+      </div>
+    </div>
+  );
+}
+
+export function DeviceInformation({ device }: { device: DisplayableDevice }) {
+  const NetworkIcon = getNetworkIcon(device.network?.kind);
+  const { latestTelemetry } = device;
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Device Information</CardTitle>
+        <CardDescription>Current status and configuration details</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {/* Device ID */}
+          <div className="space-y-2">
+            <h3 className="text-sm font-medium text-muted-foreground">Device ID</h3>
+            <div className="flex items-center space-x-2">
+              <p className="text-sm font-mono truncate">{device.id}</p>
+              <Button variant="ghost" size="sm" onClick={() => copyToClipboard(device.id)} className="h-6 w-6 p-0">
+                <Copy className="w-3 h-3" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Status */}
+          <div className="space-y-2">
+            <h3 className="text-sm font-medium text-muted-foreground">Status</h3>
+            <Badge variant={device.connected ? 'default' : 'destructive'} className="text-sm">
+              {device.connected ? 'Online' : 'Offline'}
+            </Badge>
+          </div>
+
+          {/* Last Seen */}
+          <div className="space-y-2">
+            <h3 className="text-sm font-medium text-muted-foreground">Last Seen</h3>
+            {/* suppressHydrationWarning is set because SSR and client render tend to produce different results */}
+            <p className="text-sm" suppressHydrationWarning>
+              {device.lastSeen?.toLocaleString()}
+            </p>
+          </div>
+
+          {/* Board */}
+          <div className="space-y-2">
+            <h3 className="text-sm font-medium text-muted-foreground">Board</h3>
+            <Link href={`/boards/${device.board}`} className="underline-offset-4 hover:underline" target="_blank">
+              <p className="text-sm font-mono truncate">{device.board}</p>
+            </Link>
+          </div>
+
+          {/* Framework */}
+          {device.framework && (
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium text-muted-foreground">Framework</h3>
+              <Link
+                href={`/frameworks/${device.framework}`}
+                className="underline-offset-4 hover:underline"
+                target="_blank"
+              >
+                <p className="text-sm font-mono truncate">{device.framework}</p>
+              </Link>
+            </div>
+          )}
+
+          {/* Firmware */}
+          <div className="space-y-2">
+            <h3 className="text-sm font-medium text-muted-foreground">Firmware</h3>
+            <p className="text-sm font-mono">
+              {device.firmware?.currentVersion ? `v${device.firmware?.currentVersion}` : '—'}
+            </p>
+          </div>
+
+          {/* Network Type */}
+          <div className="space-y-2">
+            <h3 className="text-sm font-medium text-muted-foreground">Network Type</h3>
+            <div className="flex items-center space-x-2">
+              <NetworkIcon className="w-4 h-4" />
+              <span className="text-sm capitalize">{device.network?.kind || 'Unknown'}</span>
+            </div>
+          </div>
+
+          {/* Local IP Address */}
+          <div className="space-y-2">
+            <h3 className="text-sm font-medium text-muted-foreground">Local IP Address</h3>
+            <div className="flex items-center space-x-2">
+              <p className="text-sm font-mono">{device.network?.local_ip || '—'}</p>
+              {device.network?.local_ip && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => copyToClipboard(device.network!.local_ip!)}
+                  className="h-6 w-6 p-0"
+                >
+                  <Copy className="w-3 h-3" />
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {/* MAC Address */}
+          <div className="space-y-2">
+            <h3 className="text-sm font-medium text-muted-foreground">MAC Address</h3>
+            <div className="flex items-center space-x-2">
+              <p className="text-sm font-mono">{device.network?.mac || '—'}</p>
+              {device.network?.mac && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => copyToClipboard(device.network!.mac!)}
+                  className="h-6 w-6 p-0"
+                >
+                  <Copy className="w-3 h-3" />
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {/* Network Name */}
+          {device.network?.name && (
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium text-muted-foreground">Network Name</h3>
+              <p className="text-sm">{device.network.name}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Current Sensor Values */}
+        <Separator />
+        <div>
+          <h3 className="text-lg font-medium mb-4">Current Sensor Values</h3>
+          <div className="h-4 w-full" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {device.usage === 'keeper' ? (
+              <>
+                <div className="p-4 border rounded-lg">
+                  <h4 className="text-sm font-medium text-muted-foreground">Temperature</h4>
+                  <p className="text-2xl font-bold">
+                    {latestTelemetry?.temperature ? `${latestTelemetry?.temperature}°C` : '—'}
+                  </p>
+                </div>
+                <div className="p-4 border rounded-lg">
+                  <h4 className="text-sm font-medium text-muted-foreground">Humidity</h4>
+                  <p className="text-2xl font-bold">
+                    {latestTelemetry?.humidity ? `${latestTelemetry?.humidity}% RH` : '—'}
+                  </p>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="p-4 border rounded-lg">
+                  <h4 className="text-sm font-medium text-muted-foreground">Soil Moisture</h4>
+                  <p className="text-2xl font-bold">
+                    {latestTelemetry?.moisture ? `${latestTelemetry?.moisture}%` : '—'}
+                  </p>
+                </div>
+                <div className="p-4 border rounded-lg">
+                  <h4 className="text-sm font-medium text-muted-foreground">pH Level</h4>
+                  <p className="text-2xl font-bold">{latestTelemetry?.ph ? `${latestTelemetry?.ph}` : '—'}</p>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+type DeviceViewHistoryChartProps = {
+  device: DisplayableDevice;
+  defaultRange: TimeRange;
+  defaultGranularity: Granularity;
+  telemetries: BucketedDeviceTelemetry[];
+};
+
+export function DeviceViewHistoryChart({
+  device,
+  defaultRange,
+  defaultGranularity,
+  telemetries,
+}: DeviceViewHistoryChartProps) {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const range = (searchParams.get('range') as TimeRange) ?? defaultRange;
+  const granularity = (searchParams.get('granularity') as Granularity) ?? defaultGranularity;
+
+  function updateParams(updates: { range?: string; granularity?: string }) {
+    const params = new URLSearchParams(Array.from(searchParams.entries()));
+    if (updates.range != null) params.set('range', updates.range);
+    if (updates.granularity != null) params.set('granularity', updates.granularity);
+    router.push(pathname + '?' + params.toString());
+  }
+
+  function formatTimestamp(date: Date) {
+    if (range === '1h' || range === '6h') {
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+    return date.toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  }
+
+  const metrics: TelemetryChartConfig[] = [];
+  if (device.usage === 'keeper') {
+    metrics.push(
+      ...([
+        {
+          key: 'temperature',
+          title: 'Temperature (°C)',
+          // domain: ['dataMin - 2', 'dataMax + 2'],
+          domain: [-1, 50], // fixed from –1°C up to 50°C
+          decimals: 1,
+          suffix: '°C',
+        },
+        {
+          key: 'humidity',
+          title: 'Humidity (% RH)',
+          domain: [0, 100],
+          decimals: 1,
+          suffix: '%',
+        },
+      ] satisfies TelemetryChartConfig[]),
+    );
+  } else if (device.usage === 'pot') {
+    metrics.push(
+      ...([
+        {
+          key: 'moisture',
+          title: 'Soil Moisture (%)',
+          domain: [0, 100],
+          decimals: 1,
+          suffix: '%',
+        },
+        {
+          key: 'ph',
+          title: 'pH Level',
+          domain: [5, 8],
+          decimals: 2,
+          suffix: '',
+        },
+      ] satisfies TelemetryChartConfig[]),
+    );
+  }
+
+  return (
+    <>
+      {/* Chart Controls */}
+      <Card>
+        <CardHeader>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
+            <div>
+              <CardTitle>Sensor Data</CardTitle>
+              <CardDescription>Historical sensor readings over time</CardDescription>
+            </div>
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+              <Select value={range} onValueChange={(value: TimeRange) => updateParams({ range: value })}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {timeRangeOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={granularity} onValueChange={(value: Granularity) => updateParams({ granularity: value })}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {granularityOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            {metrics.map((cfg) => (
+              <TelemetryChart key={cfg.key} data={telemetries} tickFormatter={formatTimestamp} config={cfg} />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </>
+  );
+}

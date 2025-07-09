@@ -47,7 +47,13 @@ export async function getDevice(id: string): Promise<DisplayableDevice> {
     where: { id: id },
     include: { firmware: true, network: true },
   });
-  return device;
+  const latestTelemetry = await prisma.deviceTelemetry.findFirst({
+    where: { deviceId: device.id },
+    orderBy: { created: 'desc' },
+    take: 1,
+  });
+
+  return { ...device, latestTelemetry };
 }
 
 // export async function createDevice(device: Omit<Device, "id" | "lastSeen">): Promise<Device> {
@@ -66,3 +72,80 @@ export async function getDevice(id: string): Promise<DisplayableDevice> {
 // export async function deleteDevice(id: string): Promise<boolean> {
 //   return true
 // }
+
+export type BucketedDeviceTelemetry = {
+  bucket: Date;
+  temperature: number | null;
+  humidity: number | null;
+  ph: number | null;
+  moisture: number | null;
+};
+
+export type GetDeviceTelemetriesProps = {
+  deviceId: string;
+  start: Date;
+  end: Date;
+  granularity: number;
+};
+
+export async function getDeviceTelemetries(props: GetDeviceTelemetriesProps): Promise<BucketedDeviceTelemetry[]> {
+  // fetch all points in window
+  const { deviceId, start, end, granularity } = props;
+  const telemetries = await prisma.deviceTelemetry.findMany({
+    where: { deviceId, created: { gte: start, lte: end } },
+  });
+
+  // bucket accumulators
+  type Agg = { sum: number; count: number };
+  const buckets = new Map<number, { temperature: Agg; humidity: Agg; ph: Agg; moisture: Agg }>();
+
+  // // 2) Bucket & average
+  for (const { created, temperature, humidity, moisture, ph } of telemetries) {
+    const offsetMs = created.getTime() - start.getTime();
+    const bucketIndex = Math.floor(offsetMs / granularity);
+    const bucketStartMs = start.getTime() + bucketIndex * granularity;
+
+    let agg = buckets.get(bucketStartMs);
+    if (!agg) {
+      agg = {
+        temperature: { sum: 0, count: 0 },
+        humidity: { sum: 0, count: 0 },
+        ph: { sum: 0, count: 0 },
+        moisture: { sum: 0, count: 0 },
+      };
+      buckets.set(bucketStartMs, agg);
+    }
+
+    if (temperature != null) {
+      agg.temperature.sum += temperature;
+      agg.temperature.count += 1;
+    }
+    if (humidity != null) {
+      agg.humidity.sum += humidity;
+      agg.humidity.count += 1;
+    }
+    if (ph != null) {
+      agg.ph.sum += ph;
+      agg.ph.count += 1;
+    }
+    if (moisture != null) {
+      agg.moisture.sum += moisture;
+      agg.moisture.count += 1;
+    }
+  }
+
+  // turn into sorted array of averages
+  const result: BucketedDeviceTelemetry[] = Array.from(buckets.entries())
+    .map(
+      ([ms, { temperature: temp, humidity: humid, ph, moisture: moist }]): BucketedDeviceTelemetry => ({
+        bucket: new Date(ms),
+        temperature: temp.count > 0 ? temp.sum / temp.count : null,
+        humidity: humid.count > 0 ? humid.sum / humid.count : null,
+        ph: ph.count > 0 ? ph.sum / ph.count : null,
+        moisture: moist.count > 0 ? moist.sum / moist.count : null,
+      }),
+    )
+    .sort((a, b) => a.bucket.getTime() - b.bucket.getTime());
+
+  return result;
+}

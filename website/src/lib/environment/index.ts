@@ -48,10 +48,10 @@ function getEnvironment(): Environment {
 
 export const environment = getEnvironment();
 
-export interface SiteUrlOptions {
+export type SiteUrlOptions = {
   /** The default URL to use if no other URL is found. */
   defaultValue: string;
-}
+};
 
 export function getSiteUrl({ defaultValue }: SiteUrlOptions): string {
   const { development, main } = environment;

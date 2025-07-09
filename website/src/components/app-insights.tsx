@@ -4,12 +4,12 @@ import { AppInsightsContext, ReactPlugin } from '@microsoft/applicationinsights-
 import { ApplicationInsights, type ITelemetryItem } from '@microsoft/applicationinsights-web';
 import React, { useEffect, useState } from 'react';
 
-export interface ApplicationInsightsProviderProps {
+export type ApplicationInsightsProviderProps = {
   connectionString?: string;
   disabled?: boolean;
   initializers?: ((item: ITelemetryItem) => boolean | void)[];
   children: React.ReactNode;
-}
+};
 
 /**
  * This Component provides telemetry with Azure App Insights

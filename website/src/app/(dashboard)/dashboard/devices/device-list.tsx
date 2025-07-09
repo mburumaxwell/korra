@@ -1,10 +1,11 @@
 'use client';
 
-import { Cable, Copy, Edit, Flower2, House, Plus, Smartphone, Trash2, Wifi } from 'lucide-react';
+import { Copy, Edit, Plus, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
 
 import type { DisplayableDevice } from '@/actions';
+import { getDeviceIcon, getNetworkIcon } from '@/components/devices';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,14 +20,12 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Tooltip, TooltipContent } from '@/components/ui/tooltip';
-import { type KorraNetworkKind } from '@/lib/schemas';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { copyToClipboard } from '@/lib/utils';
-import { TooltipTrigger } from '@radix-ui/react-tooltip';
 
-interface DeviceListProps {
+export type DeviceListProps = {
   devices: DisplayableDevice[];
-}
+};
 
 export function DeviceList({ devices: inputDevices }: DeviceListProps) {
   const [devices, setDevices] = useState<DisplayableDevice[]>(inputDevices);
@@ -73,7 +72,7 @@ export function DeviceList({ devices: inputDevices }: DeviceListProps) {
           </TableHeader>
           <TableBody>
             {devices.map((device) => {
-              const DeviceIcon = device.usage === 'keeper' ? House : Flower2;
+              const DeviceIcon = getDeviceIcon(device.usage);
               const NetworkIcon = getNetworkIcon(device.network?.kind);
               const { statusVariant, timeAgo } = getStatusInfo(device);
               const { latestTelemetry: telemetry } = device;
@@ -110,7 +109,8 @@ export function DeviceList({ devices: inputDevices }: DeviceListProps) {
                               <span className="text-xs text-muted-foreground cursor-help">{timeAgo}</span>
                             </TooltipTrigger>
                             <TooltipContent>
-                              <p className="py-2 px-1">{device.lastSeen.toLocaleString()}</p>
+                              {/* suppressHydrationWarning is set because SSR and client render tend to produce different results */}
+                              <p suppressHydrationWarning>{device.lastSeen.toLocaleString()}</p>
                             </TooltipContent>
                           </Tooltip>
                         )}
@@ -265,18 +265,5 @@ function getSensorColor(value: number, type: 'moisture' | 'ph' | 'humidity' | 't
       return 'text-yellow-600';
     default:
       return 'text-gray-600';
-  }
-}
-
-function getNetworkIcon(kind?: KorraNetworkKind | null) {
-  switch (kind) {
-    case 'wifi':
-      return Wifi;
-    case 'ethernet':
-      return Cable;
-    case 'cellular':
-      return Smartphone;
-    default:
-      return Wifi;
   }
 }

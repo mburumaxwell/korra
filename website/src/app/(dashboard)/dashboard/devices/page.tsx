@@ -7,7 +7,7 @@ export const revalidate = 0; // no caching
 
 export const metadata: Metadata = {
   title: 'Devices',
-  description: 'Devices of Korra',
+  description: 'Devices managed in Korra',
 };
 
 export default async function Page() {

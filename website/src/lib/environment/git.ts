@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
+/* eslint-disable @typescript-eslint/no-var-requires */
+
 /**
  * Retrieves the name of the current Git branch from the environment variables or from Git itself.
  * The priority order for retrieving the branch name is as follows:
@@ -40,7 +43,7 @@ export function getSha(): string | undefined {
 function getShaFromGit(): string | undefined {
   try {
     if (process.env.NEXT_RUNTIME === 'nodejs') {
-      const { execSync } = require('child_process'); // eslint-disable-line @typescript-eslint/no-require-imports
+      const { execSync } = require('child_process');
       return execSync('git rev-parse HEAD').toString().trim();
     }
   } catch {
@@ -55,7 +58,7 @@ function getShaFromGit(): string | undefined {
 function getBranchFromGit(): string | undefined {
   try {
     if (process.env.NEXT_RUNTIME === 'nodejs') {
-      const { execSync } = require('child_process'); // eslint-disable-line @typescript-eslint/no-require-imports
+      const { execSync } = require('child_process');
       return execSync('git rev-parse --abbrev-ref HEAD').toString().trim();
     }
   } catch {

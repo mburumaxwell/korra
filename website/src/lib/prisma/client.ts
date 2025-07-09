@@ -7,6 +7,7 @@ export {
   type Device,
   type DeviceActuator,
   type DeviceFirmware,
+  type DeviceNetwork,
   type DeviceTelemetry,
   type DeviceUsage,
   type FirmwareFramework,

@@ -1,4 +1,4 @@
-interface SiteUrlOptions {
+export type SiteUrlOptions = {
   /** Whether the current environment is development. */
   development: boolean;
 
@@ -7,7 +7,7 @@ interface SiteUrlOptions {
 
   /** The default URL to use if no other URL is found. */
   defaultValue: string;
-}
+};
 
 /**
  * Get the site URL based on the environment variables.
