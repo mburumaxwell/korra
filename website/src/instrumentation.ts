@@ -11,5 +11,5 @@ export async function register() {
     });
   }
 
-  registerOTel({ serviceName: 'tingle-website', traceExporter });
+  registerOTel({ serviceName: 'korra-website', traceExporter });
 }

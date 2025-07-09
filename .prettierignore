@@ -21,7 +21,7 @@ public
 static
 
 # shadcn components (generated and diff checked)
-src/components/ui/*
+website/src/components/ui/*
 
 # special files
 .changeset

@@ -1,6 +1,7 @@
 using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Options;
+using Tingle.Extensions.Http;
 using Tingle.Extensions.Primitives.Converters;
 using SC = Korra.Processor.KorraProcessorSerializerContext;
 
@@ -64,7 +65,7 @@ public enum KorraOperationalEventType
 }
 
 public class KorraDashboardClient(HttpClient httpClient, IOptionsSnapshot<KorraDashboardClientOptions> optionsAccessor)
-    : Tingle.Extensions.Http.AbstractHttpApiClient<KorraDashboardClientOptions>(httpClient, optionsAccessor)
+    : AbstractHttpApiClient<KorraDashboardClientOptions>(httpClient, optionsAccessor)
 {
     public async Task SendTelemetryAsync(KorraTelemetry telemetry, CancellationToken cancellationToken = default)
     {
@@ -85,6 +86,6 @@ public class KorraDashboardClient(HttpClient httpClient, IOptionsSnapshot<KorraD
 
 public class KorraDashboardResponse { }
 
-public class KorraDashboardClientOptions : Tingle.Extensions.Http.AbstractHttpApiClientOptions
+public class KorraDashboardClientOptions : AbstractHttpApiClientOptions
 {
 }
