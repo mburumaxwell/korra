@@ -5,6 +5,28 @@ using SC = Korra.Processor.KorraProcessorSerializerContext;
 
 var builder = Host.CreateApplicationBuilder();
 
+builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
+{
+    ["Logging:LogLevel:Default"] = "Information",
+    ["Logging:LogLevel:Microsoft"] = "Warning",
+    ["Logging:LogLevel:Microsoft.Hosting.Lifetime"] = "Information",
+    ["Logging:LogLevel:System.Net.Http"] = "Warning",
+    ["Logging:LogLevel:Tingle.EventBus"] = "Warning",
+    // ["Logging:Debug:LogLevel:Default"] = "None",
+
+    ["Logging:LogLevel:Korra.Processor"] = "Information",
+    ["Logging:LogLevel:System.Net.Http.HttpClient"] = "None", // removes all, add what we need later
+
+    ["Logging:Console:FormatterName"] = "cli",
+    ["Logging:Console:FormatterOptions:SingleLine"] = "True",
+    ["Logging:Console:FormatterOptions:IncludeCategory"] = "False",
+    ["Logging:Console:FormatterOptions:IncludeEventId"] = "False",
+    ["Logging:Console:FormatterOptions:TimestampFormat"] = "yyyy-MM-dd HH:mm:ss ",
+});
+
+// Configure logging
+builder.Logging.AddCliConsole();
+
 // Add client for sending events to the dashboard
 builder.Services.AddHttpApiClient<KorraDashboardClient, KorraDashboardClientOptions>()
                 .AddApiKeyHeaderAuthenticationHandler(builder.Configuration["Dashboard:ApiKey"]!, "Bearer")

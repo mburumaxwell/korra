@@ -29,6 +29,7 @@
     <PackageReference Include="Tingle.EventBus.Transports.Azure.EventHubs" Version="0.25.1" />
     <PackageReference Include="Tingle.Extensions.Http" Version="5.2.0" />
     <PackageReference Include="Tingle.Extensions.Http.Authentication" Version="5.2.0" />
+    <PackageReference Include="Tingle.Extensions.Logging" Version="5.2.0" />
     <PackageReference Include="Tingle.Extensions.Primitives" Version="5.2.0" />
   </ItemGroup>
 
