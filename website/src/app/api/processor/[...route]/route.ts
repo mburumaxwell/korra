@@ -63,7 +63,7 @@ app.post('/operational-event', zValidator('json', OperationalEventRequestBodySch
   const event = context.req.valid('json');
   console.log('Received operational event', event);
 
-  const { device_id: deviceId, type } = event;
+  const { device_id: deviceId, type, received } = event;
   const device = await prisma.device.findUnique({ where: { id: deviceId } });
   if (!device) {
     // technically this should not happen, but it might for existing test devices
@@ -78,7 +78,7 @@ app.post('/operational-event', zValidator('json', OperationalEventRequestBodySch
     if (!device.connected) {
       await prisma.device.update({
         where: { id: deviceId },
-        data: { connected: true, lastSeen: new Date() },
+        data: { connected: true, lastSeen: moreRecent(device.lastSeen, received) },
       });
     }
   } else if (type === 'disconnected') {
@@ -131,6 +131,12 @@ app.post('/operational-event', zValidator('json', OperationalEventRequestBodySch
 
   return context.body(null, 201);
 });
+
+function moreRecent(first?: Date | null, second?: Date | null) {
+  if (!first) return second;
+  if (!second) return first;
+  return first.getTime() > second.getTime() ? first : second;
+}
 
 export const OPTIONS = handle(app);
 export const GET = handle(app);
