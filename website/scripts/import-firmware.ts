@@ -1,7 +1,7 @@
+import dotenv from 'dotenv-flow';
 import path from 'node:path';
 import * as semver from 'semver';
 import { z } from 'zod/v4';
-import dotenv from 'dotenv-flow';
 
 import { type KorraBoardType, type KorraFirmwareFramework, type KorraUsageType } from '../src/lib/schemas.ts';
 

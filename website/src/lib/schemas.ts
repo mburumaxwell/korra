@@ -15,6 +15,9 @@ export const KorraActuatorStateSchema = z.object({
 });
 export type KorraActuatorState = z.infer<typeof KorraActuatorStateSchema>;
 
+export const KorraNetworkKindSchema = z.enum(['wifi', 'ethernet', 'cellular']);
+export type KorraNetworkKind = z.infer<typeof KorraNetworkKindSchema>;
+
 export const KorraNetworkInfoSchema = z.object({
   kind: z.enum(['wifi', 'ethernet', 'cellular']),
   mac: z.string(), // The MAC address of the device.

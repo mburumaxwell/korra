@@ -93,7 +93,8 @@ app.post('/operational-event', zValidator('json', OperationalEventRequestBodySch
     const twin = KorraDeviceTwinSchema.parse((await registry.getTwin(deviceId)).responseBody);
     if (twin) {
       const reported = twin.properties.reported;
-      if (reported.firmware !== undefined) { // checking undefined not null because null is used to unset
+      // checking undefined not null because null is used to unset
+      if (reported.firmware !== undefined) {
         await prisma.deviceFirmware.upsert({
           where: { deviceId },
           create: {
@@ -108,7 +109,8 @@ app.post('/operational-event', zValidator('json', OperationalEventRequestBodySch
         });
       }
 
-      if (reported.network !== undefined) { // checking undefined not null because null is used to unset
+      // checking undefined not null because null is used to unset
+      if (reported.network !== undefined) {
         await prisma.deviceNetwork.upsert({
           where: { deviceId },
           create: {
@@ -127,7 +129,8 @@ app.post('/operational-event', zValidator('json', OperationalEventRequestBodySch
         });
       }
 
-      if (reported.actuator !== undefined) { // checking undefined not null because null is used to unset
+      // checking undefined not null because null is used to unset
+      if (reported.actuator !== undefined) {
         const lastTime = reported.actuator?.last_time ? new Date(reported.actuator?.last_time) : null;
         await prisma.deviceActuator.upsert({
           where: { deviceId },

@@ -1,5 +1,5 @@
-import { readFile } from 'node:fs/promises';
 import dotenv from 'dotenv-flow';
+import { readFile } from 'node:fs/promises';
 
 import { getRegistry } from '../src/lib/iot-hub.ts';
 import { type AvailableFirmware } from '../src/lib/prisma/client.ts';
@@ -94,8 +94,8 @@ async function run() {
             name: reported.network?.name,
             mac: reported.network?.mac,
             local_ip: reported.network?.local_ip,
-          }
-        }
+          },
+        },
       },
       update: {
         board,
@@ -156,9 +156,9 @@ async function run() {
               name: reported.network?.name,
               mac: reported.network?.mac,
               local_ip: reported.network?.local_ip,
-            }
-          }
-        }
+            },
+          },
+        },
       },
     });
   }
