@@ -68,6 +68,13 @@ async function run() {
         certificatePem,
         connected: device.connectionState === 'connected',
         lastSeen: device.lastActivityTime ? new Date(device.lastActivityTime) : null,
+        firmware: {
+          create: {
+            currentVersion: reported.firmware?.version?.semver,
+            desiredVersion: desiredFirmware?.versionSemver,
+            desiredFirmwareId: desiredFirmware?.id,
+          },
+        },
         actuator: {
           create: {
             enabled: desired.actuator?.enabled,
@@ -80,13 +87,14 @@ async function run() {
             totalDuration: reported.actuator?.total_duration,
           },
         },
-        firmware: {
+        network: {
           create: {
-            currentVersion: reported.firmware?.version?.semver,
-            desiredVersion: desiredFirmware?.versionSemver,
-            desiredFirmwareId: desiredFirmware?.id,
-          },
-        },
+            kind: reported.network?.kind,
+            name: reported.network?.name,
+            mac: reported.network?.mac,
+            local_ip: reported.network?.local_ip,
+          }
+        }
       },
       update: {
         board,
@@ -96,6 +104,20 @@ async function run() {
         certificatePem,
         connected: device.connectionState === 'connected',
         lastSeen: device.lastActivityTime ? new Date(device.lastActivityTime) : null,
+        firmware: {
+          upsert: {
+            create: {
+              currentVersion: reported.firmware?.version?.semver,
+              desiredVersion: desiredFirmware?.versionSemver,
+              desiredFirmwareId: desiredFirmware?.id,
+            },
+            update: {
+              currentVersion: reported.firmware?.version?.semver,
+              desiredVersion: desiredFirmware?.versionSemver,
+              desiredFirmwareId: desiredFirmware?.id,
+            },
+          },
+        },
         actuator: {
           upsert: {
             create: {
@@ -120,20 +142,22 @@ async function run() {
             },
           },
         },
-        firmware: {
+        network: {
           upsert: {
             create: {
-              currentVersion: reported.firmware?.version?.semver,
-              desiredVersion: desiredFirmware?.versionSemver,
-              desiredFirmwareId: desiredFirmware?.id,
+              kind: reported.network?.kind,
+              name: reported.network?.name,
+              mac: reported.network?.mac,
+              local_ip: reported.network?.local_ip,
             },
             update: {
-              currentVersion: reported.firmware?.version?.semver,
-              desiredVersion: desiredFirmware?.versionSemver,
-              desiredFirmwareId: desiredFirmware?.id,
-            },
-          },
-        },
+              kind: reported.network?.kind,
+              name: reported.network?.name,
+              mac: reported.network?.mac,
+              local_ip: reported.network?.local_ip,
+            }
+          }
+        }
       },
     });
   }

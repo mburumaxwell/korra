@@ -108,6 +108,25 @@ app.post('/operational-event', zValidator('json', OperationalEventRequestBodySch
         });
       }
 
+      if (reported.network !== undefined) { // checking undefined not null because null is used to unset
+        await prisma.deviceNetwork.upsert({
+          where: { deviceId },
+          create: {
+            deviceId,
+            kind: reported.network?.kind,
+            name: reported.network?.name,
+            mac: reported.network?.mac,
+            local_ip: reported.network?.local_ip,
+          },
+          update: {
+            kind: reported.network?.kind,
+            name: reported.network?.name,
+            mac: reported.network?.mac,
+            local_ip: reported.network?.local_ip,
+          },
+        });
+      }
+
       if (reported.actuator !== undefined) { // checking undefined not null because null is used to unset
         const lastTime = reported.actuator?.last_time ? new Date(reported.actuator?.last_time) : null;
         await prisma.deviceActuator.upsert({

@@ -30,6 +30,12 @@ enum FirmwareFramework {
   espidf
 }
 
+enum NetworkKind {
+  wifi
+  ethernet
+  cellular
+}
+
 // list of known firmware
 model AvailableFirmware {
   id             String            @id @default(cuid())
@@ -62,6 +68,7 @@ model Device {
   lastSeen        DateTime?
   actuator        DeviceActuator?
   firmware        DeviceFirmware?
+  network         DeviceNetwork?
   DeviceTelemetry DeviceTelemetry[]
 }
 
@@ -84,6 +91,15 @@ model DeviceFirmware {
   desiredVersion    String?
   desiredFirmwareId String?
   desiredFirmware   AvailableFirmware? @relation(fields: [desiredFirmwareId], references: [id])
+}
+
+model DeviceNetwork {
+  device   Device       @relation(fields: [deviceId], references: [id])
+  deviceId String       @id
+  kind     NetworkKind?
+  mac      String?      @db.VarChar(50)
+  name     String?      @db.VarChar(50)
+  local_ip String?      @db.VarChar(100)
 }
 
 model DeviceTelemetry {
