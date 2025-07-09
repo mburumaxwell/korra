@@ -118,9 +118,10 @@ jobs:
           SWA_SETTINGS: >
             GITHUB_SHA="${{ github.sha }}"
             GITHUB_REF_NAME="${{ github.ref_name }}"
-            PROCESSOR_API_KEY="${{ secrets.PROCESSOR_API_KEY }}"
             DATABASE_URL="${{ secrets.DATABASE_URL }}"
             IOT_HUB_CONNECTION_STRING="${{ secrets.IOT_HUB_CONNECTION_STRING }}"
+            PROCESSOR_API_KEY="${{ secrets.PROCESSOR_API_KEY }}"
+            FIRMWARE_API_KEY="${{ secrets.FIRMWARE_API_KEY }}"
 
       - name: Publish review app URLs
         uses: thollander/actions-comment-pull-request@v3
