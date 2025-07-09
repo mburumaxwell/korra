@@ -47,7 +47,12 @@ export function DeviceInformation({ device }: { device: DisplayableDevice }) {
             <h3 className="text-sm font-medium text-muted-foreground">Device ID</h3>
             <div className="flex items-center space-x-2">
               <p className="text-sm font-mono truncate">{device.id}</p>
-              <Button variant="ghost" size="sm" onClick={() => copyToClipboard(device.id)} className="h-6 w-6 p-0">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => copyToClipboard(device.id)}
+                className="h-6 w-6 p-0 hover:cursor-pointer"
+              >
                 <Copy className="w-3 h-3" />
               </Button>
             </div>
@@ -74,7 +79,7 @@ export function DeviceInformation({ device }: { device: DisplayableDevice }) {
           <div className="space-y-2">
             <h3 className="text-sm font-medium text-muted-foreground">Board</h3>
             <Link href={`/boards/${device.board}`} className="underline-offset-4 hover:underline" target="_blank">
-              <p className="text-sm font-mono truncate">{device.board}</p>
+              <p className="text-sm font-mono">{device.board}</p>
             </Link>
           </div>
 
@@ -87,7 +92,7 @@ export function DeviceInformation({ device }: { device: DisplayableDevice }) {
                 className="underline-offset-4 hover:underline"
                 target="_blank"
               >
-                <p className="text-sm font-mono truncate">{device.framework}</p>
+                <p className="text-sm font-mono">{device.framework}</p>
               </Link>
             </div>
           )}
@@ -113,13 +118,13 @@ export function DeviceInformation({ device }: { device: DisplayableDevice }) {
           <div className="space-y-2">
             <h3 className="text-sm font-medium text-muted-foreground">Local IP Address</h3>
             <div className="flex items-center space-x-2">
-              <p className="text-sm font-mono">{device.network?.local_ip || '—'}</p>
+              <p className="text-sm font-mono truncate">{device.network?.local_ip || '—'}</p>
               {device.network?.local_ip && (
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => copyToClipboard(device.network!.local_ip!)}
-                  className="h-6 w-6 p-0"
+                  className="h-6 w-6 p-0 hover:cursor-pointer"
                 >
                   <Copy className="w-3 h-3" />
                 </Button>
@@ -137,7 +142,7 @@ export function DeviceInformation({ device }: { device: DisplayableDevice }) {
                   variant="ghost"
                   size="sm"
                   onClick={() => copyToClipboard(device.network!.mac!)}
-                  className="h-6 w-6 p-0"
+                  className="h-6 w-6 p-0 hover:cursor-pointer"
                 >
                   <Copy className="w-3 h-3" />
                 </Button>
@@ -149,7 +154,7 @@ export function DeviceInformation({ device }: { device: DisplayableDevice }) {
           {device.network?.name && (
             <div className="space-y-2">
               <h3 className="text-sm font-medium text-muted-foreground">Network Name</h3>
-              <p className="text-sm">{device.network.name}</p>
+              <p className="text-sm truncate">{device.network.name}</p>
             </div>
           )}
         </div>

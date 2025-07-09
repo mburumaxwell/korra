@@ -1,7 +1,8 @@
 'use client';
 
-import { Copy, Edit, Plus, Trash2 } from 'lucide-react';
+import { Edit, Plus, Trash2 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 
 import type { DisplayableDevice } from '@/actions';
@@ -21,7 +22,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { copyToClipboard } from '@/lib/utils';
 
 export type DeviceListProps = {
   devices: DisplayableDevice[];
@@ -30,6 +30,7 @@ export type DeviceListProps = {
 export function DeviceList({ devices: inputDevices }: DeviceListProps) {
   const [devices, setDevices] = useState<DisplayableDevice[]>(inputDevices);
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
   function handleDeleteDevice(id: string) {
     startTransition(async () => {
@@ -78,7 +79,12 @@ export function DeviceList({ devices: inputDevices }: DeviceListProps) {
               const { latestTelemetry: telemetry } = device;
 
               return (
-                <TableRow key={device.id}>
+                <TableRow
+                  key={device.id}
+                  // using router push because we wrapping <td> or <tr> cannot be a child of <a>
+                  onClick={() => router.push(`/dashboard/devices/${device.id}`)}
+                  className="hover:cursor-pointer"
+                >
                   <TableCell className="font-medium">
                     <div className="flex items-center space-x-2">
                       <DeviceIcon className="w-5 h-5 text-muted-foreground" />
@@ -94,14 +100,6 @@ export function DeviceList({ devices: inputDevices }: DeviceListProps) {
                           <span className="font-mono text-xs text-muted-foreground truncate max-w-[120px]">
                             {device.id}
                           </span>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => copyToClipboard(device.id)}
-                            className="h-4 w-4 p-0"
-                          >
-                            <Copy className="w-3 h-3" />
-                          </Button>
                         </div>
                         {device.lastSeen && (
                           <Tooltip>
