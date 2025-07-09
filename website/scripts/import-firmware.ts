@@ -43,7 +43,7 @@ async function importFirmware() {
     const versionValue = getAppVersionNumber(versionSemver);
 
     for (const asset of release.assets) {
-      const { browser_download_url } = asset;
+      const { browser_download_url, digest } = asset;
       const filename = path.parse(path.basename(browser_download_url)).name;
       // example URL for zephyr: https://github.com/mburumaxwell/korra/releases/download/firmware%400.2.2/keeper-esp32s3_devkitc.bin
       // example URL for arduino-pio: https://github.com/mburumaxwell/korra/releases/download/firmware-pio%400.4.1/arduino-keeper-esp32-s3-devkitc.bin
@@ -63,6 +63,8 @@ async function importFirmware() {
       } else {
         throw new Error('This should not happen');
       }
+
+      const [, hash] = digest.split(':');
       await prisma.availableFirmware.upsert({
         where: {
           board_usage_framework_versionSemver: {
@@ -82,14 +84,14 @@ async function importFirmware() {
           versionValue,
           url: browser_download_url,
           attestation: 'tbd', // TODO; figure this out some day
-          hash: 'tbd', // no source as of now
+          hash,
           signature: 'tbd', // TODO; pull signature from attestation URL
         },
         update: {
           versionValue,
           url: browser_download_url,
           attestation: 'tbd', // TODO; figure this out some day
-          hash: 'tbd', // no source as of now
+          hash,
           signature: 'tbd', // TODO; pull signature from attestation URL
         },
       });
