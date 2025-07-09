@@ -48,6 +48,14 @@ app.post('/telemetry', zValidator('json', TelemetryRequestBodySchema), async (co
     update: { deviceId, ...values },
   });
 
+  // set last seen if not present or telemetry is newer
+  if (!device.lastSeen || telemetry.created.getTime() > device.lastSeen?.getTime()) {
+    await prisma.device.update({
+      where: { id: deviceId },
+      data: { lastSeen: telemetry.created },
+    });
+  }
+
   return context.body(null, 201);
 });
 
