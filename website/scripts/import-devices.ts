@@ -55,6 +55,7 @@ async function run() {
       }
     }
 
+    const connected = device.connectionState?.toLocaleLowerCase() === 'connected';
     await prisma.device.upsert({
       where: { id: deviceId },
       create: {
@@ -66,7 +67,7 @@ async function run() {
         framework,
         label,
         certificatePem,
-        connected: device.connectionState === 'connected',
+        connected,
         lastSeen: device.lastActivityTime ? new Date(device.lastActivityTime) : null,
         firmware: {
           create: {
@@ -102,7 +103,7 @@ async function run() {
         framework,
         label,
         certificatePem,
-        connected: device.connectionState === 'connected',
+        connected,
         lastSeen: device.lastActivityTime ? new Date(device.lastActivityTime) : null,
         firmware: {
           upsert: {
