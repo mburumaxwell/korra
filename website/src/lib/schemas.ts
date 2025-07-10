@@ -2,7 +2,7 @@ import { z } from 'zod/v4';
 
 export const KorraActuatorConfigSchema = z.object({
   enabled: z.boolean(), // Whether or not the actuator is allowed
-  duration: z.number().min(5).max(15), // Seconds for which the actuator should be active at a given time (range: 5-15)
+  duration: z.number().min(5).max(60), // Seconds for which the actuator should be active at a given time (range: 5-60)
   equilibrium_time: z.number().min(3).max(60), // Seconds to wait before the next actuation (range: 3-60)
   target: z.number(),
 });

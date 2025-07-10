@@ -11,7 +11,7 @@ struct korra_actuator_config {
   bool enabled;
 
   /**
-   * Seconds for which the actuator should be active at a given time (range: 5-15)
+   * Seconds for which the actuator should be active at a given time (range: 5-60)
    */
   uint16_t duration;
 
