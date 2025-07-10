@@ -3,7 +3,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 import type { Metadata, Viewport } from 'next';
 import type { TemplateString } from 'next/dist/lib/metadata/types/metadata-types';
 
-import { Provider } from '@/components';
+import { Provider } from '@/components/provider';
 import './globals.css';
 
 import { config, socials } from '@/site-config';

@@ -44,7 +44,7 @@ export default async function Page(props: ViewDevicePageProps) {
   const telemetries = await getDeviceTelemetries({ deviceId: device.id, start, end, granularity: granularityMs });
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <>
       <DeviceViewHeader device={device} />
       <DeviceInformation device={device} />
       <DeviceViewHistoryChart
@@ -53,6 +53,6 @@ export default async function Page(props: ViewDevicePageProps) {
         defaultGranularity={defaultGranularity}
         telemetries={telemetries}
       />
-    </div>
+    </>
   );
 }

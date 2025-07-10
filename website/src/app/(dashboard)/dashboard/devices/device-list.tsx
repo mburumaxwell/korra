@@ -1,12 +1,12 @@
 'use client';
 
-import { Edit, Plus, Trash2 } from 'lucide-react';
+import { Edit, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState, useTransition } from 'react';
+import { useState } from 'react';
 
 import type { DisplayableDevice } from '@/actions';
-import { getDeviceIcon, getNetworkIcon } from '@/components/devices';
+import { getDeviceIcon, getNetworkIcon } from '@/components/dashboard/devices';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,187 +29,163 @@ export type DeviceListProps = {
 
 export function DeviceList({ devices: inputDevices }: DeviceListProps) {
   const [devices, setDevices] = useState<DisplayableDevice[]>(inputDevices);
-  const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
   function handleDeleteDevice(id: string) {
-    startTransition(async () => {
-      // TODO: do actual implementation once authentication/authorization is implemented
-      // await deleteDevice(id);
-      setDevices(devices.filter((device) => device.id !== id));
-    });
+    // TODO: do actual implementation once authentication/authorization is implemented
+    // await deleteDevice(id);
+    setDevices(devices.filter((device) => device.id !== id));
   }
 
   return (
-    // <div className="container mx-auto p-6 space-y-6">
-    <div className="mx-auto p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Korra IoT Manager</h1>
-          <p className="text-muted-foreground">
-            Managing {devices.filter((d) => d.usage === 'keeper').length} keeper(s) and{' '}
-            {devices.filter((d) => d.usage === 'pot').length} pot(s)
-          </p>
-        </div>
-        <Button asChild disabled={isPending}>
-          <Link href="/dashboard/devices/create">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Device
-          </Link>
-        </Button>
-      </div>
+    <div className="rounded-lg border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Device</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Network</TableHead>
+            <TableHead>Sensors</TableHead>
+            <TableHead>Firmware</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {devices.map((device) => {
+            const DeviceIcon = getDeviceIcon(device.usage);
+            const NetworkIcon = getNetworkIcon(device.network?.kind);
+            const { statusVariant, timeAgo } = getStatusInfo(device);
+            const { latestTelemetry: telemetry } = device;
 
-      <div className="border rounded-lg">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Device</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Network</TableHead>
-              <TableHead>Sensors</TableHead>
-              <TableHead>Firmware</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {devices.map((device) => {
-              const DeviceIcon = getDeviceIcon(device.usage);
-              const NetworkIcon = getNetworkIcon(device.network?.kind);
-              const { statusVariant, timeAgo } = getStatusInfo(device);
-              const { latestTelemetry: telemetry } = device;
-
-              return (
-                <TableRow
-                  key={device.id}
-                  // using router push because we wrapping <td> or <tr> cannot be a child of <a>
-                  onClick={() => router.push(`/dashboard/devices/${device.id}`)}
-                  className="hover:cursor-pointer"
-                >
-                  <TableCell className="font-medium">
-                    <div className="flex items-center space-x-2">
-                      <DeviceIcon className="w-5 h-5 text-muted-foreground" />
-                      <div className="w-2"></div>
-                      <div className="flex flex-col space-y-1">
-                        <div className="flex items-center space-x-2">
-                          <span className="font-semibold">{device.label}</span>
-                          <Badge variant="outline" className="text-xs px-2 py-0.5 h-5">
-                            {device.usage}
-                          </Badge>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <span className="font-mono text-xs text-muted-foreground truncate max-w-[120px]">
-                            {device.id}
-                          </span>
-                        </div>
-                        {device.lastSeen && (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <span className="text-xs text-muted-foreground cursor-help">{timeAgo}</span>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              {/* suppressHydrationWarning is set because SSR and client render tend to produce different results */}
-                              <p suppressHydrationWarning>{device.lastSeen.toLocaleString()}</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        )}
+            return (
+              <TableRow
+                key={device.id}
+                // using router push because we wrapping <td> or <tr> cannot be a child of <a>
+                onClick={() => router.push(`/dashboard/devices/${device.id}`)}
+                className="hover:cursor-pointer"
+              >
+                <TableCell className="font-medium">
+                  <div className="flex items-center space-x-2">
+                    <DeviceIcon className="text-muted-foreground h-5 w-5" />
+                    <div className="w-2"></div>
+                    <div className="flex flex-col space-y-1">
+                      <div className="flex items-center space-x-2">
+                        <span className="font-semibold">{device.label}</span>
+                        <Badge variant="outline" className="h-5 px-2 py-0.5 text-xs">
+                          {device.usage}
+                        </Badge>
                       </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={statusVariant}>{device.connected ? 'Online' : 'Offline'}</Badge>
-                  </TableCell>
-                  <TableCell className="font-mono text-sm">
-                    <div className="flex items-start space-x-2">
-                      <NetworkIcon
-                        className={`w-4 h-4 mt-0.5 ${device.connected ? 'text-green-500' : 'text-red-500'}`}
-                      />
-                      <div className="flex flex-col space-y-1 text-sm">
-                        <span className="font-mono">{device.network?.local_ip || '—'}</span>
-                        {device.network?.name && <span className="text-muted-foreground">{device.network?.name}</span>}
-                        {device.network?.mac && (
-                          <span className="text-xs text-muted-foreground font-mono">{device.network?.mac}</span>
-                        )}
+                      <div className="flex items-center space-x-1">
+                        <span className="text-muted-foreground max-w-[120px] truncate font-mono text-xs">
+                          {device.id}
+                        </span>
                       </div>
+                      {device.lastSeen && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="text-muted-foreground cursor-help text-xs">{timeAgo}</span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {/* suppressHydrationWarning is set because SSR and client render tend to produce different results */}
+                            <p suppressHydrationWarning>{device.lastSeen.toLocaleString()}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
                     </div>
-                  </TableCell>
-                  <TableCell>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Badge variant={statusVariant}>{device.connected ? 'Online' : 'Offline'}</Badge>
+                </TableCell>
+                <TableCell className="font-mono text-sm">
+                  <div className="flex items-start space-x-2">
+                    <NetworkIcon className={`mt-0.5 h-4 w-4 ${device.connected ? 'text-green-500' : 'text-red-500'}`} />
                     <div className="flex flex-col space-y-1 text-sm">
-                      {device.usage === 'keeper' ? (
-                        <>
-                          {telemetry?.temperature && (
-                            <span className={getSensorColor(telemetry?.temperature, 'temperature')}>
-                              {telemetry?.temperature}°C
-                            </span>
-                          )}
-                          {telemetry?.humidity && (
-                            <span className={getSensorColor(telemetry?.humidity, 'humidity')}>
-                              {telemetry?.humidity}% RH
-                            </span>
-                          )}
-                        </>
-                      ) : (
-                        <>
-                          {telemetry?.moisture && (
-                            <span className={getSensorColor(telemetry?.moisture, 'moisture')}>
-                              {telemetry?.moisture}% moisture
-                            </span>
-                          )}
-                          {telemetry?.ph && (
-                            <span className={getSensorColor(telemetry?.ph, 'ph')}>pH {telemetry?.ph}</span>
-                          )}
-                        </>
-                      )}
-                      {!telemetry?.temperature && !telemetry?.humidity && !telemetry?.moisture && !telemetry?.ph && (
-                        <span className="text-muted-foreground">—</span>
+                      <span className="font-mono">{device.network?.local_ip || '—'}</span>
+                      {device.network?.name && <span className="text-muted-foreground">{device.network?.name}</span>}
+                      {device.network?.mac && (
+                        <span className="text-muted-foreground font-mono text-xs">{device.network?.mac}</span>
                       )}
                     </div>
-                  </TableCell>
-                  <TableCell className="font-mono text-sm">
-                    {device.firmware?.currentVersion ? (
-                      `v${device.firmware.currentVersion}`
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex flex-col space-y-1 text-sm">
+                    {device.usage === 'keeper' ? (
+                      <>
+                        {telemetry?.temperature && (
+                          <span className={getSensorColor(telemetry?.temperature, 'temperature')}>
+                            {telemetry?.temperature}°C
+                          </span>
+                        )}
+                        {telemetry?.humidity && (
+                          <span className={getSensorColor(telemetry?.humidity, 'humidity')}>
+                            {telemetry?.humidity}% RH
+                          </span>
+                        )}
+                      </>
                     ) : (
+                      <>
+                        {telemetry?.moisture && (
+                          <span className={getSensorColor(telemetry?.moisture, 'moisture')}>
+                            {telemetry?.moisture}% moisture
+                          </span>
+                        )}
+                        {telemetry?.ph && (
+                          <span className={getSensorColor(telemetry?.ph, 'ph')}>pH {telemetry?.ph}</span>
+                        )}
+                      </>
+                    )}
+                    {!telemetry?.temperature && !telemetry?.humidity && !telemetry?.moisture && !telemetry?.ph && (
                       <span className="text-muted-foreground">—</span>
                     )}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end space-x-1">
-                      <Button variant="ghost" size="sm" asChild>
-                        <Link href={`/dashboard/devices/${device.id}/edit`}>
-                          <Edit className="w-4 h-4" />
-                        </Link>
-                      </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="sm">
-                            <Trash2 className="w-4 h-4 text-red-500" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Device</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              {`Are you sure you want to delete device "${device.label}" (${device.id})? This action cannot be undone.`}
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => handleDeleteDevice(device.id)}
-                              className="bg-red-500 hover:bg-red-600"
-                            >
-                              Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </div>
+                  </div>
+                </TableCell>
+                <TableCell className="font-mono text-sm">
+                  {device.firmware?.currentVersion ? (
+                    `v${device.firmware.currentVersion}`
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )}
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end space-x-1">
+                    <Button variant="ghost" size="sm" asChild>
+                      <Link href={`/dashboard/devices/${device.id}/edit`}>
+                        <Edit className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="sm">
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Device</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            {`Are you sure you want to delete device "${device.label}" (${device.id})? This action cannot be undone.`}
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDeleteDevice(device.id)}
+                            className="bg-red-500 hover:bg-red-600"
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
     </div>
   );
 }

@@ -27,7 +27,7 @@ export function TelemetryChart({
 }: TelemetryChartProps) {
   return (
     <div>
-      <h4 className="text-lg font-medium mb-2">{title}</h4>
+      <h4 className="mb-2 text-lg font-medium">{title}</h4>
       <div className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data}>

@@ -3,9 +3,11 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 import type { Metadata, Viewport } from 'next';
 import type { TemplateString } from 'next/dist/lib/metadata/types/metadata-types';
 
-import { Provider } from '@/components';
+import { Provider } from '@/components/provider';
 import '../../globals.css';
 
+import { Navigation } from '@/components/dashboard/navigation';
+import { environment } from '@/lib/environment';
 import { config } from '@/site-config';
 
 const titleTemplate: TemplateString = {
@@ -44,7 +46,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <body>
-        <Provider>{children}</Provider>
+        <Provider>
+          <Navigation environment={environment} />
+          <main className="lg:pl-64">
+            {/* <div className="container mx-auto p-6 pt-16 lg:pt-6 space-y-6">{children}</div> */}
+            <div className="mx-auto space-y-6 p-6 pt-16 lg:pt-6">{children}</div>
+          </main>
+        </Provider>
         <Analytics />
         <SpeedInsights />
       </body>

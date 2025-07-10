@@ -4,7 +4,7 @@ import { Copy } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import type { BucketedDeviceTelemetry, DisplayableDevice } from '@/actions';
-import { getDeviceIcon, getNetworkIcon } from '@/components/devices';
+import { getDeviceIcon, getNetworkIcon } from '@/components/dashboard/devices';
 import { TelemetryChart, type TelemetryChartConfig } from '@/components/telemetry-chart';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -20,7 +20,7 @@ export function DeviceViewHeader({ device }: { device: DisplayableDevice }) {
   return (
     <div className="flex items-center space-x-4">
       <div className="flex items-center space-x-2">
-        <DeviceIcon className="w-6 h-6 text-muted-foreground" />
+        <DeviceIcon className="text-muted-foreground h-6 w-6" />
         <h1 className="text-3xl font-bold">{device.label}</h1>
         <Badge variant="outline" className="text-sm">
           {device.usage}
@@ -41,26 +41,26 @@ export function DeviceInformation({ device }: { device: DisplayableDevice }) {
         <CardDescription>Current status and configuration details</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4">
           {/* Device ID */}
           <div className="space-y-2">
-            <h3 className="text-sm font-medium text-muted-foreground">Device ID</h3>
+            <h3 className="text-muted-foreground text-sm font-medium">Device ID</h3>
             <div className="flex items-center space-x-2">
-              <p className="text-sm font-mono truncate">{device.id}</p>
+              <p className="truncate font-mono text-sm">{device.id}</p>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => copyToClipboard(device.id)}
                 className="h-6 w-6 p-0 hover:cursor-pointer"
               >
-                <Copy className="w-3 h-3" />
+                <Copy className="h-3 w-3" />
               </Button>
             </div>
           </div>
 
           {/* Status */}
           <div className="space-y-2">
-            <h3 className="text-sm font-medium text-muted-foreground">Status</h3>
+            <h3 className="text-muted-foreground text-sm font-medium">Status</h3>
             <Badge variant={device.connected ? 'default' : 'destructive'} className="text-sm">
               {device.connected ? 'Online' : 'Offline'}
             </Badge>
@@ -68,7 +68,7 @@ export function DeviceInformation({ device }: { device: DisplayableDevice }) {
 
           {/* Last Seen */}
           <div className="space-y-2">
-            <h3 className="text-sm font-medium text-muted-foreground">Last Seen</h3>
+            <h3 className="text-muted-foreground text-sm font-medium">Last Seen</h3>
             {/* suppressHydrationWarning is set because SSR and client render tend to produce different results */}
             <p className="text-sm" suppressHydrationWarning>
               {device.lastSeen?.toLocaleString()}
@@ -77,48 +77,48 @@ export function DeviceInformation({ device }: { device: DisplayableDevice }) {
 
           {/* Board */}
           <div className="space-y-2">
-            <h3 className="text-sm font-medium text-muted-foreground">Board</h3>
+            <h3 className="text-muted-foreground text-sm font-medium">Board</h3>
             <Link href={`/boards/${device.board}`} className="underline-offset-4 hover:underline" target="_blank">
-              <p className="text-sm font-mono">{device.board}</p>
+              <p className="font-mono text-sm">{device.board}</p>
             </Link>
           </div>
 
           {/* Framework */}
           {device.framework && (
             <div className="space-y-2">
-              <h3 className="text-sm font-medium text-muted-foreground">Framework</h3>
+              <h3 className="text-muted-foreground text-sm font-medium">Framework</h3>
               <Link
                 href={`/frameworks/${device.framework}`}
                 className="underline-offset-4 hover:underline"
                 target="_blank"
               >
-                <p className="text-sm font-mono">{device.framework}</p>
+                <p className="font-mono text-sm">{device.framework}</p>
               </Link>
             </div>
           )}
 
           {/* Firmware */}
           <div className="space-y-2">
-            <h3 className="text-sm font-medium text-muted-foreground">Firmware</h3>
-            <p className="text-sm font-mono">
+            <h3 className="text-muted-foreground text-sm font-medium">Firmware</h3>
+            <p className="font-mono text-sm">
               {device.firmware?.currentVersion ? `v${device.firmware?.currentVersion}` : '—'}
             </p>
           </div>
 
           {/* Network Type */}
           <div className="space-y-2">
-            <h3 className="text-sm font-medium text-muted-foreground">Network Type</h3>
+            <h3 className="text-muted-foreground text-sm font-medium">Network Type</h3>
             <div className="flex items-center space-x-2">
-              <NetworkIcon className="w-4 h-4" />
+              <NetworkIcon className="h-4 w-4" />
               <span className="text-sm capitalize">{device.network?.kind || 'Unknown'}</span>
             </div>
           </div>
 
           {/* Local IP Address */}
           <div className="space-y-2">
-            <h3 className="text-sm font-medium text-muted-foreground">Local IP Address</h3>
+            <h3 className="text-muted-foreground text-sm font-medium">Local IP Address</h3>
             <div className="flex items-center space-x-2">
-              <p className="text-sm font-mono truncate">{device.network?.local_ip || '—'}</p>
+              <p className="truncate font-mono text-sm">{device.network?.local_ip || '—'}</p>
               {device.network?.local_ip && (
                 <Button
                   variant="ghost"
@@ -126,7 +126,7 @@ export function DeviceInformation({ device }: { device: DisplayableDevice }) {
                   onClick={() => copyToClipboard(device.network!.local_ip!)}
                   className="h-6 w-6 p-0 hover:cursor-pointer"
                 >
-                  <Copy className="w-3 h-3" />
+                  <Copy className="h-3 w-3" />
                 </Button>
               )}
             </div>
@@ -134,9 +134,9 @@ export function DeviceInformation({ device }: { device: DisplayableDevice }) {
 
           {/* MAC Address */}
           <div className="space-y-2">
-            <h3 className="text-sm font-medium text-muted-foreground">MAC Address</h3>
+            <h3 className="text-muted-foreground text-sm font-medium">MAC Address</h3>
             <div className="flex items-center space-x-2">
-              <p className="text-sm font-mono">{device.network?.mac || '—'}</p>
+              <p className="font-mono text-sm">{device.network?.mac || '—'}</p>
               {device.network?.mac && (
                 <Button
                   variant="ghost"
@@ -144,7 +144,7 @@ export function DeviceInformation({ device }: { device: DisplayableDevice }) {
                   onClick={() => copyToClipboard(device.network!.mac!)}
                   className="h-6 w-6 p-0 hover:cursor-pointer"
                 >
-                  <Copy className="w-3 h-3" />
+                  <Copy className="h-3 w-3" />
                 </Button>
               )}
             </div>
@@ -153,8 +153,8 @@ export function DeviceInformation({ device }: { device: DisplayableDevice }) {
           {/* Network Name */}
           {device.network?.name && (
             <div className="space-y-2">
-              <h3 className="text-sm font-medium text-muted-foreground">Network Name</h3>
-              <p className="text-sm truncate">{device.network.name}</p>
+              <h3 className="text-muted-foreground text-sm font-medium">Network Name</h3>
+              <p className="truncate text-sm">{device.network.name}</p>
             </div>
           )}
         </div>
@@ -162,19 +162,18 @@ export function DeviceInformation({ device }: { device: DisplayableDevice }) {
         {/* Current Sensor Values */}
         <Separator />
         <div>
-          <h3 className="text-lg font-medium mb-4">Current Sensor Values</h3>
-          <div className="h-4 w-full" />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <h3 className="mb-4 text-lg font-medium">Current Sensor Values</h3>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {device.usage === 'keeper' ? (
               <>
-                <div className="p-4 border rounded-lg">
-                  <h4 className="text-sm font-medium text-muted-foreground">Temperature</h4>
+                <div className="rounded-lg border p-4">
+                  <h4 className="text-muted-foreground text-sm font-medium">Temperature</h4>
                   <p className="text-2xl font-bold">
                     {latestTelemetry?.temperature ? `${latestTelemetry?.temperature}°C` : '—'}
                   </p>
                 </div>
-                <div className="p-4 border rounded-lg">
-                  <h4 className="text-sm font-medium text-muted-foreground">Humidity</h4>
+                <div className="rounded-lg border p-4">
+                  <h4 className="text-muted-foreground text-sm font-medium">Humidity</h4>
                   <p className="text-2xl font-bold">
                     {latestTelemetry?.humidity ? `${latestTelemetry?.humidity}% RH` : '—'}
                   </p>
@@ -182,14 +181,14 @@ export function DeviceInformation({ device }: { device: DisplayableDevice }) {
               </>
             ) : (
               <>
-                <div className="p-4 border rounded-lg">
-                  <h4 className="text-sm font-medium text-muted-foreground">Soil Moisture</h4>
+                <div className="rounded-lg border p-4">
+                  <h4 className="text-muted-foreground text-sm font-medium">Soil Moisture</h4>
                   <p className="text-2xl font-bold">
                     {latestTelemetry?.moisture ? `${latestTelemetry?.moisture}%` : '—'}
                   </p>
                 </div>
-                <div className="p-4 border rounded-lg">
-                  <h4 className="text-sm font-medium text-muted-foreground">pH Level</h4>
+                <div className="rounded-lg border p-4">
+                  <h4 className="text-muted-foreground text-sm font-medium">pH Level</h4>
                   <p className="text-2xl font-bold">{latestTelemetry?.ph ? `${latestTelemetry?.ph}` : '—'}</p>
                 </div>
               </>
@@ -282,12 +281,12 @@ export function DeviceViewHistoryChart({
       {/* Chart Controls */}
       <Card>
         <CardHeader>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
+          <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
             <div>
               <CardTitle>Sensor Data</CardTitle>
               <CardDescription>Historical sensor readings over time</CardDescription>
             </div>
-            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+            <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
               <Select value={range} onValueChange={(value: TimeRange) => updateParams({ range: value })}>
                 <SelectTrigger className="w-[140px]">
                   <SelectValue />

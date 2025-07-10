@@ -3,8 +3,8 @@ import { CreateDeviceForm } from './form';
 
 export default async function Page() {
   return (
-    <div className="container mx-auto p-6 max-w-2xl">
-      <div className="flex items-center space-x-4 mb-6">
+    <div className="container mx-auto max-w-2xl p-6">
+      <div className="mb-6 flex items-center space-x-4">
         <h1 className="text-3xl font-bold">Create New Device</h1>
       </div>
 
