@@ -114,10 +114,10 @@ jobs:
         continue-on-error: true
         run: >
           pnpm avail
-          --endpoint https://korra.maxwellweru.com
-          --api-key ${{ secrets.FIRMWARE_API_KEY }}
-          --attestation ${{ steps.attest.outputs.attestation-url}}
-          --tag ${{ github.ref_name }}
+          --endpoint 'https://korra.maxwellweru.com'
+          --api-key '${{ secrets.FIRMWARE_API_KEY }}'
+          --attestation '${{ steps.attest.outputs.attestation-url}}'
+          --tag '${{ github.ref_name }}'
         working-directory: '${{ github.workspace }}/firmware'
 
       - name: Save blobs cache
