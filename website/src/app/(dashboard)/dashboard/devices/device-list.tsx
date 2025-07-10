@@ -128,11 +128,11 @@ export function DeviceList({ devices: inputDevices }: DeviceListProps) {
                       <>
                         {telemetry?.moisture && (
                           <span className={getSensorColor(telemetry?.moisture, 'moisture')}>
-                            {telemetry?.moisture}% moisture
+                            {telemetry?.moisture.toFixed(1)}% moisture
                           </span>
                         )}
                         {telemetry?.ph && (
-                          <span className={getSensorColor(telemetry?.ph, 'ph')}>pH {telemetry?.ph}</span>
+                          <span className={getSensorColor(telemetry?.ph, 'ph')}>pH {telemetry?.ph.toFixed(2)}</span>
                         )}
                       </>
                     )}
