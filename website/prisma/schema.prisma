@@ -106,7 +106,7 @@ model DeviceNetwork {
   kind     NetworkKind?
   mac      String?      @db.VarChar(50)
   name     String?      @db.VarChar(50)
-  local_ip String?      @db.VarChar(100)
+  localIp String?      @db.VarChar(100)
 }
 
 model DeviceTelemetry {

@@ -87,7 +87,7 @@ async function importFirmware() {
           hash,
           signature: 'tbd', // TODO: pull signature from attestation URL
         },
-        update: { }, // no update because we might have edited manually
+        update: {}, // no update because we might have edited manually
       });
     }
   }

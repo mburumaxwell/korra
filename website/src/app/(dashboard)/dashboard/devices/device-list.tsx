@@ -101,7 +101,7 @@ export function DeviceList({ devices: inputDevices }: DeviceListProps) {
                   <div className="flex items-start space-x-2">
                     <NetworkIcon className={`mt-0.5 h-4 w-4 ${device.connected ? 'text-green-500' : 'text-red-500'}`} />
                     <div className="flex flex-col space-y-1 text-sm">
-                      <span className="font-mono">{device.network?.local_ip || '—'}</span>
+                      <span className="font-mono">{device.network?.localIp || '—'}</span>
                       {device.network?.name && <span className="text-muted-foreground">{device.network?.name}</span>}
                       {device.network?.mac && (
                         <span className="text-muted-foreground font-mono text-xs">{device.network?.mac}</span>

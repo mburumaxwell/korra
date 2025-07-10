@@ -118,12 +118,12 @@ export function DeviceInformation({ device }: { device: DisplayableDevice }) {
           <div className="space-y-2">
             <h3 className="text-muted-foreground text-sm font-medium">Local IP Address</h3>
             <div className="flex items-center space-x-2">
-              <p className="truncate font-mono text-sm">{device.network?.local_ip || '—'}</p>
-              {device.network?.local_ip && (
+              <p className="truncate font-mono text-sm">{device.network?.localIp || '—'}</p>
+              {device.network?.localIp && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => copyToClipboard(device.network!.local_ip!)}
+                  onClick={() => copyToClipboard(device.network!.localIp!)}
                   className="h-6 w-6 p-0 hover:cursor-pointer"
                 >
                   <Copy className="h-3 w-3" />

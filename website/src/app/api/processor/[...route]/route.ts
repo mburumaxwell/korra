@@ -118,13 +118,13 @@ app.post('/operational-event', zValidator('json', OperationalEventRequestBodySch
             kind: reported.network?.kind,
             name: reported.network?.name,
             mac: reported.network?.mac,
-            local_ip: reported.network?.local_ip,
+            localIp: reported.network?.local_ip,
           },
           update: {
             kind: reported.network?.kind,
             name: reported.network?.name,
             mac: reported.network?.mac,
-            local_ip: reported.network?.local_ip,
+            localIp: reported.network?.local_ip,
           },
         });
       }
