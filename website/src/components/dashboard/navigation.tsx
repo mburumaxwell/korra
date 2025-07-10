@@ -1,11 +1,13 @@
 'use client';
 
-import { BarChart3, Cog, Download, Flower2, Menu, Settings, X } from 'lucide-react';
+import { BarChart3, Cog, Download, Flower2, Menu, X } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import avatarImage from '@/images/avatar.png';
 import { type Environment } from '@/lib/environment';
 import { cn } from '@/lib/utils';
 
@@ -45,7 +47,7 @@ export function Navigation({ environment }: { environment: Environment }) {
           {/* Logo/Header */}
           <div className="flex h-16 items-center border-b px-6">
             <Link href="/" className="flex items-center space-x-2">
-              <Settings className="h-6 w-6" />
+              <Image src={avatarImage} alt="" className="h-6 w-6" priority />
               <span className="text-xl font-bold">Korra</span>
             </Link>
           </div>
