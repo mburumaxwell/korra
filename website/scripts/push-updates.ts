@@ -2,10 +2,10 @@ import dotenv from 'dotenv-flow';
 
 import { getRegistry, getTwin } from '../src/lib/iot-hub.ts';
 import {
-  KorraBoardTypes,
+  KORRA_BOARD_TYPES,
+  KORRA_USAGE_TYPES,
   type KorraDeviceTwinDesiredFirmware,
   type KorraFirmwareFramework,
-  KorraUsageTypes,
 } from '../src/lib/schemas.ts';
 
 type RunProps = {
@@ -52,7 +52,7 @@ async function run(props: RunProps) {
 
   // fetch the latest available firmware for the specified framework
   // the latest firmware for a framework would be multiple entries, combinations: board * usage
-  const combinations = KorraUsageTypes.length * KorraBoardTypes.length;
+  const combinations = KORRA_USAGE_TYPES.length * KORRA_BOARD_TYPES.length;
   const { framework = 'arduino', version: targetVersionSemver, count } = props;
   let firmwareEntries = await prisma.availableFirmware.findMany({
     where: { framework, ...(targetVersionSemver && { versionSemver: targetVersionSemver }) },
@@ -85,15 +85,15 @@ async function run(props: RunProps) {
   const registry = getRegistry();
   for (const device of devices) {
     // if a specific device ID is provided, skip others
-    const id = device.id;
+    const { id, label } = device;
     if (props.devices && !props.devices.includes(id)) {
-      console.log(`Skipping device ${id} as it is not in the specified devices list.`);
+      console.log(`Skipping device ${label} (${id}) as it is not in the specified devices list.`);
       continue;
     }
 
     // if a specific device ID is excluded, skip it
     if (props.exclude && props.exclude.includes(id)) {
-      console.log(`Skipping device ${id} as it is in the excluded devices list.`);
+      console.log(`Skipping device ${label} (${id}) as it is in the excluded devices list.`);
       continue;
     }
 
@@ -103,17 +103,17 @@ async function run(props: RunProps) {
     );
     if (!targetFirmware) {
       console.warn(
-        `No matching firmware found for device ${id} with board ${device.board}, usage ${device.usage}, framework ${device.framework}`,
+        `No matching firmware found for device ${label} (${id}) with board ${device.board}, usage ${device.usage}, framework ${device.framework}`,
       );
       continue;
     }
 
     // skip devices that have not reported their firmware version (haven't come online yet)
-    console.log(`Fetching twin for device ${id}`);
+    console.log(`Fetching twin for device ${label} (${id})`);
     const twin = await getTwin(registry, id);
     const reported = twin.properties.reported.firmware?.version;
     if (!reported?.semver || !reported?.value) {
-      console.warn(`Device ${id} has no reported firmware version, skipping update.`);
+      console.warn(`device ${label} (${id}) has no reported firmware version, skipping update.`);
       continue;
     }
 
@@ -123,7 +123,7 @@ async function run(props: RunProps) {
       // skip devices that are already at or above the target version
       if (reported.value >= resolvedVersionValue) {
         console.log(
-          `Device ${id} is already at or above version ${reported.semver} (${reported.value}), skipping update.`,
+          `device ${label} (${id}) is already at or above version ${reported.semver} (${reported.value}), skipping update.`,
         );
         continue;
       }
@@ -131,31 +131,22 @@ async function run(props: RunProps) {
       // skip devices that are already at the desired version
       const desired = twin.properties.desired.firmware?.version;
       if (desired?.semver === resolvedVersionSemver && desired.value === resolvedVersionValue) {
-        console.log(`Device ${id} is already at version ${desired?.semver} (${desired?.value}), skipping update.`);
+        console.log(`device ${label} (${id}) is already at version ${desired?.semver} (${desired?.value}), skipping update.`);
         continue;
       }
     }
 
-    console.log(`Updating device ${id} to version ${resolvedVersionSemver} (${resolvedVersionValue})`);
-    await registry.updateTwin(
-      id,
-      {
-        properties: {
-          desired: {
-            firmware: {
-              version: {
-                semver: resolvedVersionSemver,
-                value: resolvedVersionValue,
-              },
-              url: targetFirmware.url,
-              hash: targetFirmware.hash,
-              signature: targetFirmware.signature,
-            } satisfies KorraDeviceTwinDesiredFirmware,
-          },
-        },
+    const firmware: KorraDeviceTwinDesiredFirmware = {
+      version: {
+        semver: resolvedVersionSemver,
+        value: resolvedVersionValue,
       },
-      twin.etag,
-    );
+      url: targetFirmware.url,
+      hash: targetFirmware.hash,
+      signature: targetFirmware.signature,
+    };
+    console.log(`Updating device ${label} (${id}) to version ${resolvedVersionSemver} (${resolvedVersionValue})`);
+    await registry.updateTwin(id, { properties: { desired: { firmware } } }, twin.etag);
     updated++;
 
     if (count && updated >= count) {

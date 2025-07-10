@@ -62,11 +62,11 @@ export type KorraDeviceTwinReported = z.infer<typeof KorraDeviceTwinReportedSche
 
 export const KorraUsageTypeSchema = z.enum(['keeper', 'pot']);
 export type KorraUsageType = z.infer<typeof KorraUsageTypeSchema>;
-export const KorraUsageTypes = ['pot', 'keeper'] as const;
+export const KORRA_USAGE_TYPES = ['pot', 'keeper'] as const;
 
 export const KorraDeviceTwinTagsSchema = z.object({
   usage: KorraUsageTypeSchema.nullish(),
-  label: z.enum(['D1', 'D2', 'D3', 'M1', 'M2', 'M3', 'W1', 'W2', 'W3']).or(z.string()).nullish(),
+  label: z.enum(['K1', 'D1', 'D2', 'D3', 'M1', 'M2', 'M3', 'W1', 'W2', 'W3']).or(z.string()).nullish(),
 });
 export type KorraDeviceTwinTags = z.infer<typeof KorraDeviceTwinTagsSchema>;
 
@@ -122,7 +122,7 @@ export type OperationalEventRequestBody = z.infer<typeof OperationalEventRequest
 
 export const KorraBoardTypeSchema = z.enum(['esp32s3_devkitc', 'frdm_rw612', 'nrf7002dk']);
 export type KorraBoardType = z.infer<typeof KorraBoardTypeSchema>;
-export const KorraBoardTypes = ['esp32s3_devkitc', 'frdm_rw612', 'nrf7002dk'] as const;
+export const KORRA_BOARD_TYPES = ['esp32s3_devkitc', 'frdm_rw612', 'nrf7002dk'] as const;
 
 export const KorraFirmwareFrameworkSchema = z.enum(['zephyr', 'arduino', 'espidf']);
 export type KorraFirmwareFramework = z.infer<typeof KorraFirmwareFrameworkSchema>;
