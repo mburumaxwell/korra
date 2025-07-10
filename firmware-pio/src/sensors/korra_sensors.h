@@ -89,7 +89,7 @@ private:
 private:
 #ifdef CONFIG_APP_KIND_POT
   void read_ph(struct korra_analog_sensor_reading *reading);
-  void read_moisture(struct korra_analog_sensor_reading *reading);
+  void read_moisture(struct korra_analog_sensor_reading *reading, const uint8_t samples = 10, const uint8_t interval_ms =5);
 #endif // CONFIG_APP_KIND_POT
 };
 
