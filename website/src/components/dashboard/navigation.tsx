@@ -85,6 +85,7 @@ export function Navigation({ environment }: { environment: Environment }) {
                   className="underline-offset-4 hover:underline"
                 >
                   {environment.branch}@{environment.sha?.slice(0, 7)}
+                  {environment.development && <i> **dogfood</i>}
                 </a>
               </p>
             </div>
