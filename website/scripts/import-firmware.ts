@@ -83,17 +83,11 @@ async function importFirmware() {
 
           versionValue,
           url: browser_download_url,
-          attestation: 'tbd', // TODO; figure this out some day
+          attestation: 'tbd', // TODO: figure this out some day
           hash,
-          signature: 'tbd', // TODO; pull signature from attestation URL
+          signature: 'tbd', // TODO: pull signature from attestation URL
         },
-        update: {
-          versionValue,
-          url: browser_download_url,
-          attestation: 'tbd', // TODO; figure this out some day
-          hash,
-          signature: 'tbd', // TODO; pull signature from attestation URL
-        },
+        update: { }, // no update because we might have edited manually
       });
     }
   }

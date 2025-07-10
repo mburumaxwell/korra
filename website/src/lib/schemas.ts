@@ -133,6 +133,8 @@ export const AvailableFirmwareRequestBodySchema = z.object({
   framework: KorraFirmwareFrameworkSchema,
   version: KorraFirmwareVersionSchema, // version
   url: z.url(), // firmware binary URL
-  attestation: z.url(), // attestation URL (signature shall be pulled from this)
+  attestation: z.url(), // attestation URL
+  hash: z.string(), // SHA-256 hash in hex
+  signature: z.string(), // signature (e.g., base64 or hex)
 });
 export type AvailableFirmwareRequestBody = z.infer<typeof AvailableFirmwareRequestBodySchema>;

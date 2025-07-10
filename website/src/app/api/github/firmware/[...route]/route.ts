@@ -33,15 +33,15 @@ app.post('', zValidator('json', AvailableFirmwareRequestBodySchema), async (cont
       versionValue: payload.version.value,
       url: payload.url,
       attestation: payload.attestation,
-      hash: 'tbd', // TODO; pull signature from attestation URL
-      signature: 'tbd', // TODO; pull signature from attestation URL
+      hash: payload.hash,
+      signature: payload.signature,
     },
     update: {
       versionValue: payload.version.value,
       url: payload.url,
       attestation: payload.attestation,
-      hash: 'tbd', // TODO; pull signature from attestation URL
-      signature: 'tbd', // TODO; pull signature from attestation URL
+      hash: payload.hash,
+      signature: payload.signature,
     },
   });
 

@@ -3,8 +3,9 @@
 import chalk from 'chalk';
 import { Command, Option } from 'commander';
 import { type ChildProcessWithoutNullStreams, execSync, spawn } from 'node:child_process';
+import crypto from 'node:crypto';
 import { existsSync } from 'node:fs';
-import { copyFile, mkdir, rm, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import process from 'node:process';
 import readline from 'node:readline';
@@ -253,19 +254,33 @@ const avail = new Command('avail')
     const { endpoint, apiKey, tag, attestation, environment: environments } = options;
     console.log(`📦 Availing firmware ...`);
 
+    // ensure the output directory exists, this is where the collected binaries are
+    const outputDir = 'binaries';
+    if (!existsSync(outputDir)) {
+      throw new Error(`Output directory '${outputDir}' does not exist. Please run 'collect' first.`);
+    }
+
+    // tags are usually like firmware-pio@0.4.0
+    // we need to extract the version from the tag
+    const [, versionSemver] = tag.split('@');
+    if (!versionSemver) {
+      throw new Error(`Invalid tag format: ${tag}. Expected format: refs/tags/firmware-pio@<version>`);
+    }
+    const versionValue = getAppVersionNumber(versionSemver);
+
     for (const environment of environments) {
       const fileName = `${environment}.bin`;
+      const filePath = join(outputDir, fileName);
+      if (!existsSync(filePath)) {
+        throw new Error(`Missing expected file: ${filePath}`);
+      }
+
+      // compute hash
+      const buffer = await readFile(filePath);
+      const hash = crypto.createHash('sha256').update(buffer).digest('hex');
 
       // e.g. https://github.com/mburumaxwell/korra/releases/download/firmware-pio%400.4.0/arduino-keeper-esp32s3_devkitc.bin
       const url = `https://github.com/mburumaxwell/korra/releases/download/${encodeURIComponent(tag)}/${fileName}`;
-
-      // tags are usually like firmware-pio@0.4.0
-      // we need to extract the version from the tag
-      const [, versionSemver] = tag.split('@');
-      if (!versionSemver) {
-        throw new Error(`Invalid tag format: ${tag}. Expected format: refs/tags/firmware-pio@<version>`);
-      }
-      const versionValue = getAppVersionNumber(versionSemver);
 
       const [framework, usage, board] = environment.split('-');
       const payload = {
@@ -275,6 +290,8 @@ const avail = new Command('avail')
         version: { value: versionValue, semver: versionSemver },
         url,
         attestation,
+        hash,
+        signature: 'tbd', // TODO: pull signature from attestation URL
       };
 
       console.log(
