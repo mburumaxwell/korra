@@ -1,5 +1,11 @@
 # firmware
 
+## 0.2.3
+
+### Patch Changes
+
+- 542e3ac: Restore sensor read interval back to 5 min
+
 ## 0.2.2
 
 ### Patch Changes

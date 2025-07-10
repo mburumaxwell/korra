@@ -1,5 +1,17 @@
 # website
 
+## 0.4.0
+
+### Minor Changes
+
+- 99a974b: Add instrumentation to website using OTel and AppInsights
+
+### Patch Changes
+
+- 03c2c23: Add database migrations
+- e7158db: Add to available firmware on tagged build of firmware
+- 81f49a8: Fix communication between processor and website
+
 ## 0.3.0
 
 ### Minor Changes

@@ -1,5 +1,11 @@
 # firmware-pio
 
+## 0.4.2
+
+### Patch Changes
+
+- 542e3ac: Restore sensor read interval back to 5 min
+
 ## 0.4.1
 
 ### Patch Changes
