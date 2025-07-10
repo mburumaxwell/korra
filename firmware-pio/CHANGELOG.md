@@ -1,5 +1,11 @@
 # firmware-pio
 
+## 0.4.3
+
+### Patch Changes
+
+- 4278854: Read ADC value with samples of 10 every 5ms
+
 ## 0.4.2
 
 ### Patch Changes
