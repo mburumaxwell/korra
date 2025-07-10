@@ -44,7 +44,7 @@ type RunProps = {
  * This script is used to push updates to the devices in the registry by reading the latest firmware from the database
  * and updating the device twin's desired properties.
  *
- * It assumes the firmware is not buggy and pushes it to all devices of the specified framework.
+ * It assumes the firmware is not buggy.
  */
 async function run(props: RunProps) {
   dotenv.config();
