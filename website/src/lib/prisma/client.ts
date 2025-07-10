@@ -11,4 +11,6 @@ export {
   type DeviceTelemetry,
   type DeviceUsage,
   type FirmwareFramework,
+  type MoistureCategory,
+  type NetworkKind,
 } from '@prisma/client';

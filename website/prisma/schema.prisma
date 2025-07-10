@@ -30,6 +30,12 @@ enum FirmwareFramework {
   espidf
 }
 
+enum MoistureCategory {
+  dry
+  medium
+  wet
+}
+
 enum NetworkKind {
   wifi
   ethernet
@@ -56,20 +62,21 @@ model AvailableFirmware {
 }
 
 model Device {
-  id              String             @id
-  created         DateTime           @default(now())
-  updated         DateTime           @updatedAt
-  board           BoardType
-  usage           DeviceUsage
-  framework       FirmwareFramework?
-  label           String             @db.VarChar(20) // e.g. W1, K1, D2
-  certificatePem  String?
-  connected       Boolean            @default(false)
-  lastSeen        DateTime?
-  actuator        DeviceActuator?
-  firmware        DeviceFirmware?
-  network         DeviceNetwork?
-  DeviceTelemetry DeviceTelemetry[]
+  id               String             @id
+  created          DateTime           @default(now())
+  updated          DateTime           @updatedAt
+  board            BoardType
+  usage            DeviceUsage
+  framework        FirmwareFramework?
+  label            String             @db.VarChar(20) // e.g. W1, K1, D2
+  moistureCategory MoistureCategory?
+  certificatePem   String?
+  connected        Boolean            @default(false)
+  lastSeen         DateTime?
+  actuator         DeviceActuator?
+  firmware         DeviceFirmware?
+  network          DeviceNetwork?
+  DeviceTelemetry  DeviceTelemetry[]
 }
 
 model DeviceActuator {

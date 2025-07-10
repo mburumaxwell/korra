@@ -2,7 +2,7 @@ import dotenv from 'dotenv-flow';
 import { readFile } from 'node:fs/promises';
 
 import { getRegistry, getTwin } from '../src/lib/iot-hub.ts';
-import { type AvailableFirmware } from '../src/lib/prisma/client.ts';
+import { type AvailableFirmware, type MoistureCategory } from '../src/lib/prisma/client.ts';
 import { type KorraBoardType, type KorraFirmwareFramework } from '../src/lib/schemas.ts';
 
 async function run() {
@@ -55,6 +55,11 @@ async function run() {
       }
     }
 
+    // compute moisture category for pots based on the label
+    const lfc = label[0].toUpperCase();
+    const moistureCategory: MoistureCategory | null =
+      lfc === 'D' ? 'dry' : lfc === 'M' ? 'medium' : lfc === 'W' ? 'wet' : null;
+
     const connected = device.connectionState?.toLocaleLowerCase() === 'connected';
     await prisma.device.upsert({
       where: { id: deviceId },
@@ -66,6 +71,7 @@ async function run() {
         usage,
         framework,
         label,
+        moistureCategory,
         certificatePem,
         connected,
         lastSeen: device.lastActivityTime ? new Date(device.lastActivityTime) : null,
@@ -102,6 +108,7 @@ async function run() {
         usage,
         framework,
         label,
+        moistureCategory,
         certificatePem,
         connected,
         lastSeen: device.lastActivityTime ? new Date(device.lastActivityTime) : null,
