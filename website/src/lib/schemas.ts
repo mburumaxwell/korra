@@ -62,6 +62,7 @@ export type KorraDeviceTwinReported = z.infer<typeof KorraDeviceTwinReportedSche
 
 export const KorraUsageTypeSchema = z.enum(['keeper', 'pot']);
 export type KorraUsageType = z.infer<typeof KorraUsageTypeSchema>;
+export const KorraUsageTypes = ['pot', 'keeper'] as const;
 
 export const KorraDeviceTwinTagsSchema = z.object({
   usage: KorraUsageTypeSchema.nullish(),
@@ -76,6 +77,7 @@ export const KorraDeviceTwinSchema = z.object({
     desired: KorraDeviceTwinDesiredSchema,
     reported: KorraDeviceTwinReportedSchema,
   }),
+  etag: z.string(),
 });
 export type KorraDeviceTwin = z.infer<typeof KorraDeviceTwinSchema>;
 
@@ -120,6 +122,7 @@ export type OperationalEventRequestBody = z.infer<typeof OperationalEventRequest
 
 export const KorraBoardTypeSchema = z.enum(['esp32s3_devkitc', 'frdm_rw612', 'nrf7002dk']);
 export type KorraBoardType = z.infer<typeof KorraBoardTypeSchema>;
+export const KorraBoardTypes = ['esp32s3_devkitc', 'frdm_rw612', 'nrf7002dk'] as const;
 
 export const KorraFirmwareFrameworkSchema = z.enum(['zephyr', 'arduino', 'espidf']);
 export type KorraFirmwareFramework = z.infer<typeof KorraFirmwareFrameworkSchema>;

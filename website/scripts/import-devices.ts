@@ -1,9 +1,9 @@
 import dotenv from 'dotenv-flow';
 import { readFile } from 'node:fs/promises';
 
-import { getRegistry } from '../src/lib/iot-hub.ts';
+import { getRegistry, getTwin } from '../src/lib/iot-hub.ts';
 import { type AvailableFirmware } from '../src/lib/prisma/client.ts';
-import { type KorraBoardType, KorraDeviceTwinSchema, type KorraFirmwareFramework } from '../src/lib/schemas.ts';
+import { type KorraBoardType, type KorraFirmwareFramework } from '../src/lib/schemas.ts';
 
 async function run() {
   dotenv.config();
@@ -15,7 +15,7 @@ async function run() {
   for (const device of devices) {
     const { deviceId } = device;
     console.log(`Processing device: ${deviceId}`);
-    const twin = KorraDeviceTwinSchema.parse((await registry.getTwin(deviceId)).responseBody);
+    const twin = await getTwin(registry, deviceId);
     const { tags } = twin;
     const { usage, label } = tags;
 

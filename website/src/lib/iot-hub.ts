@@ -3,6 +3,8 @@
 import iothub from 'azure-iothub';
 const { Registry } = iothub;
 
+import { type KorraDeviceTwin, KorraDeviceTwinSchema } from './schemas.ts';
+
 let defaultRegistry: iothub.Registry | undefined = undefined;
 
 // we have a function instead of a constant because
@@ -14,4 +16,8 @@ export function getRegistry(connectionString?: string): iothub.Registry {
     return (defaultRegistry = Registry.fromConnectionString(process.env.IOT_HUB_CONNECTION_STRING!));
   }
   return Registry.fromConnectionString(connectionString);
+}
+
+export async function getTwin(registry: iothub.Registry, deviceId: string): Promise<KorraDeviceTwin> {
+  return KorraDeviceTwinSchema.parse((await registry.getTwin(deviceId)).responseBody);
 }

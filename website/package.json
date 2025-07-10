@@ -21,7 +21,8 @@
     "test": "vitest",
     "clean": "rimraf .next .turbo out",
     "import-firmware": "NODE_NO_WARNINGS=1 node scripts/import-firmware.ts",
-    "import-devices": "NODE_NO_WARNINGS=1 node scripts/import-devices.ts"
+    "import-devices": "NODE_NO_WARNINGS=1 node scripts/import-devices.ts",
+    "push-updates": "NODE_NO_WARNINGS=1 node scripts/push-updates.ts"
   },
   "dependencies": {
     "@azure/monitor-opentelemetry-exporter": "1.0.0-beta.32",
