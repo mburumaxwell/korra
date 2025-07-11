@@ -2,13 +2,12 @@ name: Processor
 
 on:
   workflow_dispatch:
-  # these is commented out because I am running locally. I might restore it when/if I have time.
-  # push:
-  #   branches: [main]
-  #   tags: ['processor@*']
-  #   paths:
-  #     - 'processor/**'
-  #     - '.github/workflows/processor.yml'
+  push:
+    branches: [main]
+    tags: ['processor@*']
+    paths:
+      - 'processor/**'
+      - '.github/workflows/processor.yml'
   pull_request:
     branches: [main]
     paths:
