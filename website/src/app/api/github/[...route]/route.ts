@@ -8,10 +8,10 @@ import { AvailableFirmwareRequestBodySchema } from '@/lib/schemas';
 
 export const dynamic = 'force-dynamic';
 
-const app = new Hono().basePath('/api/github/firmware');
+const app = new Hono().basePath('/api/github');
 app.use('/*', bearerAuth({ token: `${process.env.FIRMWARE_API_KEY}` }));
 
-app.post('', zValidator('json', AvailableFirmwareRequestBodySchema), async (context) => {
+app.post('/firmware', zValidator('json', AvailableFirmwareRequestBodySchema), async (context) => {
   const payload = context.req.valid('json');
   console.log('Received new/updated firmware from github', payload);
 
