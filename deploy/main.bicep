@@ -143,6 +143,21 @@ resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10
   }
 }
 
+/* Container App Environment */
+resource appEnvironment 'Microsoft.App/managedEnvironments@2023-05-01' = {
+  name: name
+  location: location
+  properties: {
+    appLogsConfiguration: {
+      destination: 'log-analytics'
+      logAnalyticsConfiguration: {
+        customerId: logAnalyticsWorkspace.properties.customerId
+        sharedKey: logAnalyticsWorkspace.listKeys().primarySharedKey
+      }
+    }
+  }
+}
+
 /* Application Insights */
 resource appInsightsWebsite 'Microsoft.Insights/components@2020-02-02' = {
   name: name
@@ -174,21 +189,6 @@ resource staticWebApp 'Microsoft.Web/staticSites@2024-11-01' = {
 }
 
 // custom domain is not mapped here because DNS for maxwellweru.com is controlled in another repo
-
-/* Container App Environment */
-resource appEnvironment 'Microsoft.App/managedEnvironments@2023-05-01' = {
-  name: name
-  location: location
-  properties: {
-    appLogsConfiguration: {
-      destination: 'log-analytics'
-      logAnalyticsConfiguration: {
-        customerId: logAnalyticsWorkspace.properties.customerId
-        sharedKey: logAnalyticsWorkspace.listKeys().primarySharedKey
-      }
-    }
-  }
-}
 
 /* Role Assignments */
 var roles = [
