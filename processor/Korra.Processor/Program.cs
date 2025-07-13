@@ -88,11 +88,4 @@ builder.Services.AddSlimEventBus(eb =>
 });
 
 var app = builder.Build();
-
-// run continuously or for a given duration, if provided
-if (int.TryParse(builder.Configuration["JOB_DURATION_SECONDS"], out var jobDurationSeconds))
-{
-    var cts = new CancellationTokenSource(TimeSpan.FromSeconds(jobDurationSeconds));
-    await app.RunAsync(cts.Token);
-}
-else await app.RunAsync();
+await app.RunAsync();

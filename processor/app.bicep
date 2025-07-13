@@ -8,7 +8,6 @@ param reviewAppNameSuffix string = ''
 param containerImageTag string = '#{DOCKER_IMAGE_TAG}#'
 
 var isReviewApp = reviewAppNameSuffix != null && !empty(reviewAppNameSuffix)
-var replicaTimeout = 5 * 50 // 5 minutes, max
 
 // Existing resources
 resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = {
@@ -18,21 +17,12 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' existing 
 resource iotHub 'Microsoft.Devices/IotHubs@2023-06-30' existing = { name: 'korra' }
 resource appEnvironment 'Microsoft.App/managedEnvironments@2023-05-01' existing = { name: 'korra' }
 
-resource processor 'Microsoft.App/jobs@2025-01-01' = {
+resource processor 'Microsoft.App/containerApps@2025-01-01' = {
   name: 'processor${reviewAppNameSuffix}'
   location: location
   properties: {
     environmentId: appEnvironment.id
     configuration: {
-      triggerType: 'Schedule'
-      scheduleTriggerConfig: {
-        cronExpression: '0 */2 * * *' // every 2 hours
-        parallelism: 1
-        replicaCompletionCount: 1
-      }
-      manualTriggerConfig: { parallelism: 1, replicaCompletionCount: 1 }
-      replicaTimeout: replicaTimeout
-      replicaRetryLimit: 1
       secrets: [
         {
           name: 'connection-strings-iot-hub-event-hub'
@@ -78,13 +68,31 @@ resource processor 'Microsoft.App/jobs@2025-01-01' = {
             { name: 'Dashboard__ApiKey', secretRef: 'dashboard-api-key' }
 
             { name: 'Tinybird__Token', secretRef: 'tinybird-token' }
-
-            // run for 5 seconds less than the replica timeout, to complete gracefully
-            { name: 'JOB_DURATION_SECONDS', value: string(replicaTimeout - 5) }
           ]
           resources: { cpu: json('0.25'), memory: '0.5Gi' }
         }
       ]
+      scale: {
+        minReplicas: 0
+        maxReplicas: 1
+        pollingInterval: 30 // 30 seconds, default is 30 seconds
+        cooldownPeriod: 60 // 1 minute, default is 5 minutes
+        rules: [
+          {
+            name: 'schedule'
+            custom: {
+              type: 'cron'
+              metadata: {
+                timezone: 'Europe/London'
+                // Run every 15 minutes for 1 minute
+                start: '0,15,30,45 * * * *'
+                end: '1,16,31,46 * * * *'
+                desiredReplicas: '1'
+              }
+            }
+          }
+        ]
+      }
     }
   }
   identity: { type: 'UserAssigned', userAssignedIdentities: { '${managedIdentity.id}': {} } }
