@@ -8,7 +8,7 @@ param reviewAppNameSuffix string = ''
 param containerImageTag string = '#{DOCKER_IMAGE_TAG}#'
 
 var isReviewApp = reviewAppNameSuffix != null && !empty(reviewAppNameSuffix)
-var replicaTimeout = 60 * 10 // 10 minutes, max
+var replicaTimeout = 5 * 50 // 5 minutes, max
 
 // Existing resources
 resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = {
