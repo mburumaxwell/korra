@@ -41,7 +41,8 @@ resource processor 'Microsoft.App/jobs@2025-01-01' = {
               'Endpoint=${iotHub.properties.eventHubEndpoints.events.endpoint}'
               'SharedAccessKeyName=iothubowner'
               'SharedAccessKey=${iotHub.listkeys().value[0].primaryKey}'
-              'EntityPath=${iotHub.properties.eventHubEndpoints.events.path}'
+              // cannot set path here and in the ENV so we remove this since the ENV one is required
+              // 'EntityPath=${iotHub.properties.eventHubEndpoints.events.path}'
             ],
             ';'
           )
@@ -72,6 +73,7 @@ resource processor 'Microsoft.App/jobs@2025-01-01' = {
               value: isReviewApp ? 'iothub-checkpoints-review' : 'iothub-checkpoints'
             }
             { name: 'IotHub__EventHubs__Checkpoints__HubName', value: iotHub.properties.eventHubEndpoints.events.path }
+
             { name: 'Dashboard__Endpoint', secretRef: 'dashboard-endpoint' }
             { name: 'Dashboard__ApiKey', secretRef: 'dashboard-api-key' }
 
