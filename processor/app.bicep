@@ -72,7 +72,7 @@ resource processor 'Microsoft.App/jobs@2025-01-01' = {
               name: 'IotHub__EventHubs__Checkpoints__BlobContainerName'
               value: isReviewApp ? 'iothub-checkpoints-review' : 'iothub-checkpoints'
             }
-            { name: 'IotHub__EventHubs__Checkpoints__HubName', value: iotHub.properties.eventHubEndpoints.events.path }
+            { name: 'IotHub__EventHubs__HubName', value: iotHub.properties.eventHubEndpoints.events.path }
 
             { name: 'Dashboard__Endpoint', secretRef: 'dashboard-endpoint' }
             { name: 'Dashboard__ApiKey', secretRef: 'dashboard-api-key' }
