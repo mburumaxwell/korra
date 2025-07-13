@@ -156,6 +156,7 @@ async function run(props: RunProps) {
   }
 }
 
-await run({ version: '0.4.0', count: 1 });
-// await run({ version: '0.4.0', count: 2, exclude: ['ac9273f93030'] });
-// await run({ version: '0.4.0', devices: ['ac9273f93030'] });
+await run({ version: '0.4.3' });
+// await run({ version: '0.4.3', count: 1 });
+// await run({ version: '0.4.2', count: 2, exclude: ['ac9273f93030'] });
+// await run({ version: '0.4.2', devices: ['ac9273f93030'] });
