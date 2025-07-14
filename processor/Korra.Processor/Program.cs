@@ -78,11 +78,26 @@ builder.Services.AddSlimEventBus(eb =>
     eb.AddAzureEventHubsTransport(options =>
     {
         options.Credentials = builder.Configuration["IotHub:EventHubs:ConnectionString"]!;
-        var blobUrl = builder.Configuration["BlobStorage:Endpoint"]!;
-        var isLocal = !blobUrl.Contains(".core.windows.net");
-        options.BlobStorageCredentials = !isLocal
-            ? new AzureBlobStorageCredentials { ServiceUrl = new Uri(blobUrl), TokenCredential = new DefaultAzureCredential(), }
-            : "UseDevelopmentStorage=true";
+        if (Uri.TryCreate(builder.Configuration["BlobStorage:Endpoint"], UriKind.Absolute, out var blobUrl))
+        {
+            if (blobUrl.Host.Contains(".core.windows.net"))
+            {
+                options.BlobStorageCredentials = new AzureBlobStorageCredentials
+                {
+                    ServiceUrl = blobUrl,
+                    TokenCredential = new DefaultAzureCredential(),
+                };
+            }
+        }
+        else
+        {
+            options.BlobStorageCredentials = builder.Configuration["BlobStorage:ConnectionString"]!;
+        }
+
+        if (options.BlobStorageCredentials.CurrentValue is null)
+        {
+            options.BlobStorageCredentials = "UseDevelopmentStorage=true";
+        }
         options.BlobContainerName = builder.Configuration["IotHub:EventHubs:Checkpoints:BlobContainerName"]!;
     });
 });
