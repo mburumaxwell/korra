@@ -189,7 +189,9 @@ export function DeviceInformation({ device }: { device: DisplayableDevice }) {
                 </div>
                 <div className="rounded-lg border p-4">
                   <h4 className="text-muted-foreground text-sm font-medium">pH Level</h4>
-                  <p className="text-2xl font-bold">{latestTelemetry?.ph ? `${latestTelemetry?.ph.toFixed(2)}` : '—'}</p>
+                  <p className="text-2xl font-bold">
+                    {latestTelemetry?.ph ? `${latestTelemetry?.ph.toFixed(2)}` : '—'}
+                  </p>
                 </div>
               </>
             )}

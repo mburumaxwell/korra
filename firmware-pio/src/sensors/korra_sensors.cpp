@@ -34,7 +34,8 @@ void KorraSensors::read_ph(struct korra_analog_sensor_reading *reading) {
   reading->value = -1;
 }
 
-void KorraSensors::read_moisture(struct korra_analog_sensor_reading *reading, const uint8_t samples, const uint8_t interval_ms) {
+void KorraSensors::read_moisture(struct korra_analog_sensor_reading *reading, const uint8_t samples,
+                                 const uint8_t interval_ms) {
   // TODO: May need to recalibrate this from time to time or sensor to sensor, if too much move it to device twin
   // There is an inverse ratio between the sensor output value and soil moisture.
   // https://wiki.dfrobot.com/Capacitive_Soil_Moisture_Sensor_SKU_SEN0193

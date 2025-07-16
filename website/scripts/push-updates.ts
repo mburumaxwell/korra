@@ -1,4 +1,4 @@
-import env from '@next/env'
+import env from '@next/env';
 
 import { getRegistry, getTwin } from '@/lib/iot-hub';
 import {
@@ -132,7 +132,9 @@ async function run(props: RunProps) {
       // skip devices that are already at the desired version
       const desired = twin.properties.desired.firmware?.version;
       if (desired?.semver === resolvedVersionSemver && desired.value === resolvedVersionValue) {
-        console.log(`device ${label} (${id}) is already at version ${desired?.semver} (${desired?.value}), skipping update.`);
+        console.log(
+          `device ${label} (${id}) is already at version ${desired?.semver} (${desired?.value}), skipping update.`,
+        );
         continue;
       }
     }
