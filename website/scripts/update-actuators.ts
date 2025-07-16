@@ -1,4 +1,4 @@
-import dotenv from 'dotenv-flow';
+import env from '@next/env';
 
 import { ACTUATOR_TARGETS_POT } from '@/lib/actuator';
 import { getRegistry, getTwin } from '@/lib/iot-hub';
@@ -42,7 +42,8 @@ type RunProps = {
  * It assumes the firmware is not buggy.
  */
 async function run(props: RunProps) {
-  dotenv.config();
+  env.loadEnvConfig(process.cwd());
+
   const { prisma } = await import('@/lib/prisma');
 
   // fetch devices

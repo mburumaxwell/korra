@@ -1,4 +1,4 @@
-import dotenv from 'dotenv-flow';
+import env from '@next/env';
 import path from 'node:path';
 import * as semver from 'semver';
 import { z } from 'zod/v4';
@@ -28,7 +28,8 @@ function getAppVersionNumber(value: string) {
 }
 
 async function importFirmware() {
-  dotenv.config();
+  env.loadEnvConfig(process.cwd());
+
   const { prisma } = await import('@/lib/prisma');
   const response = await fetch('https://api.github.com/repos/mburumaxwell/korra/releases');
   const releasesData = await response.json();

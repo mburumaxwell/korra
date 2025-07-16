@@ -1,4 +1,4 @@
-import dotenv from 'dotenv-flow';
+import env from '@next/env';
 import { readFile } from 'node:fs/promises';
 
 import { getRegistry, getTwin } from '@/lib/iot-hub';
@@ -6,7 +6,8 @@ import { type AvailableFirmware, type MoistureCategory } from '@/lib/prisma/clie
 import { type KorraBoardType, type KorraFirmwareFramework } from '@/lib/schemas';
 
 async function run() {
-  dotenv.config();
+  env.loadEnvConfig(process.cwd());
+
   const { prisma } = await import('@/lib/prisma');
   const registry = getRegistry();
   const devices = (await registry.list()).responseBody;
