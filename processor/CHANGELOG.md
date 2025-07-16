@@ -1,5 +1,14 @@
 # processor
 
+## 0.2.1
+
+### Patch Changes
+
+- 96dc6f9: Allow use of connection string in processor
+- 367cb3d: Reduce replica timeout from 10 minutes to 5 minutes
+- e4cd17f: Fix env variable name for hub name
+- bdc0a42: Do not specify EntityPath in connection string
+
 ## 0.2.0
 
 ### Minor Changes
