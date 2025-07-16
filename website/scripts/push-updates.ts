@@ -1,12 +1,12 @@
 import dotenv from 'dotenv-flow';
 
-import { getRegistry, getTwin } from '../src/lib/iot-hub.ts';
+import { getRegistry, getTwin } from '@/lib/iot-hub';
 import {
   KORRA_BOARD_TYPES,
   KORRA_USAGE_TYPES,
   type KorraDeviceTwinDesiredFirmware,
   type KorraFirmwareFramework,
-} from '../src/lib/schemas.ts';
+} from '@/lib/schemas';
 
 type RunProps = {
   /**
@@ -48,7 +48,7 @@ type RunProps = {
  */
 async function run(props: RunProps) {
   dotenv.config();
-  const { prisma } = await import('../src/lib/prisma/index.ts');
+  const { prisma } = await import('@/lib/prisma');
 
   // fetch the latest available firmware for the specified framework
   // the latest firmware for a framework would be multiple entries, combinations: board * usage

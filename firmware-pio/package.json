@@ -5,22 +5,23 @@
   "license": "AGPL-3.0-later",
   "type": "module",
   "scripts": {
-    "build": "NODE_NO_WARNINGS=1 node scripts/firmware.ts build",
+    "build": "tsx scripts/firmware.ts build",
     "build:keeper": "pnpm build --environment keeper-esp32s3_devkitc",
     "build:pot": "pnpm build --environment pot-esp32s3_devkitc",
-    "flash": "NODE_NO_WARNINGS=1 node scripts/firmware.ts flash",
+    "flash": "tsx scripts/firmware.ts flash",
     "flash:keeper": "pnpm flash --environment keeper-esp32s3_devkitc",
     "flash:pot": "pnpm flash --environment pot-esp32s3_devkitc",
-    "collect": "NODE_NO_WARNINGS=1 node scripts/firmware.ts collect",
-    "avail": "NODE_NO_WARNINGS=1 node scripts/firmware.ts avail",
+    "collect": "tsx scripts/firmware.ts collect",
+    "avail": "tsx scripts/firmware.ts avail",
     "clean": "rimraf .pio binaries",
-    "packages:version": "NODE_NO_WARNINGS=1 node scripts/firmware.ts version"
+    "packages:version": "tsx scripts/firmware.ts version"
   },
   "devDependencies": {
     "@types/semver": "7.7.0",
     "chalk": "5.4.1",
     "commander": "14.0.0",
     "semver": "7.7.2",
+    "tsx": "4.20.3",
     "typescript": "5.8.3"
   }
 }

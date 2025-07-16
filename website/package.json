@@ -20,10 +20,10 @@
     "lint": "next lint",
     "test": "vitest",
     "clean": "rimraf .next .turbo out",
-    "import-firmware": "NODE_NO_WARNINGS=1 node scripts/import-firmware.ts",
-    "import-devices": "NODE_NO_WARNINGS=1 node scripts/import-devices.ts",
-    "push-updates": "NODE_NO_WARNINGS=1 node scripts/push-updates.ts",
-    "update-actuators": "NODE_NO_WARNINGS=1 node scripts/update-actuators.ts"
+    "import-firmware": "tsx scripts/import-firmware.ts",
+    "import-devices": "tsx scripts/import-devices.ts",
+    "push-updates": "tsx scripts/push-updates.ts",
+    "update-actuators": "tsx scripts/update-actuators.ts"
   },
   "dependencies": {
     "@azure/monitor-opentelemetry-exporter": "1.0.0-beta.32",
@@ -75,6 +75,7 @@
     "semver": "7.7.2",
     "shadcn": "2.8.0",
     "tailwindcss": "4.1.11",
+    "tsx": "4.20.3",
     "tw-animate-css": "1.3.5",
     "typescript": "5.8.3"
   }

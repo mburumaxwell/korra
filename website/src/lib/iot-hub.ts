@@ -3,7 +3,7 @@
 import iothub from 'azure-iothub';
 const { Registry } = iothub;
 
-import { type KorraDeviceTwin, KorraDeviceTwinSchema } from './schemas.ts';
+import { type KorraDeviceTwin, KorraDeviceTwinSchema } from './schemas';
 
 let defaultRegistry: iothub.Registry | undefined = undefined;
 

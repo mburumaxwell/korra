@@ -5,10 +5,10 @@
   "license": "AGPL-3.0-later",
   "type": "module",
   "scripts": {
-    "blobs": "NODE_NO_WARNINGS=1 node scripts/firmware.ts blobs",
+    "blobs": "tsx scripts/firmware.ts blobs",
     "blobs:fetch": "pnpm blobs fetch",
     "blobs:clean": "pnpm blobs clean",
-    "build": "NODE_NO_WARNINGS=1 node scripts/firmware.ts build",
+    "build": "tsx scripts/firmware.ts build",
     "build:keeper:esp32s3_devkitc": "pnpm build --app keeper --board esp32s3_devkitc/esp32s3/procpu",
     "build:keeper:frdm_rw612": "pnpm build --app keeper --board frdm_rw612",
     "build:keeper:nrf7002dk": "pnpm build --app keeper --board nrf7002dk/nrf5340/cpuapp",
@@ -17,23 +17,24 @@
     "build:pot:frdm_rw612": "pnpm build --app pot --board frdm_rw612",
     "build:pot:nrf7002dk": "pnpm build --app pot --board nrf7002dk/nrf5340/cpuapp",
     "build:pot": "pnpm build --app pot",
-    "flash": "NODE_NO_WARNINGS=1 node scripts/firmware.ts flash",
+    "flash": "tsx scripts/firmware.ts flash",
     "flash:keeper:esp32s3_devkitc": "pnpm flash --app keeper --board esp32s3_devkitc/esp32s3/procpu",
     "flash:keeper:frdm_rw612": "pnpm flash --app keeper --board frdm_rw612",
     "flash:keeper:nrf7002dk": "pnpm flash --app keeper --board nrf7002dk/nrf5340/cpuapp",
     "flash:pot:esp32s3_devkitc": "pnpm flash --app pot --board esp32s3_devkitc/esp32s3/procpu",
     "flash:pot:frdm_rw612": "pnpm flash --app pot --board frdm_rw612",
     "flash:pot:nrf7002dk": "pnpm flash --app pot --board nrf7002dk/nrf5340/cpuapp",
-    "collect": "NODE_NO_WARNINGS=1 node scripts/firmware.ts collect",
-    "avail": "NODE_NO_WARNINGS=1 node scripts/firmware.ts avail",
+    "collect": "tsx scripts/firmware.ts collect",
+    "avail": "tsx scripts/firmware.ts avail",
     "clean": "rimraf build binaries",
-    "packages:version": "NODE_NO_WARNINGS=1 node scripts/firmware.ts version"
+    "packages:version": "tsx scripts/firmware.ts version"
   },
   "devDependencies": {
     "@types/semver": "7.7.0",
     "chalk": "5.4.1",
     "commander": "14.0.0",
     "semver": "7.7.2",
+    "tsx": "4.20.3",
     "typescript": "5.8.3"
   }
 }

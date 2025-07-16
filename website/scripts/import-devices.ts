@@ -1,13 +1,13 @@
 import dotenv from 'dotenv-flow';
 import { readFile } from 'node:fs/promises';
 
-import { getRegistry, getTwin } from '../src/lib/iot-hub.ts';
-import { type AvailableFirmware, type MoistureCategory } from '../src/lib/prisma/client.ts';
-import { type KorraBoardType, type KorraFirmwareFramework } from '../src/lib/schemas.ts';
+import { getRegistry, getTwin } from '@/lib/iot-hub';
+import { type AvailableFirmware, type MoistureCategory } from '@/lib/prisma/client';
+import { type KorraBoardType, type KorraFirmwareFramework } from '@/lib/schemas';
 
 async function run() {
   dotenv.config();
-  const { prisma } = await import('../src/lib/prisma/index.ts');
+  const { prisma } = await import('@/lib/prisma');
   const registry = getRegistry();
   const devices = (await registry.list()).responseBody;
   console.log(`Found ${devices.length} devices in the IoT Hub.`);

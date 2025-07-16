@@ -1,8 +1,8 @@
 import dotenv from 'dotenv-flow';
 
-import { ACTUATOR_TARGETS_POT } from '../src/lib/actuator.ts';
-import { getRegistry, getTwin } from '../src/lib/iot-hub.ts';
-import { type KorraActuatorConfig, type KorraUsageType } from '../src/lib/schemas.ts';
+import { ACTUATOR_TARGETS_POT } from '@/lib/actuator';
+import { getRegistry, getTwin } from '@/lib/iot-hub';
+import { type KorraActuatorConfig, type KorraUsageType } from '@/lib/schemas';
 
 type RunProps = {
   /**
@@ -43,7 +43,7 @@ type RunProps = {
  */
 async function run(props: RunProps) {
   dotenv.config();
-  const { prisma } = await import('../src/lib/prisma/index.ts');
+  const { prisma } = await import('@/lib/prisma');
 
   // fetch devices
   const { usage, enabled = true, count } = props;

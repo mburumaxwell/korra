@@ -1,4 +1,4 @@
-import { type MoistureCategory } from './prisma/client.ts';
+import { type MoistureCategory } from './prisma/client';
 
 export const ACTUATOR_TARGETS_POT: Record<MoistureCategory, number> = {
   dry: 25,
