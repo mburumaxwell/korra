@@ -5,7 +5,8 @@
 
 // Device to Cloud message topic -> devices/{device-id}/messages/events/
 //                               -> devices/{device-id}/messages/events/{property-bag}
-#define TOPIC_FORMAT_D2C_MESSAGE "devices/%s/messages/events/"
+// System properties are added automatically and their keys are prefixed with "$."
+#define TOPIC_FORMAT_D2C_MESSAGE "devices/%s/messages/events/$.ct=application%%2Fjson%3Bcharset%%3Dutf-8"
 
 // Cloud to device message topic filter -> devices/{device-id}/messages/devicebound/#
 #define TOPIC_C2D_PREFIX "devices/%s/messages/devicebound/"
