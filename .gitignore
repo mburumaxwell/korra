@@ -21,3 +21,4 @@ app_version.h
 .DS_Store
 
 website/scripts/provisioning
+*.local.sh
