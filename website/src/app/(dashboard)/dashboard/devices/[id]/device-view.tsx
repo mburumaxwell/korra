@@ -78,7 +78,7 @@ export function DeviceInformation({ device }: { device: DisplayableDevice }) {
           {/* Board */}
           <div className="space-y-2">
             <h3 className="text-muted-foreground text-sm font-medium">Board</h3>
-            <Link href={`/boards/${device.board}`} className="underline-offset-4 hover:underline" target="_blank">
+            <Link href={`/boards#${device.board}`} className="underline-offset-4 hover:underline" target="_blank">
               <p className="font-mono text-sm">{device.board}</p>
             </Link>
           </div>
@@ -88,7 +88,7 @@ export function DeviceInformation({ device }: { device: DisplayableDevice }) {
             <div className="space-y-2">
               <h3 className="text-muted-foreground text-sm font-medium">Framework</h3>
               <Link
-                href={`/frameworks/${device.framework}`}
+                href={`/frameworks#${device.framework}`}
                 className="underline-offset-4 hover:underline"
                 target="_blank"
               >
