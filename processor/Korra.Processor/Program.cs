@@ -29,7 +29,7 @@ var inMemConfigSource = new MemoryConfigurationSource
         ["Logging:Console:FormatterOptions:IncludeEventId"] = "False",
         ["Logging:Console:FormatterOptions:TimestampFormat"] = "yyyy-MM-dd HH:mm:ss ",
 
-        ["BlobStorage:Endpoint"] = "http://127.0.0.1:10000/devstoreaccount1",
+        ["BlobStorage:ConnectionString"] = "UseDevelopmentStorage=true",
         ["IotHub:EventHubs:ConnectionString"] = "Endpoint=sb://abcd.servicebus.windows.net/;SharedAccessKeyName=xyz;SharedAccessKey=AAAAAAAAAAAAAAAAAAAAAA==",
         ["IotHub:EventHubs:Checkpoints:BlobContainerName"] = "iothub-checkpoints-dev",
         ["IotHub:EventHubs:HubName"] = "iothub-ehub-test-dev-0000000-0aaaa000aa",
@@ -78,25 +78,20 @@ builder.Services.AddSlimEventBus(eb =>
     eb.AddAzureEventHubsTransport(options =>
     {
         options.Credentials = builder.Configuration["IotHub:EventHubs:ConnectionString"]!;
-        if (Uri.TryCreate(builder.Configuration["BlobStorage:Endpoint"], UriKind.Absolute, out var blobUrl))
+        if (Uri.TryCreate(builder.Configuration["BlobStorage:Endpoint"], UriKind.Absolute, out var url)
+            && url.Host.Contains(".core.windows.net"))
         {
-            if (blobUrl.Host.Contains(".core.windows.net"))
+            options.BlobStorageCredentials = new AzureBlobStorageCredentials
             {
-                options.BlobStorageCredentials = new AzureBlobStorageCredentials
-                {
-                    ServiceUrl = blobUrl,
-                    TokenCredential = new DefaultAzureCredential(),
-                };
-            }
-        }
-        else
-        {
-            options.BlobStorageCredentials = builder.Configuration["BlobStorage:ConnectionString"]!;
+                ServiceUrl = url,
+                TokenCredential = new DefaultAzureCredential(),
+            };
         }
 
         if (options.BlobStorageCredentials.CurrentValue is null)
         {
-            options.BlobStorageCredentials = "UseDevelopmentStorage=true";
+            options.BlobStorageCredentials = builder.Configuration["BlobStorage:ConnectionString"]
+                                             ?? "UseDevelopmentStorage=true";
         }
         options.BlobContainerName = builder.Configuration["IotHub:EventHubs:Checkpoints:BlobContainerName"]!;
     });
