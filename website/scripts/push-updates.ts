@@ -4,11 +4,18 @@ import { getRegistry, getTwin } from '@/lib/iot-hub';
 import {
   KORRA_BOARD_TYPES,
   KORRA_USAGE_TYPES,
+  type KorraUsageType,
   type KorraDeviceTwinDesiredFirmware,
   type KorraFirmwareFramework,
 } from '@/lib/schemas';
 
 type RunProps = {
+  /**
+   * The usage type of the devices to update.
+   * If not specified, all usage types will be considered.
+   */
+  usage?: KorraUsageType;
+
   /**
    * The firmware framework to update devices for.
    * @default 'arduino'
@@ -53,10 +60,13 @@ async function run(props: RunProps) {
 
   // fetch the latest available firmware for the specified framework
   // the latest firmware for a framework would be multiple entries, combinations: board * usage
-  const combinations = KORRA_USAGE_TYPES.length * KORRA_BOARD_TYPES.length;
-  const { framework = 'arduino', version: targetVersionSemver, count } = props;
+  const { usage, framework = 'arduino', version: targetVersionSemver, count } = props;
+  const combinations = (usage ? 1 : KORRA_USAGE_TYPES.length) * KORRA_BOARD_TYPES.length;
   let firmwareEntries = await prisma.availableFirmware.findMany({
-    where: { framework, ...(targetVersionSemver && { versionSemver: targetVersionSemver }) },
+    where: {
+      ...(usage && { usage }),
+      framework, ...(targetVersionSemver && { versionSemver: targetVersionSemver })
+    },
     orderBy: { created: 'desc' },
     take: combinations,
   });
@@ -73,7 +83,7 @@ async function run(props: RunProps) {
   }
 
   // fetch devices
-  const devices = await prisma.device.findMany({ where: { framework }, include: { firmware: true } });
+  const devices = await prisma.device.findMany({ where: { usage, framework }, include: { firmware: true } });
 
   // work on each device
   let updated = 0;
@@ -166,7 +176,9 @@ async function run(props: RunProps) {
   }
 }
 
-await run({ version: '0.4.3' });
+// await run({ version: '0.4.3' });
+// await run({ version: '0.4.3', usage: 'pot' });
+await run({ usage: 'keeper' });
 // await run({ version: '0.4.3', count: 1 });
 // await run({ version: '0.4.2', count: 2, exclude: ['ac9273f93030'] });
 // await run({ version: '0.4.2', devices: ['ac9273f93030'] });
