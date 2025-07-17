@@ -4,7 +4,7 @@ import { Copy } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import type { BucketedDeviceTelemetry, DisplayableDevice } from '@/actions';
-import { getDeviceIcon, getNetworkIcon } from '@/components/dashboard/devices';
+import { getNetworkIcon, getUsageIcon } from '@/components/dashboard/devices';
 import { TelemetryChart, type TelemetryChartConfig } from '@/components/telemetry-chart';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -16,11 +16,11 @@ import { copyToClipboard } from '@/lib/utils';
 import Link from 'next/link';
 
 export function DeviceViewHeader({ device }: { device: DisplayableDevice }) {
-  const DeviceIcon = getDeviceIcon(device.usage);
+  const UsageIcon = getUsageIcon(device.usage);
   return (
     <div className="flex items-center space-x-4">
       <div className="flex items-center space-x-2">
-        <DeviceIcon className="text-muted-foreground h-6 w-6" />
+        <UsageIcon className="text-muted-foreground h-6 w-6" />
         <h1 className="text-3xl font-bold">{device.label}</h1>
         <Badge variant="outline" className="text-sm">
           {device.usage}

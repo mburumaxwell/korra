@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import type { DisplayableDevice } from '@/actions';
-import { getDeviceIcon, getNetworkIcon } from '@/components/dashboard/devices';
+import { getNetworkIcon, getUsageIcon } from '@/components/dashboard/devices';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -52,7 +52,7 @@ export function DeviceList({ devices: inputDevices }: DeviceListProps) {
         </TableHeader>
         <TableBody>
           {devices.map((device) => {
-            const DeviceIcon = getDeviceIcon(device.usage);
+            const UsageIcon = getUsageIcon(device.usage);
             const NetworkIcon = getNetworkIcon(device.network?.kind);
             const { statusVariant, timeAgo } = getStatusInfo(device);
             const { latestTelemetry: telemetry } = device;
@@ -66,7 +66,7 @@ export function DeviceList({ devices: inputDevices }: DeviceListProps) {
               >
                 <TableCell className="font-medium">
                   <div className="flex items-center space-x-2">
-                    <DeviceIcon className="text-muted-foreground h-5 w-5" />
+                    <UsageIcon className="text-muted-foreground h-5 w-5" />
                     <div className="w-2"></div>
                     <div className="flex flex-col space-y-1">
                       <div className="flex items-center space-x-2">

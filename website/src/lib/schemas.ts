@@ -126,6 +126,7 @@ export const KORRA_BOARD_TYPES = ['esp32s3_devkitc', 'frdm_rw612', 'nrf7002dk'] 
 
 export const KorraFirmwareFrameworkSchema = z.enum(['zephyr', 'arduino', 'espidf']);
 export type KorraFirmwareFramework = z.infer<typeof KorraFirmwareFrameworkSchema>;
+export const KORRA_FIRMWARE_FRAMEWORKS = ['zephyr', 'arduino', 'espidf'] as const;
 
 export const AvailableFirmwareRequestBodySchema = z.object({
   board: KorraBoardTypeSchema,

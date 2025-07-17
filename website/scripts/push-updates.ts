@@ -72,12 +72,6 @@ async function run(props: RunProps) {
     throw new Error(`No firmware available for framework: ${framework}`);
   }
 
-  const resolvedVersionSemver = firmwareEntries[0].versionSemver;
-  const resolvedVersionValue = firmwareEntries[0].versionValue;
-  console.log(
-    `Updating devices running '${framework}' to ${resolvedVersionSemver} (${resolvedVersionValue} or 0x${resolvedVersionValue.toString(16).padStart(5, '0')})`,
-  );
-
   // fetch devices
   const devices = await prisma.device.findMany({ where: { framework }, include: { firmware: true } });
 
@@ -122,18 +116,18 @@ async function run(props: RunProps) {
     // if it is in the list, we will update it regardless of its current version
     if (!props.devices || !props.devices.includes(id)) {
       // skip devices that are already at or above the target version
-      if (reported.value >= resolvedVersionValue) {
+      if (reported.value >= targetFirmware.versionValue) {
         console.log(
-          `device ${label} (${id}) is already at or above version ${reported.semver} (${reported.value}), skipping update.`,
+          `Device ${label} (${id}) is already at or above version ${reported.semver} (${reported.value}), skipping update.`,
         );
         continue;
       }
 
       // skip devices that are already at the desired version
       const desired = twin.properties.desired.firmware?.version;
-      if (desired?.semver === resolvedVersionSemver && desired.value === resolvedVersionValue) {
+      if (desired?.semver === targetFirmware.versionSemver && desired.value === targetFirmware.versionValue) {
         console.log(
-          `device ${label} (${id}) is already at version ${desired?.semver} (${desired?.value}), skipping update.`,
+          `Device ${label} (${id}) is already at version ${desired?.semver} (${desired?.value}), skipping update.`,
         );
         continue;
       }
@@ -141,16 +135,29 @@ async function run(props: RunProps) {
 
     const firmware: KorraDeviceTwinDesiredFirmware = {
       version: {
-        semver: resolvedVersionSemver,
-        value: resolvedVersionValue,
+        semver: targetFirmware.versionSemver,
+        value: targetFirmware.versionValue,
       },
       url: targetFirmware.url,
       hash: targetFirmware.hash,
       signature: targetFirmware.signature,
     };
-    console.log(`Updating device ${label} (${id}) to version ${resolvedVersionSemver} (${resolvedVersionValue})`);
+    console.log(
+      `Updating device ${label} (${id}) to version ${targetFirmware.versionSemver} (${targetFirmware.versionValue})`,
+    );
     await registry.updateTwin(id, { properties: { desired: { firmware } } }, twin.etag);
     updated++;
+    await prisma.device.update({
+      where: { id },
+      data: {
+        firmware: {
+          update: {
+            desiredVersion: targetFirmware.versionSemver,
+            desiredFirmwareId: targetFirmware.id,
+          },
+        },
+      },
+    });
 
     if (count && updated >= count) {
       console.log(`Updated ${updated} devices, stopping as per count limit.`);

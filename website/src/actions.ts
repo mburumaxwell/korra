@@ -1,7 +1,55 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { type Device, type DeviceFirmware, type DeviceNetwork, type DeviceTelemetry } from '@/lib/prisma/client';
+import {
+  type AvailableFirmware,
+  type BoardType,
+  type Device,
+  type DeviceFirmware,
+  type DeviceNetwork,
+  type DeviceTelemetry,
+  type DeviceUsage,
+  type FirmwareFramework,
+} from '@/lib/prisma/client';
+import { KORRA_BOARD_TYPES, KORRA_FIRMWARE_FRAMEWORKS, KORRA_USAGE_TYPES } from '@/lib/schemas';
+
+export type DisplayableFirmware = AvailableFirmware & {};
+
+export type GetFirmwareProps = {
+  usage?: DeviceUsage;
+  board?: BoardType;
+  framework?: FirmwareFramework;
+};
+
+export async function getAvailableFirmware(props: GetFirmwareProps): Promise<DisplayableFirmware[]> {
+  const firmware = await prisma.availableFirmware.findMany({
+    where: {
+      ...(props.usage ? { usage: props.usage } : {}),
+      ...(props.board ? { board: props.board } : {}),
+      ...(props.framework ? { framework: props.framework } : {}),
+    },
+    orderBy: { created: 'desc' },
+  });
+  return firmware as DisplayableFirmware[];
+}
+
+export async function getLatestAvailableFirmware(): Promise<DisplayableFirmware[]> {
+  return (
+    await Promise.all(
+      KORRA_BOARD_TYPES.flatMap((board) => {
+        return KORRA_USAGE_TYPES.flatMap((usage) => {
+          return KORRA_FIRMWARE_FRAMEWORKS.map(async (framework) => {
+            const latest = await prisma.availableFirmware.findFirst({
+              where: { board, usage, framework },
+              orderBy: { versionValue: 'desc' },
+            });
+            return latest;
+          });
+        });
+      }),
+    )
+  ).filter((f) => f !== null) as DisplayableFirmware[];
+}
 
 export type DisplayableDevice = Device & {
   firmware?: DeviceFirmware | null;
