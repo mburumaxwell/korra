@@ -200,8 +200,8 @@ export function DevicesFirmwareTab({ value, devices, latestFirmwareEntries }: De
                             <AlertDialogHeader>
                               <AlertDialogTitle>Force Firmware Update</AlertDialogTitle>
                               <AlertDialogDescription>
-                                This will immediately trigger a firmware update for device "{device.label}". The device
-                                must be online and this action cannot be undone.
+                                This will immediately trigger a firmware update for device &quot;{device.label}&quot;.
+                                The device must be online and this action cannot be undone.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
