@@ -1,5 +1,12 @@
 # firmware-pio
 
+## 0.4.4
+
+### Patch Changes
+
+- 04a883c: Add content type as system property when sending D2C messages
+- 4e5484b: Add `kind` application property to D2C messages
+
 ## 0.4.3
 
 ### Patch Changes

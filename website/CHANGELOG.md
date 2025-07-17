@@ -1,5 +1,11 @@
 # website
 
+## 0.5.0
+
+### Minor Changes
+
+- ff69739: Added/updated website landing page
+
 ## 0.4.0
 
 ### Minor Changes

@@ -1,5 +1,11 @@
 # processor
 
+## 0.2.2
+
+### Patch Changes
+
+- f15138b: Processor should not have default blob storage endpoint to allow connection string override
+
 ## 0.2.1
 
 ### Patch Changes
