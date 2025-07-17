@@ -6,7 +6,8 @@
 // Device to Cloud message topic -> devices/{device-id}/messages/events/
 //                               -> devices/{device-id}/messages/events/{property-bag}
 // System properties are added automatically and their keys are prefixed with "$."
-#define TOPIC_FORMAT_D2C_MESSAGE "devices/%s/messages/events/$.ct=application%%2Fjson%3Bcharset%%3Dutf-8"
+// Application properties are added as key-value pairs in the property bag.
+#define TOPIC_FORMAT_D2C_MESSAGE "devices/%s/messages/events/$.ct=application%%2Fjson%3Bcharset%%3Dutf-8&type=%s"
 
 // Cloud to device message topic filter -> devices/{device-id}/messages/devicebound/#
 #define TOPIC_C2D_PREFIX "devices/%s/messages/devicebound/"
@@ -127,9 +128,9 @@ void KorraCloudHub::push(const struct korra_sensors_data *source) {
 #endif // CONFIG_APP_KIND_POT
 
   // prepare topic
-  size_t topic_len = snprintf(NULL, 0, TOPIC_FORMAT_D2C_MESSAGE, deviceid);
+  size_t topic_len = snprintf(NULL, 0, TOPIC_FORMAT_D2C_MESSAGE, deviceid, "sensors");
   char topic[topic_len + 1] = {0};
-  topic_len = snprintf(topic, sizeof(topic), TOPIC_FORMAT_D2C_MESSAGE, deviceid);
+  topic_len = snprintf(topic, sizeof(topic), TOPIC_FORMAT_D2C_MESSAGE, deviceid, "sensors");
 
   // prepare payload
   size_t payload_len = measureJson(doc);
