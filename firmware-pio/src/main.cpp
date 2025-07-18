@@ -101,16 +101,16 @@ void setup() {
   tcp_client_hub.setCACert(root_ca_certs);
   tcp_client_hub.setCertificate(devcert);
   tcp_client_hub.setPrivateKey(devkey);
-  hub.begin();
   hub.onDeviceTwinUpdated(device_twin_updated);
   hub.onDirectMethodInvoked(device_direct_method_invoked);
+  hub.begin();
 
   // setup OTA
   ota.begin(root_ca_certs);
 
   // setup actuator
-  actuator.begin();
   actuator.onStateUpdated([](const struct korra_actuator_state *) { update_device_twin(NULL); });
+  actuator.begin();
 
   // setup timers
   timer.every(500, maintain);
@@ -121,7 +121,6 @@ void setup() {
                                                   // resource exhaustion observed during long uptime
 
   // setup shell
-  shell.attach(Serial);
   shell.addCommand(F("info"), shell_command_info);
   shell.addCommand(F("reboot"), shell_command_reboot);
   shell.addCommand(F("prefs-clear"), shell_command_prefs_clear);
@@ -132,6 +131,7 @@ void setup() {
   shell.addCommand(F("wifi-cred-set-personal <ssid> <passphrase>"), shell_command_wifi_cred_set_personal);
   shell.addCommand(F("wifi-cred-set-ent <ssid> <identity> <username> <password>"), shell_command_wifi_cred_set_ent);
   shell.addCommand(F("actuator-reset-state"), shell_command_actuator_reset_state);
+  shell.attach(Serial);
 }
 
 void loop() {
