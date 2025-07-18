@@ -41,6 +41,7 @@ KorraActuator actuator;
 static bool maintain(void *);
 static bool collect_data(void *);
 static bool maintain_ota(void *);
+static bool reboot_timer(void *);
 static bool update_device_twin(void *);
 static void device_twin_updated(struct korra_device_twin *twin, bool initial);
 
@@ -114,6 +115,7 @@ void setup() {
   timer.every((CONFIG_SENSORS_READ_PERIOD_SECONDS * 1000), collect_data);
   timer.every((3600 * 1000) /* 1 hour, in millis */, update_device_twin);
   timer.every(1000, maintain_ota);
+  timer.every(24 * 60 * 60 * 1000, reboot_timer); // reboot every 24 hours to address potential memory leaks and resource exhaustion observed during long uptime
 
   // setup shell
   shell.attach(Serial);
@@ -172,6 +174,11 @@ static bool collect_data(void *) {
 static bool maintain_ota(void *) {
   ota.maintain();
   return true; // true to repeat the action, false to stop
+}
+
+static bool reboot_timer(void *) {
+  esp_restart();
+  return false; // true to repeat the action, false to stop
 }
 
 static bool update_device_twin(void *) {
