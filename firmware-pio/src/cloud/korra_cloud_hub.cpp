@@ -7,7 +7,7 @@
 //                               -> devices/{device-id}/messages/events/{property-bag}
 // System properties are added automatically and their keys are prefixed with "$."
 // Application properties are added as key-value pairs in the property bag.
-#define TOPIC_FORMAT_D2C_MESSAGE "devices/%s/messages/events/$.ct=application%%2Fjson%3Bcharset%%3Dutf-8&type=%s"
+#define TOPIC_FORMAT_D2C_MESSAGE "devices/%s/messages/events/$.ct=application%%2Fjson%%3Bcharset%%3Dutf-8&type=%s"
 
 // Cloud to device message topic filter -> devices/{device-id}/messages/devicebound/#
 #define TOPIC_C2D_PREFIX "devices/%s/messages/devicebound/"
