@@ -87,9 +87,9 @@ void KorraCloudHub::maintain(struct korra_cloud_provisioning_info *info) {
       mqtt.subscribe(topic, /* qos */ 0);
 
       // subscribe to device twin messages
-      mqtt.subscribe(TOPIC_TWIN_RESULT_FILTER, /* qos */ 0);   // request response
-      mqtt.subscribe(TOPIC_TWIN_PATCH_DESIRED_FILTER, /* qos */ 0);    // updates to desired props
-      mqtt.subscribe(TOPIC_DIRECT_METHOD_FILTER, /* qos */ 0); // direct methods
+      mqtt.subscribe(TOPIC_TWIN_RESULT_FILTER, /* qos */ 0);        // request response
+      mqtt.subscribe(TOPIC_TWIN_PATCH_DESIRED_FILTER, /* qos */ 0); // updates to desired props
+      mqtt.subscribe(TOPIC_DIRECT_METHOD_FILTER, /* qos */ 0);      // direct methods
     }
   }
 
@@ -367,8 +367,8 @@ void KorraCloudHub::on_mqtt_message(int size) {
     char method_name[64] = {0};
     int rid = 0;
     if (sscanf(prefix_pos + strlen(TOPIC_DIRECT_METHOD_PREFIX), "%63[^/]/?$rid=%d", method_name, &rid) != 2) {
-        Serial.println(F("Error: Failed to parse direct method call topic."));
-        return;
+      Serial.println(F("Error: Failed to parse direct method call topic."));
+      return;
     }
     Serial.printf("Direct method call: %s (RID: %d)\n", method_name, rid);
 
