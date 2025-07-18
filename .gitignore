@@ -20,5 +20,5 @@ app_version.h
 .idea
 .DS_Store
 
-website/scripts/provisioning
+provisioning
 *.local.sh

@@ -26,7 +26,7 @@ async function run() {
     }
 
     // Read the certificate PEM file based on the label
-    const certificatePem = await readFile(`scripts/provisioning/certs/${label?.toLowerCase()}.cer`, 'utf-8');
+    const certificatePem = await readFile(`../provisioning/certs/${label?.toLowerCase()}.cer`, 'utf-8');
 
     // if the lastActivityTime is more than one month ago, set to null
     let lastSeen = device.lastActivityTime ? new Date(device.lastActivityTime) : null;
