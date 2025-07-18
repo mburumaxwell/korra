@@ -23,8 +23,8 @@
 #define TOPIC_TWIN_RESULT_FILTER TOPIC_TWIN_RESULT_PREFIX "#"
 #define TOPIC_FORMAT_TWIN_GET_STATUS "$iothub/twin/GET/?$rid=%d"
 #define TOPIC_FORMAT_TWIN_PATCH_REPORTED "$iothub/twin/PATCH/properties/reported/?$rid=%d"
-#define TOPIC_TWIN_PATCH_PREFIX "$iothub/twin/PATCH/properties/desired/"
-#define TOPIC_TWIN_PATCH_FILTER TOPIC_TWIN_PATCH_PREFIX "#"
+#define TOPIC_TWIN_PATCH_DESIRED_PREFIX "$iothub/twin/PATCH/properties/desired/"
+#define TOPIC_TWIN_PATCH_DESIRED_FILTER TOPIC_TWIN_PATCH_DESIRED_PREFIX "#"
 
 KorraCloudHub *KorraCloudHub::_instance = NULL;
 
@@ -88,7 +88,7 @@ void KorraCloudHub::maintain(struct korra_cloud_provisioning_info *info) {
 
       // subscribe to device twin messages
       mqtt.subscribe(TOPIC_TWIN_RESULT_FILTER, /* qos */ 0);   // request response
-      mqtt.subscribe(TOPIC_TWIN_PATCH_FILTER, /* qos */ 0);    // updates to desired props
+      mqtt.subscribe(TOPIC_TWIN_PATCH_DESIRED_FILTER, /* qos */ 0);    // updates to desired props
       mqtt.subscribe(TOPIC_DIRECT_METHOD_FILTER, /* qos */ 0); // direct methods
     }
   }
@@ -338,7 +338,7 @@ void KorraCloudHub::on_mqtt_message(int size) {
   }
 
   // find the prefix (twin desired update)
-  prefix_pos = strstr(topic, TOPIC_TWIN_PATCH_PREFIX);
+  prefix_pos = strstr(topic, TOPIC_TWIN_PATCH_DESIRED_PREFIX);
   if (prefix_pos != NULL) {
     // parse the json payload
     JsonDocument doc;
