@@ -2,4 +2,5 @@ packages:
   - 'firmware'
   - 'firmware-pio'
   - 'processor'
+  - 'tinybird'
   - 'website'

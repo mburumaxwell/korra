@@ -1,0 +1,11 @@
+{
+  "name": "tinybird",
+  "version": "0.0.0",
+  "private": true,
+  "license": "AGPL-3.0-later",
+  "scripts": {
+    "tb": "tb",
+    "build": "pnpm tb build",
+    "test": "pnpm tb test run"
+  }
+}

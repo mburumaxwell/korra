@@ -74,6 +74,8 @@ importers:
 
   processor: {}
 
+  tinybird: {}
+
   website:
     dependencies:
       '@azure/monitor-opentelemetry-exporter':
