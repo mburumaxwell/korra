@@ -9,6 +9,7 @@
 
 #include <ArduinoJson.h>
 #include <ArduinoMqttClient.h>
+#include <arduino-timer.h>
 
 #include "internet/korra_network_shared.h"
 #include "korra_cloud_shared.h"
@@ -57,8 +58,9 @@ public:
    * Please note that only one instance of the class can be initialized at the same time.
    *
    * @param client The secure TCP client to use for communication.
+   * @param timer The timer instance to use for scheduling repetitive or future tasks.
    */
-  KorraCloudHub(Client &client);
+  KorraCloudHub(Client &client, Timer<> &timer);
 
   /**
    * Cleanup resources created and managed by the KorraCloudHub class.
@@ -120,6 +122,10 @@ public:
     device_twin_updated_callback = callback;
   }
 
+  inline void onDirectMethodInvoked(int (*callback)(const char *method_name, const JsonVariantConst &payload)) {
+    direct_method_call_callback = callback;
+  }
+
   /**
    * Returns existing instance (singleton) of the KorraCloudHub class.
    * It may be a null pointer if the KorraCloudHub object was never constructed or it was destroyed.
@@ -132,16 +138,6 @@ public:
   void on_mqtt_message(int size);
 
 private:
-  /// Living instance of the KorraCloudHub class. It can be NULL.
-  static KorraCloudHub *_instance;
-
-private:
-  void connect(int retries = 3, int delay_ms = 5000);
-  void query_device_twin();
-  void populate_desired_props(const JsonVariantConst &json, struct korra_device_twin_desired *desired);
-  void populate_reported_props(const JsonVariantConst &json, struct korra_device_twin_reported *reported);
-
-private:
   MqttClient mqtt;
   bool client_setup = false;
   char *username = NULL, *hostname = NULL, *deviceid = NULL;
@@ -150,6 +146,18 @@ private:
   bool twin_requested = false;
   struct korra_device_twin twin = {0};
   void (*device_twin_updated_callback)(struct korra_device_twin *twin, bool initial);
+  int (*direct_method_call_callback)(const char *method_name, const JsonVariantConst &payload);
+  Timer<> &timer;
+
+  /// Living instance of the KorraCloudHub class. It can be NULL.
+  static KorraCloudHub *_instance;
+
+private:
+  void connect(int retries = 3, int delay_ms = 5000);
+  void query_device_twin();
+  void populate_desired_props(const JsonVariantConst &json, struct korra_device_twin_desired *desired);
+  void populate_reported_props(const JsonVariantConst &json, struct korra_device_twin_reported *reported);
+  void direct_method_response(int status_code, int request_id);
 };
 
 #endif // BOARD_HAS_INTERNET

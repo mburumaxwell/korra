@@ -13,6 +13,12 @@
 #define TOPIC_C2D_PREFIX "devices/%s/messages/devicebound/"
 #define TOPIC_C2D_FILTER TOPIC_C2D_PREFIX "#"
 
+// Direct method message topic filter -> $iothub/methods/POST/#
+#define TOPIC_DIRECT_METHOD_PREFIX "$iothub/methods/POST/"
+#define TOPIC_DIRECT_METHOD_FILTER TOPIC_DIRECT_METHOD_PREFIX "#"
+// Direct method response topic format -> $iothub/methods/res/{status}/?$rid={request-id}
+#define TOPIC_FORMAT_DIRECT_METHOD_RESPONSE "$iothub/methods/res/%d/?$rid=%d"
+
 #define TOPIC_TWIN_RESULT_PREFIX "$iothub/twin/res/"
 #define TOPIC_TWIN_RESULT_FILTER TOPIC_TWIN_RESULT_PREFIX "#"
 #define TOPIC_FORMAT_TWIN_GET_STATUS "$iothub/twin/GET/?$rid=%d"
@@ -26,7 +32,7 @@ static void on_mqtt_message_callback(int size) {
   KorraCloudHub::instance()->on_mqtt_message(size);
 }
 
-KorraCloudHub::KorraCloudHub(Client &client) : mqtt(client) {
+KorraCloudHub::KorraCloudHub(Client &client, Timer<> &timer) : mqtt(client), timer(timer) {
   _instance = this;
 }
 
@@ -81,8 +87,9 @@ void KorraCloudHub::maintain(struct korra_cloud_provisioning_info *info) {
       mqtt.subscribe(topic, /* qos */ 0);
 
       // subscribe to device twin messages
-      mqtt.subscribe(TOPIC_TWIN_RESULT_FILTER, /* qos */ 0); // request response
-      mqtt.subscribe(TOPIC_TWIN_PATCH_FILTER, /* qos */ 0);  // updates to desired props
+      mqtt.subscribe(TOPIC_TWIN_RESULT_FILTER, /* qos */ 0);   // request response
+      mqtt.subscribe(TOPIC_TWIN_PATCH_FILTER, /* qos */ 0);    // updates to desired props
+      mqtt.subscribe(TOPIC_DIRECT_METHOD_FILTER, /* qos */ 0); // direct methods
     }
   }
 
@@ -274,6 +281,7 @@ void KorraCloudHub::on_mqtt_message(int size) {
   // sample topics
   // twin (request response) -> $iothub/registrations/res/200/?$rid=1
   // twin (updated desired)  -> $iothub/twin/PATCH/properties/desired/?$version={new-version}
+  // direct method call      -> $iothub/methods/POST/{method-name}/?$rid={request-id}
 
   // find the prefix (twin request response)
   const char *prefix_pos = strstr(topic, TOPIC_TWIN_RESULT_PREFIX);
@@ -349,6 +357,38 @@ void KorraCloudHub::on_mqtt_message(int size) {
     if (device_twin_updated_callback != NULL) {
       device_twin_updated_callback(&twin, /* initial */ false);
     }
+
+    return;
+  }
+
+  // find the prefix (direct method call)
+  prefix_pos = strstr(topic, TOPIC_DIRECT_METHOD_PREFIX);
+  if (prefix_pos != NULL) {
+    char method_name[64] = {0};
+    int rid = 0;
+    if (sscanf(prefix_pos + strlen(TOPIC_DIRECT_METHOD_PREFIX), "%63[^/]/?$rid=%d", method_name, &rid) != 2) {
+        Serial.println(F("Error: Failed to parse direct method call topic."));
+        return;
+    }
+    Serial.printf("Direct method call: %s (RID: %d)\n", method_name, rid);
+
+    // parse the json payload
+    JsonDocument doc;
+    if (size > 0) {
+      DeserializationError error = deserializeJson(doc, payload);
+      if (error) {
+        Serial.print(F("deserializeJson() failed: "));
+        Serial.println(error.f_str());
+        return;
+      }
+    }
+
+    // invoke the callback
+    int status_code = 404; // default status code (not found)
+    if (direct_method_call_callback != NULL) {
+      status_code = direct_method_call_callback(method_name, doc);
+    }
+    direct_method_response(status_code, rid);
 
     return;
   }
@@ -451,4 +491,17 @@ void KorraCloudHub::populate_reported_props(const JsonVariantConst &json, struct
     twin.reported.actuator.last_time = node_acc["last_time"].as<time_t>();
     twin.reported.actuator.total_duration = node_acc["total_duration"].as<uint32_t>();
   }
+}
+
+void KorraCloudHub::direct_method_response(int status_code, int request_id) {
+  // prepare topic
+  size_t topic_len = snprintf(NULL, 0, TOPIC_FORMAT_DIRECT_METHOD_RESPONSE, status_code, request_id);
+  char topic[topic_len + 1] = {0};
+  snprintf(topic, sizeof(topic), TOPIC_FORMAT_DIRECT_METHOD_RESPONSE, status_code, request_id);
+  Serial.printf("Sending message to topic '%s'\n", topic);
+
+  // publish
+  mqtt.beginMessage(topic, /* retain */ false, /* qos */ 0, /* dup */ false);
+  mqtt.print("{}"); // must be an empty json otherwise it won't work
+  mqtt.endMessage();
 }

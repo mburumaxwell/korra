@@ -28,7 +28,7 @@ static WiFiClientSecure tcp_client_provisioning;
 static KorraCloudProvisioning provisioning(tcp_client_provisioning, prefs, timer);
 
 static WiFiClientSecure tcp_client_hub; // each client can only open one socket so we cannot share
-static KorraCloudHub hub(tcp_client_hub);
+static KorraCloudHub hub(tcp_client_hub, timer);
 
 static KorraOta ota;
 
@@ -44,6 +44,7 @@ static bool maintain_ota(void *);
 static bool reboot_timer(void *);
 static bool update_device_twin(void *);
 static void device_twin_updated(struct korra_device_twin *twin, bool initial);
+static int device_direct_method_invoked(const char *method_name, const JsonVariantConst &payload);
 
 static int shell_command_info(int argc, char **argv);
 static int shell_command_reboot(int argc, char **argv);
@@ -102,6 +103,7 @@ void setup() {
   tcp_client_hub.setPrivateKey(devkey);
   hub.begin();
   hub.onDeviceTwinUpdated(device_twin_updated);
+  hub.onDirectMethodInvoked(device_direct_method_invoked);
 
   // setup OTA
   ota.begin(root_ca_certs);
@@ -233,6 +235,19 @@ static void device_twin_updated(struct korra_device_twin *twin, bool initial) {
       return false; // true to repeat the action, false to stop
     });
   }
+}
+
+static int device_direct_method_invoked(const char *method_name, const JsonVariantConst &payload) {
+  if (strcmp(method_name, "reboot") == 0) {
+    Serial.println("Scheduling device reboot in 10 sec as requested by the cloud.");
+    timer.in(10 * 1000, [](void *) -> bool {
+      Serial.println("Rebooting device as requested by the cloud.");
+      esp_restart();
+      return false; // true to repeat the action, false to stop
+    });
+    return 200; // method executed successfully
+  }
+  return 404; // method not found
 }
 
 static int shell_command_info(int argc, char **argv) // info
