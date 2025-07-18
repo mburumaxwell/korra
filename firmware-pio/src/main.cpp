@@ -211,9 +211,7 @@ static void device_twin_updated(struct korra_device_twin *twin, bool initial) {
   actuator.set_config(&(twin->desired.actuator));
 
   // check for firmware updates
-  if ((twin->desired.firmware.version.value && twin->desired.firmware.version.value != APP_VERSION_NUMBER) ||
-      (strlen(twin->desired.firmware.version.semver) &&
-       strcmp(twin->desired.firmware.version.semver, APP_VERSION_STRING) != 0)) {
+  if ((twin->desired.firmware.version.value && twin->desired.firmware.version.value != APP_VERSION_NUMBER)) {
     Serial.printf("We have a new firmware version: %s (%d)\n", twin->desired.firmware.version.semver,
                   twin->desired.firmware.version.value);
 
