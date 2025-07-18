@@ -4,9 +4,9 @@ import { getRegistry, getTwin } from '@/lib/iot-hub';
 import {
   KORRA_BOARD_TYPES,
   KORRA_USAGE_TYPES,
-  type KorraUsageType,
   type KorraDeviceTwinDesiredFirmware,
   type KorraFirmwareFramework,
+  type KorraUsageType,
 } from '@/lib/schemas';
 
 type RunProps = {
@@ -65,7 +65,8 @@ async function run(props: RunProps) {
   let firmwareEntries = await prisma.availableFirmware.findMany({
     where: {
       ...(usage && { usage }),
-      framework, ...(targetVersionSemver && { versionSemver: targetVersionSemver })
+      framework,
+      ...(targetVersionSemver && { versionSemver: targetVersionSemver }),
     },
     orderBy: { created: 'desc' },
     take: combinations,
