@@ -178,7 +178,6 @@ static bool maintain_ota(void *) {
 
 static bool reboot_timer(void *) {
   esp_restart();
-  return false; // true to repeat the action, false to stop
 }
 
 static bool update_device_twin(void *) {
@@ -249,7 +248,6 @@ static int shell_command_reboot(int argc, char **argv) {
   // command format: reboot
 
   esp_restart();
-  return EXIT_SUCCESS;
 }
 
 static int shell_command_prefs_clear(int argc, char **argv) {
@@ -261,8 +259,6 @@ static int shell_command_prefs_clear(int argc, char **argv) {
   Serial.println("Rebooting in 10 sec ...");
   delay(10 * 1000);
   esp_restart();
-
-  return EXIT_SUCCESS;
 }
 
 static int shell_command_device_cred_clear(int argc, char **argv) {
@@ -277,8 +273,6 @@ static int shell_command_device_cred_clear(int argc, char **argv) {
   Serial.println("Rebooting in 10 sec ...");
   delay(10 * 1000);
   esp_restart();
-
-  return EXIT_SUCCESS;
 }
 
 static int shell_command_provisioning_clear(int argc, char **argv) {
