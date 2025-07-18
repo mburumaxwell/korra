@@ -22,7 +22,7 @@ public:
    *
    * @param client The secure TCP client to use for communication.
    * @param prefs The preferences instance to use for storing the provisioning info.
-   * @param timer The timer instance to use for scheduling repetitive tasks.
+   * @param timer The timer instance to use for scheduling repetitive or future tasks.
    */
   KorraCloudProvisioning(Client &client, Preferences &prefs, Timer<> &timer);
 
