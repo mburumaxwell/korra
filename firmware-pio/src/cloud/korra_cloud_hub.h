@@ -27,7 +27,7 @@ struct korra_device_twin_desired_firmware {
 };
 
 struct korra_device_twin_desired {
-  uint32_t version; // $version
+  uint16_t version; // $version
   struct korra_device_twin_desired_firmware firmware;
   struct korra_actuator_config actuator;
 };
@@ -37,7 +37,7 @@ struct korra_device_twin_reported_firmware {
 };
 
 struct korra_device_twin_reported {
-  uint32_t version; // $version
+  uint16_t version; // $version
   struct korra_device_twin_reported_firmware firmware;
   struct korra_network_props network;
   struct korra_actuator_state actuator;
