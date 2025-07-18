@@ -279,7 +279,10 @@ void KorraCloudHub::on_mqtt_message(int size) {
   const char *prefix_pos = strstr(topic, TOPIC_TWIN_RESULT_PREFIX);
   if (prefix_pos != NULL) {
     int status_code = 0;
-    sscanf(prefix_pos + strlen(TOPIC_TWIN_RESULT_PREFIX), "%d", &status_code);
+    if (sscanf(prefix_pos + strlen(TOPIC_TWIN_RESULT_PREFIX), "%d", &status_code) != 1) {
+      Serial.println(F("Error: Failed to parse status code."));
+      return;
+    }
 
     if (status_code == 200) {
       // parse the json payload
