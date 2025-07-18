@@ -9,7 +9,6 @@
 
 #include <ArduinoJson.h>
 #include <ArduinoMqttClient.h>
-#include <arduino-timer.h>
 
 #include "internet/korra_network_shared.h"
 #include "korra_cloud_shared.h"
@@ -58,9 +57,8 @@ public:
    * Please note that only one instance of the class can be initialized at the same time.
    *
    * @param client The secure TCP client to use for communication.
-   * @param timer The timer instance to use for scheduling repetitive or future tasks.
    */
-  KorraCloudHub(Client &client, Timer<> &timer);
+  KorraCloudHub(Client &client);
 
   /**
    * Cleanup resources created and managed by the KorraCloudHub class.
@@ -147,7 +145,6 @@ private:
   struct korra_device_twin twin = {0};
   void (*device_twin_updated_callback)(struct korra_device_twin *twin, bool initial);
   int (*direct_method_call_callback)(const char *method_name, const JsonVariantConst &payload);
-  Timer<> &timer;
 
   /// Living instance of the KorraCloudHub class. It can be NULL.
   static KorraCloudHub *_instance;

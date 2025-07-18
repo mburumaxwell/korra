@@ -32,7 +32,7 @@ static void on_mqtt_message_callback(int size) {
   KorraCloudHub::instance()->on_mqtt_message(size);
 }
 
-KorraCloudHub::KorraCloudHub(Client &client, Timer<> &timer) : mqtt(client), timer(timer) {
+KorraCloudHub::KorraCloudHub(Client &client) : mqtt(client) {
   _instance = this;
 }
 

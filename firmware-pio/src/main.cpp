@@ -28,7 +28,7 @@ static WiFiClientSecure tcp_client_provisioning;
 static KorraCloudProvisioning provisioning(tcp_client_provisioning, prefs, timer);
 
 static WiFiClientSecure tcp_client_hub; // each client can only open one socket so we cannot share
-static KorraCloudHub hub(tcp_client_hub, timer);
+static KorraCloudHub hub(tcp_client_hub);
 
 static KorraOta ota;
 
