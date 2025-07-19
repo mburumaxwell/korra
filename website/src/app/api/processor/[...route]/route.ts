@@ -1,4 +1,3 @@
-import { OperationalEventRequestBodySchema, TelemetryRequestBodySchema } from '@/lib/schemas';
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import { bearerAuth } from 'hono/bearer-auth';
@@ -6,13 +5,18 @@ import { handle } from 'hono/vercel';
 
 import { getRegistry, getTwin } from '@/lib/iot-hub';
 import { prisma } from '@/lib/prisma';
+import {
+  OperationalEventRequestBodySchema,
+  TelemetryRequestBodyActuatorsSchema,
+  TelemetryRequestBodySensorsSchema,
+} from '@/lib/schemas';
 
 export const dynamic = 'force-dynamic';
 
 const app = new Hono().basePath('/api/processor');
 app.use('/*', bearerAuth({ token: `${process.env.PROCESSOR_API_KEY}` }));
 
-app.post('/telemetry', zValidator('json', TelemetryRequestBodySchema), async (context) => {
+app.post('/telemetry/sensors', zValidator('json', TelemetryRequestBodySensorsSchema), async (context) => {
   const telemetry = context.req.valid('json');
 
   const { id, device_id: deviceId, app_kind: kind } = telemetry;
@@ -37,12 +41,57 @@ app.post('/telemetry', zValidator('json', TelemetryRequestBodySchema), async (co
     usage: kind,
     created: telemetry.created,
     received: telemetry.received ?? new Date(),
-    temperature: kind == 'keeper' ? telemetry.temperature : undefined,
-    humidity: kind == 'keeper' ? telemetry.humidity : undefined,
-    moisture: kind == 'pot' ? telemetry.moisture : undefined,
-    ph: kind == 'pot' ? telemetry.ph : undefined,
+    temperature: kind === 'keeper' ? telemetry.temperature : undefined,
+    humidity: kind === 'keeper' ? telemetry.humidity : undefined,
+    moisture: kind === 'pot' ? telemetry.moisture : undefined,
+    ph: kind === 'pot' ? telemetry.ph : undefined,
   };
   await prisma.deviceTelemetry.upsert({
+    where: { id: id },
+    create: { id, deviceId, ...values },
+    update: { deviceId, ...values },
+  });
+
+  // set last seen if not present or telemetry is newer
+  if (!device.lastSeen || telemetry.created.getTime() > device.lastSeen?.getTime()) {
+    await prisma.device.update({
+      where: { id: deviceId },
+      data: { lastSeen: telemetry.created },
+    });
+  }
+
+  return context.body(null, 201);
+});
+
+app.post('/telemetry/actuators', zValidator('json', TelemetryRequestBodyActuatorsSchema), async (context) => {
+  const telemetry = context.req.valid('json');
+
+  const { id, device_id: deviceId, app_kind: kind } = telemetry;
+  const device = await prisma.device.findUnique({ where: { id: deviceId } });
+  if (!device) {
+    // technically this should not happen, but it might for existing test devices
+    // we log then fail silently
+    console.warn(`Device with ID ${deviceId} not found. Telemetry will not be processed.`);
+    return context.body(null, 204);
+  }
+
+  // if we receive telemetry for a device that is not of the expected kind, we ignore it
+  if (kind !== device.usage) {
+    console.warn(
+      `Received telemetry for device ${deviceId} of kind ${kind}, but expected ${device.usage}. Ignoring telemetry.`,
+    );
+    return context.body(null, 204);
+  }
+
+  // store telemetry in the database, if it does not already exist
+  const values = {
+    usage: kind,
+    created: telemetry.created,
+    received: telemetry.received ?? new Date(),
+    fan: kind === 'keeper' ? telemetry.fan.duration : undefined,
+    pump: kind === 'pot' ? telemetry.pump.duration : undefined,
+  };
+  await prisma.deviceTelemetryActuation.upsert({
     where: { id: id },
     create: { id, deviceId, ...values },
     update: { deviceId, ...values },
@@ -160,8 +209,7 @@ app.post('/operational-event', zValidator('json', OperationalEventRequestBodySch
 });
 
 function moreRecent(first?: Date | null, second?: Date | null) {
-  if (!first) return second;
-  if (!second) return first;
+  if (!first || !second) return second || first;
   return first.getTime() > second.getTime() ? first : second;
 }
 

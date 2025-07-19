@@ -62,21 +62,22 @@ model AvailableFirmware {
 }
 
 model Device {
-  id               String             @id
-  created          DateTime           @default(now())
-  updated          DateTime           @updatedAt
+  id               String                     @id
+  created          DateTime                   @default(now())
+  updated          DateTime                   @updatedAt
   board            BoardType
   usage            DeviceUsage
   framework        FirmwareFramework?
-  label            String             @db.VarChar(20) // e.g. W1, K1, D2
+  label            String                     @db.VarChar(20) // e.g. W1, K1, D2
   moistureCategory MoistureCategory?
   certificatePem   String?
-  connected        Boolean            @default(false)
+  connected        Boolean                    @default(false)
   lastSeen         DateTime?
   actuator         DeviceActuator?
   firmware         DeviceFirmware?
   network          DeviceNetwork?
   DeviceTelemetry  DeviceTelemetry[]
+  actuations       DeviceTelemetryActuation[]
 }
 
 model DeviceActuator {
@@ -106,7 +107,7 @@ model DeviceNetwork {
   kind     NetworkKind?
   mac      String?      @db.VarChar(50)
   name     String?      @db.VarChar(50)
-  localIp String?      @db.VarChar(100)
+  localIp  String?      @db.VarChar(100)
 }
 
 model DeviceTelemetry {
@@ -120,6 +121,21 @@ model DeviceTelemetry {
   humidity    Float?
   moisture    Float?
   ph          Float?
+
+  @@index([deviceId, created])
+  @@index([deviceId, received])
+  @@index([usage, created])
+}
+
+model DeviceTelemetryActuation {
+  id       String      @id
+  device   Device      @relation(fields: [deviceId], references: [id])
+  deviceId String
+  usage    DeviceUsage
+  created  DateTime
+  received DateTime?
+  fan      Int?
+  pump     Int?
 
   @@index([deviceId, created])
   @@index([deviceId, received])

@@ -2,6 +2,7 @@
 using Azure.Messaging.EventHubs.Consumer;
 using Tingle.EventBus;
 using Tingle.EventBus.Configuration;
+using Tingle.EventBus.Transports.Azure.EventHubs;
 using Tingle.EventBus.Transports.Azure.EventHubs.IotHub;
 using SC = Korra.Processor.KorraProcessorSerializerContext;
 
@@ -40,6 +41,10 @@ internal class KorraIotEventsConsumer(KorraDashboardClient dashboardClient,
         var deviceId = context.GetIotHubDeviceId() ?? throw new InvalidOperationException("device id cannot be null");
         var enqueued = context.GetIotHubEnqueuedTime();
 
+        var typeRaw = context.GetEventData().GetPropertyValue<string>("type");
+        var type = Enum.TryParse<KorraIotHubTelemetryType>(typeRaw, ignoreCase: true, out var value)
+                 ? value : KorraIotHubTelemetryType.Sensors;
+
         var appKind = incoming.AppKind switch
         {
             KorraIotHubTelemetryAppKind.Keeper => KorraAppKind.Keeper,
@@ -50,40 +55,83 @@ internal class KorraIotEventsConsumer(KorraDashboardClient dashboardClient,
         // var telemetryId = Tingle.Extensions.Primitives.Ksuid.Generate(incoming.Created);
         var telemetryId = $"{context.GetEventData().SequenceNumber}";
 
-        var telemetry = new KorraTelemetry
+        if (type is KorraIotHubTelemetryType.Sensors)
         {
-            Id = telemetryId,
-            DeviceId = deviceId,
-            Created = new DateTimeOffset(incoming.Created, TimeSpan.Zero),
-            Received = enqueued?.ToUniversalTime(),
-            AppKind = appKind,
-            // we assume the units for this do not vary, otherwise we would need to convert
-            Temperature = incoming.Temperature?.Value,
-            Humidity = incoming.Humidity?.Value,
-            Moisture = incoming.Moisture?.Value,
-            PH = incoming.PH?.Value,
-        };
+            var sensors = new KorraTelemetrySensors
+            {
+                Id = telemetryId,
+                DeviceId = deviceId,
+                Created = new DateTimeOffset(incoming.Created, TimeSpan.Zero),
+                Received = enqueued?.ToUniversalTime(),
+                AppKind = appKind,
+                // we assume the units for this do not vary, otherwise we would need to convert
+                Temperature = incoming.Temperature?.Value,
+                Humidity = incoming.Humidity?.Value,
+                Moisture = incoming.Moisture?.Value,
+                PH = incoming.PH?.Value,
+            };
 
-        logger.LogInformation("Forwarding telemetry from {DeviceId} (dated: {Created:o})", deviceId, telemetry.Created);
-        if (logger.IsEnabled(LogLevel.Debug))
-        {
-            logger.LogDebug("{Telemetry}", JsonSerializer.Serialize(telemetry, SC.Default.KorraTelemetry));
+            logger.LogInformation("Forwarding telemetry from {DeviceId} (dated: {Created:o})", deviceId, sensors.Created);
+            if (logger.IsEnabled(LogLevel.Debug))
+            {
+                logger.LogDebug("{Telemetry}", JsonSerializer.Serialize(sensors, SC.Default.KorraTelemetrySensors));
+            }
+            await dashboardClient.SendAsync(sensors, cancellationToken);
+
+            var tbp = new System.Text.Json.Nodes.JsonObject
+            {
+                ["id"] = sensors.Id,
+                // tinybird expects a specific format for date-time
+                ["timestamp"] = sensors.Created.ToString("yyyy-MM-dd'T'HH:mm:ss"),
+                ["device_id"] = sensors.DeviceId,
+                ["app_kind"] = sensors.AppKind.GetEnumMemberAttrValueOrDefault(),
+                ["temperature"] = sensors.Temperature,
+                ["humidity"] = sensors.Humidity,
+                ["moisture"] = sensors.Moisture,
+                ["ph"] = sensors.PH,
+            };
+            await tinybirdClient.SendAsync("telemetry", tbp, cancellationToken);
         }
-        await dashboardClient.SendTelemetryAsync(telemetry, cancellationToken);
-
-        var tinybirdPayload = new System.Text.Json.Nodes.JsonObject
+        else if (type is KorraIotHubTelemetryType.Actuators)
         {
-            ["id"] = telemetry.Id,
-            // tinybird expects a specific format for date-time
-            ["timestamp"] = telemetry.Created.ToString("yyyy-MM-dd'T'HH:mm:ss"),
-            ["device_id"] = telemetry.DeviceId,
-            ["app_kind"] = telemetry.AppKind.GetEnumMemberAttrValueOrDefault(),
-            ["temperature"] = telemetry.Temperature,
-            ["humidity"] = telemetry.Humidity,
-            ["moisture"] = telemetry.Moisture,
-            ["ph"] = telemetry.PH,
-        };
-        await tinybirdClient.SendAsync("telemetry", tinybirdPayload, cancellationToken);
+            var actuators = new KorraTelemetryActuators
+            {
+                Id = telemetryId,
+                DeviceId = deviceId,
+                Created = new DateTimeOffset(incoming.Created, TimeSpan.Zero),
+                Received = enqueued?.ToUniversalTime(),
+                AppKind = appKind,
+                PumpDuration = incoming.Pump?.Duration,
+                PumpQuantity = incoming.Pump?.Quantity,
+                FanDuration = incoming.Fan?.Duration,
+                FanQuantity = incoming.Fan?.Quantity,
+            };
+
+            logger.LogInformation("Forwarding actuator telemetry from {DeviceId} (dated: {Created:o})", deviceId, actuators.Created);
+            if (logger.IsEnabled(LogLevel.Debug))
+            {
+                logger.LogDebug("{Telemetry}", JsonSerializer.Serialize(actuators, SC.Default.KorraTelemetryActuators));
+            }
+            await dashboardClient.SendAsync(actuators, cancellationToken);
+
+            var tbp = new System.Text.Json.Nodes.JsonObject
+            {
+                ["id"] = actuators.Id,
+                // tinybird expects a specific format for date-time
+                ["timestamp"] = actuators.Created.ToString("yyyy-MM-dd'T'HH:mm:ss"),
+                ["device_id"] = actuators.DeviceId,
+                ["app_kind"] = actuators.AppKind.GetEnumMemberAttrValueOrDefault(),
+                ["pump_duration"] = actuators.PumpDuration,
+                ["pump_quantity"] = actuators.PumpQuantity,
+                ["fan_duration"] = actuators.FanDuration,
+                ["fan_quantity"] = actuators.FanQuantity,
+            };
+            await tinybirdClient.SendAsync("actuator_telemetry", tbp, cancellationToken);
+        }
+        else
+        {
+            throw new NotSupportedException($"Unsupported telemetry type: {type}");
+        }
     }
 
     internal virtual async Task HandleOperationalEventAsync(EventContext context,
@@ -115,6 +163,6 @@ internal class KorraIotEventsConsumer(KorraDashboardClient dashboardClient,
         {
             logger.LogDebug("{Event}", JsonSerializer.Serialize(@event, SC.Default.KorraOperationalEvent));
         }
-        await dashboardClient.SendOperationalEventAsync(@event, cancellationToken);
+        await dashboardClient.SendAsync(@event, cancellationToken);
     }
 }
