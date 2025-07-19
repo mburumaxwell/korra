@@ -44,19 +44,19 @@ enum NetworkKind {
 
 // list of known firmware
 model AvailableFirmware {
-  id             String            @id @default(cuid())
-  created        DateTime          @default(now())
-  updated        DateTime          @updatedAt
-  board          BoardType
-  usage          DeviceUsage
-  framework      FirmwareFramework
-  versionValue   Int
-  versionSemver  String
-  url            String
-  attestation    String
-  hash           String
-  signature      String
-  DeviceFirmware DeviceFirmware[]
+  id            String            @id @default(cuid())
+  created       DateTime          @default(now())
+  updated       DateTime          @updatedAt
+  board         BoardType
+  usage         DeviceUsage
+  framework     FirmwareFramework
+  versionValue  Int
+  versionSemver String
+  url           String
+  attestation   String
+  hash          String
+  signature     String
+  devices       DeviceFirmware[]
 
   @@unique([board, usage, framework, versionSemver])
 }
@@ -76,7 +76,7 @@ model Device {
   actuator         DeviceActuator?
   firmware         DeviceFirmware?
   network          DeviceNetwork?
-  DeviceTelemetry  DeviceTelemetry[]
+  sensors          DeviceTelemetry[]
   actuations       DeviceTelemetryActuation[]
 }
 
