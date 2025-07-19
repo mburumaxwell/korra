@@ -81,36 +81,64 @@ export const KorraDeviceTwinSchema = z.object({
 });
 export type KorraDeviceTwin = z.infer<typeof KorraDeviceTwinSchema>;
 
-export const KorraTelemetryKeeperSchema = z.object({
+export const KorraTelemetryKeeperSensorsSchema = z.object({
   app_kind: z.literal('keeper'),
   temperature: z.number(), // °C
   humidity: z.number(), // Relative humidity (%)
 });
-export type KorraTelemetryKeeper = z.infer<typeof KorraTelemetryKeeperSchema>;
+export type KorraTelemetryKeeperSensors = z.infer<typeof KorraTelemetryKeeperSensorsSchema>;
 
-export const KorraTelemetryPotSchema = z.object({
+export const KorraTelemetryPotSensorsSchema = z.object({
   app_kind: z.literal('pot'),
   moisture: z.number(), // Percentage (%) of water in the soil
   ph: z.number().nullish(),
 });
-export type KorraTelemetryPot = z.infer<typeof KorraTelemetryPotSchema>;
+export type KorraTelemetryPotSensors = z.infer<typeof KorraTelemetryPotSensorsSchema>;
 
-export const KorraTelemetrySchema = z.discriminatedUnion('app_kind', [
-  KorraTelemetryKeeperSchema,
-  KorraTelemetryPotSchema,
+export const KorraTelemetrySensorsSchema = z.discriminatedUnion('app_kind', [
+  KorraTelemetryKeeperSensorsSchema,
+  KorraTelemetryPotSensorsSchema,
 ]);
-export type KorraTelemetry = z.infer<typeof KorraTelemetrySchema>;
+export type KorraTelemetry = z.infer<typeof KorraTelemetrySensorsSchema>;
 
-export const TelemetryRequestBodySchema = z.intersection(
-  z.object({
-    id: z.string(),
-    device_id: z.string(),
-    created: z.coerce.date(),
-    received: z.coerce.date().nullish(),
+const KorraTelemetryBaseSchema = z.object({
+  id: z.string(),
+  device_id: z.string(),
+  created: z.coerce.date(),
+  received: z.coerce.date().nullish(),
+});
+export const TelemetryRequestBodySensorsSchema = z.intersection(KorraTelemetryBaseSchema, KorraTelemetrySensorsSchema);
+export type TelemetryRequestBodySensors = z.infer<typeof TelemetryRequestBodySensorsSchema>;
+
+export const KorraTelemetryKeeperActuatorsSchema = z.object({
+  app_kind: z.literal('keeper'),
+  fan: z.object({
+    duration: z.number().int(), // milliseconds active
+    quantity: z.number(),
   }),
-  KorraTelemetrySchema,
+});
+export type KorraTelemetryKeeperActuators = z.infer<typeof KorraTelemetryKeeperActuatorsSchema>;
+
+export const KorraTelemetryPotActuatorsSchema = z.object({
+  app_kind: z.literal('pot'),
+  pump: z.object({
+    duration: z.number().int(), // milliseconds active
+    quantity: z.number(),
+  }),
+});
+export type KorraTelemetryPotActuators = z.infer<typeof KorraTelemetryPotActuatorsSchema>;
+
+export const KorraTelemetryActuatorsSchema = z.discriminatedUnion('app_kind', [
+  KorraTelemetryKeeperActuatorsSchema,
+  KorraTelemetryPotActuatorsSchema,
+]);
+export type KorraTelemetryActuators = z.infer<typeof KorraTelemetryActuatorsSchema>;
+
+export const TelemetryRequestBodyActuatorsSchema = z.intersection(
+  KorraTelemetryBaseSchema,
+  KorraTelemetryActuatorsSchema,
 );
-export type TelemetryRequestBody = z.infer<typeof TelemetryRequestBodySchema>;
+export type TelemetryRequestBodyActuators = z.infer<typeof TelemetryRequestBodyActuatorsSchema>;
 
 export const OperationalEventRequestBodySchema = z.object({
   type: z.enum(['connected', 'disconnected', 'twin.updated']),

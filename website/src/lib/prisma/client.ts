@@ -9,6 +9,7 @@ export {
   type DeviceFirmware,
   type DeviceNetwork,
   type DeviceTelemetry,
+  type DeviceTelemetryActuation,
   type DeviceUsage,
   type FirmwareFramework,
   type MoistureCategory,

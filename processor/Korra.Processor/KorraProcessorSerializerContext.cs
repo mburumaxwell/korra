@@ -3,7 +3,8 @@ using System.Text.Json.Serialization;
 
 namespace Korra.Processor;
 
-[JsonSerializable(typeof(KorraTelemetry))]
+[JsonSerializable(typeof(KorraTelemetrySensors))]
+[JsonSerializable(typeof(KorraTelemetryActuators))]
 [JsonSerializable(typeof(KorraIotHubTelemetry))]
 [JsonSerializable(typeof(KorraOperationalEvent))]
 [JsonSerializable(typeof(KorraDashboardResponse))]

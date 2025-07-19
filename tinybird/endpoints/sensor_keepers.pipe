@@ -1,7 +1,7 @@
 DESCRIPTION >
-    API endpoint to query telemetry data for keeper nodes with filtering by device_id and date range.
+    API endpoint to query sensor data for keeper nodes with filtering by device_id and date range.
 
-NODE keepers_endpoint_node
+NODE sensor_keepers_endpoint_node
 SQL >
     %
     SELECT

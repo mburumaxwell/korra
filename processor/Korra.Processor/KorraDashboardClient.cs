@@ -7,7 +7,7 @@ using SC = Korra.Processor.KorraProcessorSerializerContext;
 
 namespace Korra.Processor;
 
-public class KorraTelemetry
+public class AbstractKorraTelemetry
 {
     [JsonPropertyName("id")]
     public required string Id { get; set; }
@@ -23,6 +23,10 @@ public class KorraTelemetry
 
     [JsonPropertyName("app_kind")]
     public required KorraAppKind AppKind { get; set; }
+}
+
+public class KorraTelemetrySensors : AbstractKorraTelemetry
+{
 
     [JsonPropertyName("temperature")]
     public required float? Temperature { get; set; }
@@ -35,6 +39,21 @@ public class KorraTelemetry
 
     [JsonPropertyName("ph")]
     public required float? PH { get; set; }
+}
+
+public class KorraTelemetryActuators : AbstractKorraTelemetry
+{
+    [JsonPropertyName("pump_duration")]
+    public required int? PumpDuration { get; set; }
+
+    [JsonPropertyName("pump_quantity")]
+    public required float? PumpQuantity { get; set; }
+
+    [JsonPropertyName("fan_duration")]
+    public required int? FanDuration { get; set; }
+
+    [JsonPropertyName("fan_quantity")]
+    public required float? FanQuantity { get; set; }
 }
 
 [JsonConverter(typeof(JsonStringEnumMemberConverter<KorraAppKind>))]
@@ -70,15 +89,23 @@ public enum KorraOperationalEventType
 public class KorraDashboardClient(HttpClient httpClient, IOptionsSnapshot<KorraDashboardClientOptions> optionsAccessor)
     : AbstractHttpApiClient<KorraDashboardClientOptions>(httpClient, optionsAccessor)
 {
-    public async Task SendTelemetryAsync(KorraTelemetry telemetry, CancellationToken cancellationToken = default)
+    public async Task SendAsync(KorraTelemetrySensors telemetry, CancellationToken cancellationToken = default)
     {
-        var content = MakeJsonContent(telemetry, SC.Default.KorraTelemetry);
-        var request = new HttpRequestMessage(HttpMethod.Post, "/api/processor/telemetry") { Content = content, };
+        var content = MakeJsonContent(telemetry, SC.Default.KorraTelemetrySensors);
+        var request = new HttpRequestMessage(HttpMethod.Post, "/api/processor/telemetry/sensors") { Content = content, };
         var response = await SendAsync(request, SC.Default.KorraDashboardResponse, cancellationToken);
         response.EnsureSuccess();
     }
 
-    public async Task SendOperationalEventAsync(KorraOperationalEvent @event, CancellationToken cancellationToken = default)
+    public async Task SendAsync(KorraTelemetryActuators telemetry, CancellationToken cancellationToken = default)
+    {
+        var content = MakeJsonContent(telemetry, SC.Default.KorraTelemetryActuators);
+        var request = new HttpRequestMessage(HttpMethod.Post, "/api/processor/telemetry/actuators") { Content = content, };
+        var response = await SendAsync(request, SC.Default.KorraDashboardResponse, cancellationToken);
+        response.EnsureSuccess();
+    }
+
+    public async Task SendAsync(KorraOperationalEvent @event, CancellationToken cancellationToken = default)
     {
         var content = MakeJsonContent(@event, SC.Default.KorraOperationalEvent);
         var request = new HttpRequestMessage(HttpMethod.Post, "/api/processor/operational-event") { Content = content, };

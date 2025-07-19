@@ -1,7 +1,7 @@
 DESCRIPTION >
-    API endpoint to query telemetry data for pot nodes with filtering by device_id and date range.
+    API endpoint to query sensor data for pot nodes with filtering by device_id and date range.
 
-NODE pots_endpoint_node
+NODE sensor_pots_endpoint_node
 SQL >
     %
     SELECT
