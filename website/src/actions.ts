@@ -7,7 +7,7 @@ import {
   type Device,
   type DeviceFirmware,
   type DeviceNetwork,
-  type DeviceTelemetry,
+  type DeviceTelemetrySensors,
   type DeviceUsage,
   type FirmwareFramework,
 } from '@/lib/prisma/client';
@@ -53,7 +53,7 @@ export async function getLatestAvailableFirmware(): Promise<DisplayableFirmware[
 
 export type DisplayableDevice = Device & {
   firmware?: DeviceFirmware | null;
-  latestTelemetry?: DeviceTelemetry | null;
+  latestTelemetry?: DeviceTelemetrySensors | null;
   network?: DeviceNetwork | null;
 };
 
@@ -63,7 +63,7 @@ export async function getDevices(): Promise<DisplayableDevice[]> {
   });
   const results = await Promise.all(
     devices.map(async (device): Promise<DisplayableDevice> => {
-      const latestTelemetry = await prisma.deviceTelemetry.findFirst({
+      const latestTelemetry = await prisma.deviceTelemetrySensors.findFirst({
         where: { deviceId: device.id },
         orderBy: { created: 'desc' },
         take: 1,
@@ -95,7 +95,7 @@ export async function getDevice(id: string): Promise<DisplayableDevice> {
     where: { id: id },
     include: { firmware: true, network: true },
   });
-  const latestTelemetry = await prisma.deviceTelemetry.findFirst({
+  const latestTelemetry = await prisma.deviceTelemetrySensors.findFirst({
     where: { deviceId: device.id },
     orderBy: { created: 'desc' },
     take: 1,
@@ -139,7 +139,7 @@ export type GetDeviceTelemetriesProps = {
 export async function getDeviceTelemetries(props: GetDeviceTelemetriesProps): Promise<BucketedDeviceTelemetry[]> {
   // fetch all points in window
   const { deviceId, start, end, granularity } = props;
-  const telemetries = await prisma.deviceTelemetry.findMany({
+  const telemetries = await prisma.deviceTelemetrySensors.findMany({
     where: { deviceId, created: { gte: start, lte: end } },
   });
 

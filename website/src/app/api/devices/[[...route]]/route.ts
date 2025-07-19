@@ -3,7 +3,7 @@ import { bearerAuth } from 'hono/bearer-auth';
 import { handle } from 'hono/vercel';
 
 import { prisma } from '@/lib/prisma';
-import { type DeviceTelemetry, type DeviceTelemetryActuation } from '@/lib/prisma/client';
+import { type DeviceTelemetrySensors, type DeviceTelemetryActuation } from '@/lib/prisma/client';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,17 +11,17 @@ const app = new Hono().basePath('/api/devices');
 app.use('/*', bearerAuth({ token: `${process.env.PROCESSOR_API_KEY}` }));
 
 app.get('/', async (context) => {
-  const devices = await prisma.device.findMany();
+  const devices = await prisma.device.findMany({ include: { firmware: true, network: true } });
   return context.json(devices.map((d) => ({ ...d, certificatePem: undefined })));
 });
 
 app.get('/:id', async (context) => {
   const id = context.req.param('id');
-  const device = await prisma.device.findFirst({ where: { id } });
+  const device = await prisma.device.findFirst({ where: { id }, include: { firmware: true, network: true } });
   return context.json(device);
 });
 
-function simplifyTelemetrySensors(value: DeviceTelemetry) {
+function simplifyTelemetrySensors(value: DeviceTelemetrySensors) {
   return {
     ...value,
     // remove fields we do not need to expose
@@ -51,7 +51,7 @@ app.get('/:id/telemetry/sensors', async (context) => {
   const id = context.req.param('id');
   const device = await prisma.device.findFirst({ where: { id } });
   if (!device) return context.json({ error: 'device_not_found' }, 400);
-  const telemetries = await prisma.deviceTelemetry.findMany({
+  const telemetries = await prisma.deviceTelemetrySensors.findMany({
     where: { deviceId: device.id },
     orderBy: { created: 'desc' },
     take: 100,
@@ -63,7 +63,7 @@ app.get('/:id/telemetry/sensors/latest', async (context) => {
   const id = context.req.param('id');
   const device = await prisma.device.findFirst({ where: { id } });
   if (!device) return context.json({ error: 'device_not_found' }, 400);
-  const telemetry = await prisma.deviceTelemetry.findFirst({
+  const telemetry = await prisma.deviceTelemetrySensors.findFirst({
     where: { deviceId: device.id },
     orderBy: { created: 'desc' },
     take: 1,

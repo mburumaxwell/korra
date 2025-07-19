@@ -76,7 +76,7 @@ model Device {
   actuator         DeviceActuator?
   firmware         DeviceFirmware?
   network          DeviceNetwork?
-  sensors          DeviceTelemetry[]
+  sensors          DeviceTelemetrySensors[]
   actuations       DeviceTelemetryActuation[]
 }
 
@@ -110,7 +110,7 @@ model DeviceNetwork {
   localIp  String?      @db.VarChar(100)
 }
 
-model DeviceTelemetry {
+model DeviceTelemetrySensors {
   id          String      @id
   device      Device      @relation(fields: [deviceId], references: [id])
   deviceId    String

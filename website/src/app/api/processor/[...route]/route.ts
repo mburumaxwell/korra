@@ -46,7 +46,7 @@ app.post('/telemetry/sensors', zValidator('json', TelemetryRequestBodySensorsSch
     moisture: kind === 'pot' ? telemetry.moisture : undefined,
     ph: kind === 'pot' ? telemetry.ph : undefined,
   };
-  await prisma.deviceTelemetry.upsert({
+  await prisma.deviceTelemetrySensors.upsert({
     where: { id: id },
     create: { id, deviceId, ...values },
     update: { deviceId, ...values },
