@@ -3,7 +3,7 @@ import { bearerAuth } from 'hono/bearer-auth';
 import { handle } from 'hono/vercel';
 
 import { prisma } from '@/lib/prisma';
-import { type DeviceTelemetrySensors, type DeviceTelemetryActuation } from '@/lib/prisma/client';
+import { type DeviceTelemetryActuation, type DeviceTelemetrySensors } from '@/lib/prisma/client';
 
 export const dynamic = 'force-dynamic';
 
