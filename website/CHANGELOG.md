@@ -1,5 +1,11 @@
 # website
 
+## 0.6.0
+
+### Minor Changes
+
+- 447df11: Add support for storing actuation records once they are produced
+
 ## 0.5.0
 
 ### Minor Changes

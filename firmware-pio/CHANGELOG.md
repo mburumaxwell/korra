@@ -1,5 +1,21 @@
 # firmware-pio
 
+## 0.5.0
+
+### Minor Changes
+
+- d350aa1: Support for direct methods with support for reboot
+
+### Patch Changes
+
+- c97410f: Fix formatting issue in D2C message topic definition
+- ac7bc39: No need to check `semver` to know if there are updates
+- 2767546: Match type for version in twin structures to that parsed from JSON
+- 26b8627: Remove unnecessary return statements after reboot calls
+- 7267cd2: Add error handling for status code parsing in MQTT message callback
+- 2bf2fe8: Setup callbacks before begin to ensure registration
+- 1cee576: Reboot device every 24 hours to fix weird issues
+
 ## 0.4.4
 
 ### Patch Changes

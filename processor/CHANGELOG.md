@@ -1,5 +1,11 @@
 # processor
 
+## 0.3.0
+
+### Minor Changes
+
+- 447df11: Add support for storing actuation records once they are produced
+
 ## 0.2.2
 
 ### Patch Changes
