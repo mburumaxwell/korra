@@ -228,7 +228,7 @@ function getSensorColor(value: number, type: 'moisture' | 'ph' | 'humidity' | 't
       if (value >= 20) return 'text-yellow-600';
       return 'text-red-600';
     case 'ph':
-      if (value == -1) return 'text-gray-600'; // when the sensor is not present
+      if (value === -1) return 'text-gray-600'; // when the sensor is not present
       if (value >= 6.0 && value <= 7.5) return 'text-green-600';
       return 'text-yellow-600';
     case 'humidity':
