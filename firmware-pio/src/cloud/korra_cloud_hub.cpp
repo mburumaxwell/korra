@@ -151,6 +151,44 @@ void KorraCloudHub::push(const struct korra_sensors_data *source) {
   mqtt.endMessage();
 }
 
+void KorraCloudHub::push(const struct korra_actuation *source) {
+  JsonDocument doc;
+
+  // set the IOS8601 version of the timestamp
+  struct tm tm;
+  gmtime_r(&(source->timestamp), &tm);
+  char time_str[sizeof("1970-01-01T00:00:00")];
+  strftime(time_str, sizeof(time_str), "%FT%T", &tm);
+  doc["created"] = time_str;
+
+#ifdef CONFIG_APP_KIND_KEEPER
+  doc["app_kind"] = "keeper";
+  doc["fan"]["duration"] = source->duration;
+  doc["fan"]["quantity"] = 0;
+#endif // CONFIG_APP_KIND_KEEPER
+#ifdef CONFIG_APP_KIND_POT
+  doc["app_kind"] = "pot";
+  doc["pump"]["duration"] = source->duration;
+  doc["pump"]["quantity"] = 0;
+#endif // CONFIG_APP_KIND_POT
+
+  // prepare topic
+  size_t topic_len = snprintf(NULL, 0, TOPIC_FORMAT_D2C_MESSAGE, deviceid, "actuators");
+  char topic[topic_len + 1] = {0};
+  topic_len = snprintf(topic, sizeof(topic), TOPIC_FORMAT_D2C_MESSAGE, deviceid, "actuators");
+
+  // prepare payload
+  size_t payload_len = measureJson(doc);
+  char payload[payload_len + 1] = {0};
+  payload_len = serializeJson(doc, payload, sizeof(payload));
+  Serial.printf("Sending message to topic '%s', length %d bytes:\n%s\n", topic, payload_len, payload);
+
+  // publish
+  mqtt.beginMessage(topic, /* retain */ false, /* qos */ 0, /* dup */ false);
+  mqtt.write((const uint8_t *)payload, payload_len);
+  mqtt.endMessage();
+}
+
 void KorraCloudHub::update(struct korra_device_twin_reported *props) {
   // The request message body contains a JSON document that contains new values for reported properties.
   // Each member in the JSON document updates or add the corresponding member in the device twin's document.
@@ -192,23 +230,6 @@ void KorraCloudHub::update(struct korra_device_twin_reported *props) {
   if (strcmp(props->network.local_ip, twin.reported.network.local_ip) != 0) {
     snprintf((char *)twin.reported.network.local_ip, sizeof(twin.reported.network.local_ip), props->network.local_ip);
     doc["network"]["local_ip"] = props->network.local_ip;
-    update |= true;
-  }
-
-  // check the actuator state
-  if (props->actuator.count != twin.reported.actuator.count) {
-    twin.reported.actuator.count = props->actuator.count;
-    doc["actuator"]["count"] = props->actuator.count;
-    update |= true;
-  }
-  if (props->actuator.last_time != twin.reported.actuator.last_time) {
-    twin.reported.actuator.last_time = props->actuator.last_time;
-    doc["actuator"]["last_time"] = props->actuator.last_time;
-    update |= true;
-  }
-  if (props->actuator.total_duration != twin.reported.actuator.total_duration) {
-    twin.reported.actuator.total_duration = props->actuator.total_duration;
-    doc["actuator"]["total_duration"] = props->actuator.total_duration;
     update |= true;
   }
 
@@ -482,14 +503,6 @@ void KorraCloudHub::populate_reported_props(const JsonVariantConst &json, struct
       size_t local_ip_raw_len = MIN((int)strlen(local_ip_raw) + 1, (int)sizeof(twin.reported.network.local_ip));
       memcpy(twin.reported.network.local_ip, local_ip_raw, local_ip_raw_len - 1);
     }
-  }
-
-  // actuator
-  JsonVariantConst node_acc = json["actuator"];
-  if (!node_acc.isNull()) {
-    twin.reported.actuator.count = node_acc["count"].as<uint16_t>();
-    twin.reported.actuator.last_time = node_acc["last_time"].as<time_t>();
-    twin.reported.actuator.total_duration = node_acc["total_duration"].as<uint32_t>();
   }
 }
 

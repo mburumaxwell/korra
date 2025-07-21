@@ -27,15 +27,12 @@ struct korra_actuator_config {
   float target;
 };
 
-struct korra_actuator_state {
-  /** Number of times the actuator was activated */
-  uint16_t count;
-
+struct korra_actuation {
   /** Last time (UNIX since Epoch) the actuator was activated */
-  time_t last_time;
+  time_t timestamp;
 
   /** Total seconds the actuator was active */
-  uint32_t total_duration;
+  uint16_t duration;
 };
 
 class KorraActuator {
@@ -76,24 +73,13 @@ public:
   void set_config(const struct korra_actuator_config *value);
 
   /**
-   * Update the state for the actuator.
-   * This should only be called for the first time to preserve state.
-   */
-  void set_state(const struct korra_actuator_state *value);
-
-  /**
-   * Registers callback that will be called each time the actuator state is updated.
+   * Registers callback that will be called each time actuation happens.
    *
    * @param callback
    */
-  inline void onStateUpdated(void (*callback)(const struct korra_actuator_state *value)) {
-    state_updated_callback = callback;
+  inline void onActuated(void (*callback)(const struct korra_actuation *value)) {
+    actuated_callback = callback;
   }
-
-  /**
-   * Returns the current state of the actuator.
-   */
-  inline const struct korra_actuator_state *state() { return &current_state; }
 
   /**
    * Returns the current configuration of the actuator.
@@ -102,17 +88,15 @@ public:
 
 private:
   struct korra_actuator_config current_config = {0};
-  struct korra_actuator_state current_state = {0};
-  void (*state_updated_callback)(const struct korra_actuator_state *value) = NULL;
+  void (*actuated_callback)(const struct korra_actuation *value) = NULL;
 
   unsigned long timepoint = 0;
   bool current_value_consumed = true; // prevents early actuation
   float current_value = 0;
 
 private:
-  void actuate(uint32_t duration_sec);
+  void actuate(uint16_t duration_sec);
   void print_config();
-  void print_state();
 };
 
 #endif // KORRA_ACTUATOR_H
