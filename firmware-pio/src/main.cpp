@@ -108,7 +108,7 @@ void setup() {
   ota.begin(root_ca_certs);
 
   // setup actuator
-  actuator.onActuated([](const struct korra_actuation *value) { hub.push(value);; });
+  actuator.onActuated([](const struct korra_actuation *value) { hub.push(value); });
   actuator.begin();
 
   // setup timers
