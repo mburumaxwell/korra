@@ -101,10 +101,8 @@ internal class KorraIotEventsConsumer(KorraDashboardClient dashboardClient,
                 Created = new DateTimeOffset(incoming.Created, TimeSpan.Zero),
                 Received = enqueued?.ToUniversalTime(),
                 AppKind = appKind,
-                PumpDuration = incoming.Pump?.Duration,
-                PumpQuantity = incoming.Pump?.Quantity,
-                FanDuration = incoming.Fan?.Duration,
-                FanQuantity = incoming.Fan?.Quantity,
+                Pump = incoming.Pump,
+                Fan = incoming.Fan,
             };
 
             logger.LogInformation("Forwarding actuator telemetry from {DeviceId} (dated: {Created:o})", deviceId, actuators.Created);
@@ -121,10 +119,10 @@ internal class KorraIotEventsConsumer(KorraDashboardClient dashboardClient,
                 ["timestamp"] = actuators.Created.ToString("yyyy-MM-dd'T'HH:mm:ss"),
                 ["device_id"] = actuators.DeviceId,
                 ["app_kind"] = actuators.AppKind.GetEnumMemberAttrValueOrDefault(),
-                ["pump_duration"] = actuators.PumpDuration,
-                ["pump_quantity"] = actuators.PumpQuantity,
-                ["fan_duration"] = actuators.FanDuration,
-                ["fan_quantity"] = actuators.FanQuantity,
+                ["pump_duration"] = actuators.Pump?.Duration,
+                ["pump_quantity"] = actuators.Pump?.Quantity,
+                ["fan_duration"] = actuators.Fan?.Duration,
+                ["fan_quantity"] = actuators.Fan?.Quantity,
             };
             await tinybirdClient.SendAsync("actuator_telemetry", tbp, cancellationToken);
         }

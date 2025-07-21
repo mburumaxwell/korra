@@ -43,17 +43,19 @@ public class KorraTelemetrySensors : AbstractKorraTelemetry
 
 public class KorraTelemetryActuators : AbstractKorraTelemetry
 {
-    [JsonPropertyName("pump_duration")]
-    public required int? PumpDuration { get; set; }
+    [JsonPropertyName("pump")]
+    public required KorraTelemetryActuatorValue? Pump { get; set; }
 
-    [JsonPropertyName("pump_quantity")]
-    public required float? PumpQuantity { get; set; }
+    [JsonPropertyName("fan")]
+    public required KorraTelemetryActuatorValue? Fan { get; set; }
+}
 
-    [JsonPropertyName("fan_duration")]
-    public required int? FanDuration { get; set; }
-
-    [JsonPropertyName("fan_quantity")]
-    public required float? FanQuantity { get; set; }
+public record KorraTelemetryActuatorValue(
+    [property: JsonPropertyName("duration")] int Duration,
+    [property: JsonPropertyName("quantity")] float? Quantity)
+{
+    public static implicit operator KorraTelemetryActuatorValue?(KorraIotHubTelemetryActuatorValue? value)
+        => value is null ? null : new KorraTelemetryActuatorValue(value.Duration, value.Quantity);
 }
 
 [JsonConverter(typeof(JsonStringEnumMemberConverter<KorraAppKind>))]
