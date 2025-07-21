@@ -180,7 +180,7 @@ void KorraCloudHub::push(const struct korra_actuation *source) {
   // prepare payload
   size_t payload_len = measureJson(doc);
   char payload[payload_len + 1] = {0};
-  payload_len = serializeJson(doc, payload, payload_len);
+  payload_len = serializeJson(doc, payload, sizeof(payload));
   Serial.printf("Sending message to topic '%s', length %d bytes:\n%s\n", topic, payload_len, payload);
 
   // publish
