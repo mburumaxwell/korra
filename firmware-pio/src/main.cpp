@@ -55,7 +55,6 @@ static int shell_command_internet_cred_clear(int argc, char **argv);
 static int shell_command_wifi_cred_set_open(int argc, char **argv);
 static int shell_command_wifi_cred_set_personal(int argc, char **argv);
 static int shell_command_wifi_cred_set_ent(int argc, char **argv);
-static int shell_command_actuator_reset_state(int argc, char **argv);
 
 void setup() {
   delay(3000); // allow time for the serial monitor to connect
@@ -109,7 +108,7 @@ void setup() {
   ota.begin(root_ca_certs);
 
   // setup actuator
-  actuator.onStateUpdated([](const struct korra_actuator_state *) { update_device_twin(NULL); });
+  actuator.onActuated([](const struct korra_actuation *value) { hub.push(value);; });
   actuator.begin();
 
   // setup timers
@@ -130,7 +129,6 @@ void setup() {
   shell.addCommand(F("wifi-cred-set-open <ssid>"), shell_command_wifi_cred_set_open);
   shell.addCommand(F("wifi-cred-set-personal <ssid> <passphrase>"), shell_command_wifi_cred_set_personal);
   shell.addCommand(F("wifi-cred-set-ent <ssid> <identity> <username> <password>"), shell_command_wifi_cred_set_ent);
-  shell.addCommand(F("actuator-reset-state"), shell_command_actuator_reset_state);
   shell.attach(Serial);
 }
 
@@ -197,9 +195,6 @@ static bool update_device_twin(void *) {
   // set the network props
   memcpy(&(props.network), internet.props(), sizeof(struct korra_network_props));
 
-  // set the actuator state
-  memcpy(&(props.actuator), actuator.state(), sizeof(struct korra_actuator_state));
-
   // push the update to the hub
   hub.update(&props);
 
@@ -224,9 +219,6 @@ static void device_twin_updated(struct korra_device_twin *twin, bool initial) {
 
   // for the first time, trigger an update in 5 seconds (it will check if there needs to be a push)
   if (initial) {
-    // update in-memory state so that we continue from where we left off
-    actuator.set_state(&(twin->reported.actuator));
-
     // update twin in 5 seconds (should set properties of what we are currently running)
     timer.in((5 * 1000) /* 5 seconds, in millis */, [](void *) -> bool {
       update_device_twin(NULL);
@@ -337,12 +329,4 @@ static int shell_command_wifi_cred_set_ent(int argc, char **argv) {
   Serial.printf("Setting internet credentials (enterprise). SSID: '%s'\n", credentials.ssid);
   if (!internet.credentials_clear()) return EXIT_FAILURE;
   return internet.credentials_save_wifi(&credentials) ? EXIT_SUCCESS : EXIT_FAILURE;
-}
-
-static int shell_command_actuator_reset_state(int argc, char **argv) {
-  // command format: actuator-reset-state
-  struct korra_actuator_state state = {0};
-  actuator.set_state(&state);
-  update_device_twin(NULL);
-  return EXIT_SUCCESS;
 }

@@ -39,7 +39,6 @@ struct korra_device_twin_reported {
   uint16_t version; // $version
   struct korra_device_twin_reported_firmware firmware;
   struct korra_network_props network;
-  struct korra_actuator_state actuator;
 };
 
 struct korra_device_twin {
@@ -86,6 +85,14 @@ public:
    * @param source All values for configured sensors.
    */
   void push(const struct korra_sensors_data *source);
+
+  /**
+   * Publishes data for actuators.
+   * If the connection has not been established, nothing is published.
+   *
+   * @param source All values for configured actuators.
+   */
+  void push(const struct korra_actuation *source);
 
   /**
    * Update reported properties of the device twin.

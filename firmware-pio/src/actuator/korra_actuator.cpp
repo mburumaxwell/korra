@@ -13,7 +13,6 @@ KorraActuator::KorraActuator() {
 }
 
 KorraActuator::~KorraActuator() {
-  state_updated_callback = NULL;
 }
 
 void KorraActuator::begin() {
@@ -61,13 +60,19 @@ void KorraActuator::maintain() {
     const unsigned long elapsed_time = (millis() - timepoint) / 1000;
     if (elapsed_time > current_config.equilibrium_time) {
       // Actuating for a given duration
-      const uint32_t duration = current_config.duration;
+      const uint16_t duration = current_config.duration;
+      struct korra_actuation actuation = {.timestamp = time(NULL), .duration = duration};
       Serial.printf("Actuating for %d sec, targeting %.2f " TARGET_UNIT_STR ", currently %.2f\n", duration,
                     current_config.target, current_value);
       actuate(duration);
       timepoint = millis(); // reset the timepoint (must be done after actuation)
       current_value_consumed = true;
       Serial.println(F("Actuation completed"));
+
+      // Record actuation
+      if (actuated_callback) {
+        actuated_callback(&actuation);
+      }
     }
   }
 }
@@ -79,13 +84,7 @@ void KorraActuator::set_config(const struct korra_actuator_config *value) {
   print_config();
 }
 
-void KorraActuator::set_state(const struct korra_actuator_state *value) {
-  memcpy(&current_state, value, sizeof(struct korra_actuator_state));
-  Serial.println("Actuator State set");
-  print_state();
-}
-
-void KorraActuator::actuate(uint32_t duration_sec) {
+void KorraActuator::actuate(uint16_t duration_sec) {
 #ifdef CONFIG_APP_KIND_KEEPER
 
   digitalWrite(CONFIG_ACTUATORS_FAN_PIN, HIGH); // on
@@ -101,14 +100,6 @@ void KorraActuator::actuate(uint32_t duration_sec) {
   digitalWrite(CONFIG_ACTUATORS_PUMP_PIN, LOW); // off
 
 #endif // CONFIG_APP_KIND_POT
-
-  // update the state
-  current_state.count++;
-  current_state.last_time = time(NULL);
-  current_state.total_duration += duration_sec;
-  if (state_updated_callback) {
-    state_updated_callback(&current_state);
-  }
 }
 
 void KorraActuator::print_config() {
@@ -116,10 +107,4 @@ void KorraActuator::print_config() {
   Serial.printf("Actuator Config: Duration: %d seconds\n", current_config.duration);
   Serial.printf("Actuator Config: Equilibrium Time: %d seconds\n", current_config.equilibrium_time);
   Serial.printf("Actuator Config: Target: %.2f\n", current_config.target);
-}
-
-void KorraActuator::print_state() {
-  Serial.printf("Actuator State: Count: %d\n", current_state.count);
-  Serial.printf("Actuator State: Last Time: %d\n", current_state.last_time);
-  Serial.printf("Actuator State: Total Duration: %d seconds\n", current_state.total_duration);
 }
