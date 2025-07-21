@@ -7,6 +7,7 @@ import {
   type Device,
   type DeviceFirmware,
   type DeviceNetwork,
+  type DeviceTelemetryActuation,
   type DeviceTelemetrySensors,
   type DeviceUsage,
   type FirmwareFramework,
@@ -196,4 +197,22 @@ export async function getDeviceTelemetries(props: GetDeviceTelemetriesProps): Pr
     .sort((a, b) => a.bucket.getTime() - b.bucket.getTime());
 
   return result;
+}
+
+export type GetDeviceActuationsProps = {
+  deviceId: string;
+  count?: number;
+};
+
+export type DisplayableDeviceActuation = DeviceTelemetryActuation & {};
+
+export async function getDeviceActuations(props: GetDeviceActuationsProps): Promise<DisplayableDeviceActuation[]> {
+  const { deviceId, count = 20 } = props;
+  const telemetries = await prisma.deviceTelemetryActuation.findMany({
+    where: { deviceId },
+    orderBy: { created: 'desc' },
+    take: count,
+  });
+
+  return telemetries;
 }

@@ -1,9 +1,10 @@
 'use client';
 
-import { Copy } from 'lucide-react';
+import { Copy, Droplets, Zap } from 'lucide-react';
+import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
-import type { BucketedDeviceTelemetry, DisplayableDevice } from '@/actions';
+import type { BucketedDeviceTelemetry, DisplayableDevice, DisplayableDeviceActuation } from '@/actions';
 import { getNetworkIcon, getUsageIcon } from '@/components/dashboard/devices';
 import { TelemetryChart, type TelemetryChartConfig } from '@/components/telemetry-chart';
 import { Badge } from '@/components/ui/badge';
@@ -11,9 +12,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { granularityOptions, timeRangeOptions, type Granularity, type TimeRange } from '@/lib/aggregation';
 import { copyToClipboard } from '@/lib/utils';
-import Link from 'next/link';
 
 export function DeviceViewHeader({ device }: { device: DisplayableDevice }) {
   const UsageIcon = getUsageIcon(device.usage);
@@ -202,19 +203,14 @@ export function DeviceInformation({ device }: { device: DisplayableDevice }) {
   );
 }
 
-type DeviceViewHistoryChartProps = {
+type DeviceSensorsHistoryProps = {
   device: DisplayableDevice;
   defaultRange: TimeRange;
   defaultGranularity: Granularity;
-  telemetries: BucketedDeviceTelemetry[];
+  data: BucketedDeviceTelemetry[];
 };
 
-export function DeviceViewHistoryChart({
-  device,
-  defaultRange,
-  defaultGranularity,
-  telemetries,
-}: DeviceViewHistoryChartProps) {
+export function DeviceSensorsHistory({ device, defaultRange, defaultGranularity, data }: DeviceSensorsHistoryProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -317,13 +313,77 @@ export function DeviceViewHistoryChart({
           </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-6">
+          <div className="grid grid-cols-1 gap-4 space-y-6 md:grid-cols-2">
             {metrics.map((cfg) => (
-              <TelemetryChart key={cfg.key} data={telemetries} tickFormatter={formatTimestamp} config={cfg} />
+              <TelemetryChart key={cfg.key} data={data} tickFormatter={formatTimestamp} config={cfg} />
             ))}
           </div>
         </CardContent>
       </Card>
     </>
+  );
+}
+
+type DeviceActuationsTableProps = {
+  device: DisplayableDevice;
+  data: DisplayableDeviceActuation[];
+};
+
+export function DeviceActuationsTable({ device, data }: DeviceActuationsTableProps) {
+  if (data.length === 0) return <></>;
+
+  return (
+    <div>
+      <h3 className="mb-4 text-lg font-medium">Recent Actuations</h3>
+      <div className="rounded-lg border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Timestamp</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>Duration</TableHead>
+              <TableHead>Status</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {data.map((actuation) => {
+              // const latency = actuation.received ? actuation.received.getTime() - actuation.created.getTime() : null
+
+              return (
+                <TableRow key={actuation.id}>
+                  <TableCell className="text-sm">
+                    <div>
+                      <div className="font-medium" suppressHydrationWarning>
+                        {actuation.created.toLocaleString()}
+                      </div>
+                      {/* {latency && <div className="text-xs text-muted-foreground">Latency: {latency}ms</div>} */}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center space-x-2">
+                      {device.usage === 'keeper' ? (
+                        <>
+                          <Zap className="h-4 w-4 text-blue-500" />
+                          <span>Fan</span>
+                        </>
+                      ) : (
+                        <>
+                          <Droplets className="h-4 w-4 text-green-500" />
+                          <span>Pump</span>
+                        </>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell className="font-mono">{actuation.fan ?? actuation.pump}s</TableCell>
+                  <TableCell>
+                    <Badge variant={'default'}>{'Completed'}</Badge>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
   );
 }

@@ -1,9 +1,9 @@
 import type { Metadata, ResolvingMetadata } from 'next';
 import { notFound } from 'next/navigation';
 
-import { getDevice, getDeviceTelemetries } from '@/actions';
+import { getDevice, getDeviceActuations, getDeviceTelemetries } from '@/actions';
 import { getDateTimeRange, granularityToMilliseconds, type Granularity, type TimeRange } from '@/lib/aggregation';
-import { DeviceInformation, DeviceViewHeader, DeviceViewHistoryChart } from './device-view';
+import { DeviceActuationsTable, DeviceInformation, DeviceSensorsHistory, DeviceViewHeader } from './device-view';
 
 export const revalidate = 0; // no caching
 
@@ -41,18 +41,20 @@ export default async function Page(props: ViewDevicePageProps) {
   const { range = defaultRange, granularity = defaultGranularity } = searchParams;
   const { start, end } = getDateTimeRange(range);
   const granularityMs = granularityToMilliseconds(granularity);
-  const telemetries = await getDeviceTelemetries({ deviceId: device.id, start, end, granularity: granularityMs });
+  const sensors = await getDeviceTelemetries({ deviceId: device.id, start, end, granularity: granularityMs });
+  const actuations = await getDeviceActuations({ deviceId: device.id });
 
   return (
     <>
       <DeviceViewHeader device={device} />
       <DeviceInformation device={device} />
-      <DeviceViewHistoryChart
+      <DeviceSensorsHistory
         device={device}
         defaultRange={defaultRange}
         defaultGranularity={defaultGranularity}
-        telemetries={telemetries}
+        data={sensors}
       />
+      <DeviceActuationsTable device={device} data={actuations} />
     </>
   );
 }
