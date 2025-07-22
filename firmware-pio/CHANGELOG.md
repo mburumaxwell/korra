@@ -1,5 +1,11 @@
 # firmware-pio
 
+## 0.6.0
+
+### Minor Changes
+
+- bbeee41: Produce actuation data from devices instead of updating twin
+
 ## 0.5.0
 
 ### Minor Changes

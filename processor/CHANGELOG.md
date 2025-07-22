@@ -1,5 +1,11 @@
 # processor
 
+## 0.3.1
+
+### Patch Changes
+
+- e221991: Fix schema when sending actuators telemetry from processor to dashboard
+
 ## 0.3.0
 
 ### Minor Changes
