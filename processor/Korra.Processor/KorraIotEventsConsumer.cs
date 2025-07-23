@@ -71,7 +71,7 @@ internal class KorraIotEventsConsumer(KorraDashboardClient dashboardClient,
                 PH = incoming.PH?.Value,
             };
 
-            logger.LogInformation("Forwarding telemetry from {DeviceId} (dated: {Created:o})", deviceId, sensors.Created);
+            logger.LogInformation("Forwarding sensors telemetry from {DeviceId} (dated: {Created:o})", deviceId, sensors.Created);
             if (logger.IsEnabled(LogLevel.Debug))
             {
                 logger.LogDebug("{Telemetry}", JsonSerializer.Serialize(sensors, SC.Default.KorraTelemetrySensors));
