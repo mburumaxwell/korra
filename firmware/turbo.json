@@ -1,0 +1,10 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "extends": ["//"],
+  "globalDependencies": ["west-manifest/west.yml"],
+  "tasks": {
+    "build": {
+      "outputs": ["build/**", "build-**"]
+    }
+  }
+}

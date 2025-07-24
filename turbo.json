@@ -1,29 +1,10 @@
 {
-  "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": [
-    "**/.env",
-    "**/.env.*",
-    "**/eslint*.config.*",
-    "**/vitest.config.*",
-    "tsconfig.json",
-    "platformio.ini",
-    "west-manifest/west.yml"
-  ],
-  "globalEnv": ["NODE_ENV"],
-  "globalPassThroughEnv": ["DATABASE_URL", "IOT_HUB_CONNECTION_STRING", "PROCESSOR_API_KEY", "FIRMWARE_API_KEY"],
+  "$schema": "https://turborepo.com/schema.json",
+  "globalDependencies": ["tsconfig.json"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [
-        "dist/**",
-        "tasks/**/dist/**",
-        ".next/**",
-        "!.next/cache/**",
-        "out/**",
-        "build/**",
-        "build-**",
-        ".pio/**"
-      ]
+      "outputs": ["dist/**", "out/**"]
     },
     "lint": {},
     "test": {},
