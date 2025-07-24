@@ -6,7 +6,7 @@ manifest:
     - name: zephyr
       repo-path: zephyr
       remote: zephyrproject
-      revision: 4bd1d39c67dfb4860fbd4f9ccc17e084aa32d763
+      revision: v4.2.0
       clone-depth: 1
       import:
         path-prefix: external
