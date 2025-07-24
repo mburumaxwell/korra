@@ -5,6 +5,7 @@
         "Prisma.prisma",
         "TinybirdCo.vscode-tinybird-support",
         "davidanson.vscode-markdownlint",
+        "github.vscode-github-actions",
         "gruntfuggly.todo-tree",
         "ms-azuretools.vscode-bicep",
         "ms-dotnettools.csdevkit",
