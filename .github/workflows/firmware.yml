@@ -25,6 +25,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  TURBO_TELEMETRY_DISABLED: 1 # Disable Turbo telemetry
+
 jobs:
   Build:
     # using macos-latest because it tends to be faster and closely mirrors dev environment
@@ -56,6 +59,9 @@ jobs:
           node-version: 24
           cache: pnpm
 
+      - name: Setup turborepo caching
+        uses: rharkor/caching-for-turbo@v1.8
+
       - name: Download deps
         run: pnpm install
         working-directory: '${{ github.workspace }}/firmware'
@@ -74,7 +80,7 @@ jobs:
         working-directory: '${{ github.workspace }}/firmware'
 
       - name: Build
-        run: pnpm build --pristine
+        run: pnpm turbo build -- --pristine
         working-directory: '${{ github.workspace }}/firmware'
 
       - name: Collect output

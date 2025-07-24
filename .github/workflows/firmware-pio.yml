@@ -25,6 +25,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
+  TURBO_TELEMETRY_DISABLED: 1 # Disable Turbo telemetry
   CI: 1 # Needed for PlatformIO? https://docs.platformio.org/en/stable/envvars.html#envvar-CI
 
 jobs:
@@ -62,15 +63,18 @@ jobs:
           node-version: 24
           cache: pnpm
 
+      - name: Setup turborepo caching
+        uses: rharkor/caching-for-turbo@v1.8
+
       - name: Download deps
         run: pnpm install
-        working-directory: '${{ github.workspace }}/firmware'
+        working-directory: '${{ github.workspace }}/firmware-pio'
 
       - name: Build
-        run: pio run
-        # running the below tends to fail but since pio knows how to run parallel, we do not need it to add hacks in CI
-        # run: pnpm build
-        # working-directory: '${{ github.workspace }}/firmware-pio'
+        run: pio run --project-dir ../
+        # TODO: restore below once we can disable parallelism in the script
+        # run: pnpm turbo build
+        working-directory: '${{ github.workspace }}/firmware-pio'
 
       - name: Collect output
         run: pnpm collect
