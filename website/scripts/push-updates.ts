@@ -177,7 +177,7 @@ async function run(props: RunProps) {
   }
 }
 
-await run({ });
+await run({});
 // await run({ version: '0.4.3' });
 // await run({ version: '0.4.3', usage: 'pot' });
 // await run({ usage: 'keeper' });
