@@ -64,7 +64,9 @@ jobs:
           cache: pnpm
 
       - name: Setup turborepo caching
-        uses: rharkor/caching-for-turbo@v1.8
+        uses: rharkor/caching-for-turbo@v2.2.3
+        with:
+          cache-prefix: turbo_firmwarepio_
 
       - name: Download deps
         run: pnpm install
