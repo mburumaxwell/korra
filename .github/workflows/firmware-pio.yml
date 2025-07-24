@@ -73,9 +73,7 @@ jobs:
         working-directory: '${{ github.workspace }}/firmware-pio'
 
       - name: Build
-        run: pio run --project-dir ../
-        # TODO: restore below once we can disable parallelism in the script
-        # run: pnpm turbo build
+        run: pnpm turbo build
         working-directory: '${{ github.workspace }}/firmware-pio'
 
       - name: Collect output

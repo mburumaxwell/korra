@@ -69,7 +69,6 @@ const build = new Command('build')
     ];
     let colorIndex = 0;
 
-    const procs: Promise<unknown>[] = [];
     const childProcs: ChildProcessWithoutNullStreams[] = [];
     const results: { id: string; success: boolean; duration: string }[] = [];
     const startTime = Date.now();
@@ -81,6 +80,8 @@ const build = new Command('build')
       });
     });
 
+    // work on each environment without parallelism
+    // this is to avoid issues with PlatformIO's parallel builds
     for (const environment of environments) {
       const color = colors[colorIndex++ % colors.length];
       const id = `[${environment}]`;
@@ -103,55 +104,52 @@ const build = new Command('build')
 
       const proc = spawn(cmd, { shell: true });
       childProcs.push(proc);
-      procs.push(
-        new Promise((resolve) => {
-          const procStart = Date.now();
+      const prom = new Promise((resolve) => {
+        const procStart = Date.now();
 
-          const finish = (code: number | null) => {
-            const success = code === 0;
-            const elapsed = ((Date.now() - procStart) / 1000).toFixed(1);
-            results.push({ id, success, duration: elapsed });
-            resolve(undefined);
-          };
+        const finish = (code: number | null) => {
+          const success = code === 0;
+          const elapsed = ((Date.now() - procStart) / 1000).toFixed(1);
+          results.push({ id, success, duration: elapsed });
+          resolve(undefined);
+        };
 
-          if (isCI) {
-            console.log(`::group::Build ${prefix}`);
-            console.log(`${prefix} 🏗️ Running: ${cmd}`);
-            // Buffer mode for CI
-            let stdout = '';
-            let stderr = '';
+        if (isCI) {
+          console.log(`::group::Build ${prefix}`);
+          console.log(`${prefix} 🏗️ Running: ${cmd}`);
+          // Buffer mode for CI
+          let stdout = '';
+          let stderr = '';
 
-            proc.stdout.on('data', (data) => {
-              stdout += data.toString();
-            });
-            proc.stderr.on('data', (data) => {
-              stderr += data.toString();
-            });
+          proc.stdout.on('data', (data) => {
+            stdout += data.toString();
+          });
+          proc.stderr.on('data', (data) => {
+            stderr += data.toString();
+          });
 
-            proc.on('close', (code) => {
-              console.log(stdout.trim());
-              console.error(stderr.trim());
-              console.log(`::endgroup::`);
-              finish(code);
-            });
-          } else {
-            // Local: stream with prefix
-            console.log(`${prefix} 🏗️ Running: ${cmd}`);
-            const rlOut = readline.createInterface({ input: proc.stdout });
-            rlOut.on('line', (line) => console.log(`${prefix} ${line}`));
+          proc.on('close', (code) => {
+            console.log(stdout.trim());
+            console.error(stderr.trim());
+            console.log(`::endgroup::`);
+            finish(code);
+          });
+        } else {
+          // Local: stream with prefix
+          console.log(`${prefix} 🏗️ Running: ${cmd}`);
+          const rlOut = readline.createInterface({ input: proc.stdout });
+          rlOut.on('line', (line) => console.log(`${prefix} ${line}`));
 
-            const rlErr = readline.createInterface({ input: proc.stderr });
-            rlErr.on('line', (line) => console.error(`${prefix} ${line}`));
+          const rlErr = readline.createInterface({ input: proc.stderr });
+          rlErr.on('line', (line) => console.error(`${prefix} ${line}`));
 
-            proc.on('close', (code) => {
-              finish(code);
-            });
-          }
-        }),
-      );
+          proc.on('close', (code) => {
+            finish(code);
+          });
+        }
+      });
+      await prom;
     }
-
-    await Promise.all(procs);
 
     const duration = ((Date.now() - startTime) / 1000).toFixed(1);
     const succeeded = results.filter((r) => r.success);
