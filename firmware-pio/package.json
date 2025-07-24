@@ -13,7 +13,7 @@
     "flash:pot": "pnpm flash --environment pot-esp32s3_devkitc",
     "collect": "tsx scripts/firmware.ts collect",
     "avail": "tsx scripts/firmware.ts avail",
-    "clean": "rimraf .pio binaries",
+    "clean": "rimraf .pio .turbo binaries",
     "packages:version": "tsx scripts/firmware.ts version"
   },
   "devDependencies": {

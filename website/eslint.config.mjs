@@ -1,4 +1,5 @@
 import { FlatCompat } from '@eslint/eslintrc';
+import turboPlugin from 'eslint-plugin-turbo';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -12,6 +13,9 @@ const compat = new FlatCompat({
 const eslintConfig = [
   ...compat.extends('next/core-web-vitals', 'next/typescript'),
   {
+    plugins: {
+      turbo: turboPlugin,
+    },
     rules: {
       '@typescript-eslint/no-var-requires': 'error',
       '@typescript-eslint/no-unused-vars': 'off',
