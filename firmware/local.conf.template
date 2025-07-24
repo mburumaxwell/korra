@@ -19,5 +19,9 @@
 #
 # ==============================================================================
 
-# Example override for WiFi scanning:
+# # Example override for WiFi scanning:
 # CONFIG_WIFI_SCAN_NETWORKS=y
+
+# # Debugging
+# CONFIG_DEBUG_OPTIMIZATIONS=y
+# CONFIG_DEBUG_THREAD_INFO=y

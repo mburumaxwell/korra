@@ -9,7 +9,7 @@
           "relBoardSubDir": "espressif/esp32s3_devkitc",
           "name": "build/keeper/esp32s3_devkitc",
           "westBuildArgs": "",
-          "westBuildCMakeArgs": " -DCONFIG_DEBUG_OPTIMIZATIONS=y -DCONFIG_DEBUG_THREAD_INFO=y ",
+          "westBuildCMakeArgs": "",
           "confFiles": {
             "config": [],
             "extraConfig": [
@@ -34,7 +34,7 @@
           "relBoardSubDir": "nxp/frdm_rw612",
           "name": "build/keeper/frdm_rw612",
           "westBuildArgs": "",
-          "westBuildCMakeArgs": " -DCONFIG_DEBUG_OPTIMIZATIONS=y -DCONFIG_DEBUG_THREAD_INFO=y ",
+          "westBuildCMakeArgs": "",
           "confFiles": {
             "config": [],
             "extraConfig": [
@@ -59,7 +59,7 @@
           "relBoardSubDir": "nordic/nrf7002dk",
           "name": "build/keeper/nrf7002dk",
           "westBuildArgs": "",
-          "westBuildCMakeArgs": " -DCONFIG_DEBUG_OPTIMIZATIONS=y -DCONFIG_DEBUG_THREAD_INFO=y ",
+          "westBuildCMakeArgs": "",
           "confFiles": {
             "config": [],
             "extraConfig": [
@@ -84,7 +84,7 @@
           "relBoardSubDir": "espressif/esp32s3_devkitc",
           "name": "build/pot/esp32s3_devkitc",
           "westBuildArgs": "",
-          "westBuildCMakeArgs": " -DCONFIG_DEBUG_OPTIMIZATIONS=y -DCONFIG_DEBUG_THREAD_INFO=y ",
+          "westBuildCMakeArgs": "",
           "confFiles": {
             "config": [],
             "extraConfig": [
@@ -109,7 +109,7 @@
           "relBoardSubDir": "nxp/frdm_rw612",
           "name": "build/pot/frdm_rw612",
           "westBuildArgs": "",
-          "westBuildCMakeArgs": " -DCONFIG_DEBUG_OPTIMIZATIONS=y -DCONFIG_DEBUG_THREAD_INFO=y ",
+          "westBuildCMakeArgs": "",
           "confFiles": {
             "config": [],
             "extraConfig": [
@@ -134,7 +134,7 @@
           "relBoardSubDir": "nordic/nrf7002dk",
           "name": "build/pot/nrf7002dk",
           "westBuildArgs": "",
-          "westBuildCMakeArgs": " -DCONFIG_DEBUG_OPTIMIZATIONS=y -DCONFIG_DEBUG_THREAD_INFO=y ",
+          "westBuildCMakeArgs": "",
           "confFiles": {
             "config": [],
             "extraConfig": [

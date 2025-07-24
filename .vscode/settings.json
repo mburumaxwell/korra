@@ -33,5 +33,8 @@
         "Tinybird",
         "Vercel"
     ],
-    "yaml.format.singleQuote": true
+    "yaml.format.singleQuote": true,
+    "nrf-connect.applications": [
+        "${workspaceFolder}/firmware"
+    ]
 }
