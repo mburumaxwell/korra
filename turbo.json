@@ -1,7 +1,8 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": ["**/.env", "**/.env.*", "**/eslint*.config.*", "**/vitest.config.*"],
-  "globalEnv": ["NODE_ENV", "DATABASE_URL", "IOT_HUB_CONNECTION_STRING", "PROCESSOR_API_KEY", "FIRMWARE_API_KEY"],
+  "globalDependencies": ["**/.env", "**/.env.*", "**/eslint*.config.*", "**/vitest.config.*", "tsconfig.json"],
+  "globalEnv": ["NODE_ENV"],
+  "globalPassThroughEnv": ["DATABASE_URL", "IOT_HUB_CONNECTION_STRING", "PROCESSOR_API_KEY", "FIRMWARE_API_KEY"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
