@@ -17,8 +17,33 @@ app_version.h
 # tinybird
 .tinyb
 
-.idea
-.DS_Store
+# testing
+/coverage
 
+# outputs
+.next
+out
+build
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# local env files
+.env*.local
+
+# vercel
+.vercel
+
+# misc
 provisioning
+.DS_Store
+.idea
+*.pem
 *.local.sh
