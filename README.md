@@ -106,6 +106,7 @@ internet-cred-clear
 
 - `firmware/` — Zephyr-based firmware for supported boards
 - `firmware-pio/` — PlatformIO/Arduino-based firmware
+- `processor/` — C#/.NET backend for processing events from IoTHub
 - `website/` — Next.js web dashboard
 - `deploy/` — Azure infrastructure templates (Bicep)
 - `west-manifest/` — Zephyr west manifest and configuration
