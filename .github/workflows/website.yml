@@ -25,6 +25,7 @@ concurrency:
 
 env:
   NEXT_TELEMETRY_DISABLED: 1 # Disable Next.js telemetry
+  TURBO_TELEMETRY_DISABLED: 1 # Disable Turbo telemetry
 
   # SWA_ENVIRONMENT_FOR_PR: ${{ (github.event_name == 'pull_request' && format('ra{0}', github.event.pull_request.number)) || '' }}
   SWA_ENVIRONMENT_FOR_PR: ${{ (github.event_name == 'pull_request' && format('{0}', github.event.pull_request.number)) || '' }}
@@ -50,6 +51,9 @@ jobs:
           node-version: 24
           cache: pnpm
 
+      - name: Setup turborepo caching
+        uses: rharkor/caching-for-turbo@v1.8
+
       - name: Download deps
         run: pnpm install
         working-directory: '${{ github.workspace }}/website'
@@ -64,13 +68,13 @@ jobs:
             ${{ runner.os }}-next-website
 
       - name: Build
-        run: pnpm build
+        run: pnpm turbo build
         working-directory: '${{ github.workspace }}/website'
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }} # needed for prebuild script (generates types)
 
       - name: Lint
-        run: pnpm lint
+        run: pnpm turbo lint
         working-directory: '${{ github.workspace }}/website'
 
       - name: Azure Login

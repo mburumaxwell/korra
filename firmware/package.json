@@ -26,7 +26,7 @@
     "flash:pot:nrf7002dk": "pnpm flash --app pot --board nrf7002dk/nrf5340/cpuapp",
     "collect": "tsx scripts/firmware.ts collect",
     "avail": "tsx scripts/firmware.ts avail",
-    "clean": "rimraf build binaries",
+    "clean": "rimraf .turbo build binaries",
     "packages:version": "tsx scripts/firmware.ts version"
   },
   "devDependencies": {
