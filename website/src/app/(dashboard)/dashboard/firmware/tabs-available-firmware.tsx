@@ -67,6 +67,7 @@ export function AvailableFirmwareTab({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Boards</SelectItem>
+                  <SelectItem value="esp32c6_devkitc">ESP32-C6 DevKitC</SelectItem>
                   <SelectItem value="esp32s3_devkitc">ESP32-S3 DevKitC</SelectItem>
                   <SelectItem value="frdm_rw612">FRDM-RW612</SelectItem>
                   <SelectItem value="nrf7002dk">nRF7002 DK</SelectItem>

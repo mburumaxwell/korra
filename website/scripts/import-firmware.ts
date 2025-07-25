@@ -59,7 +59,7 @@ async function importFirmware() {
       } else if (folder === 'firmware-pio') {
         // @ts-expect-error - forcing enum values
         [framework, usage] = filename.split('-');
-        // here we only have esp32
+        // here we only have esp32s3
         board = 'esp32s3_devkitc';
       } else {
         throw new Error('This should not happen');

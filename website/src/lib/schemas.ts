@@ -148,9 +148,9 @@ export const OperationalEventRequestBodySchema = z.object({
 });
 export type OperationalEventRequestBody = z.infer<typeof OperationalEventRequestBodySchema>;
 
-export const KorraBoardTypeSchema = z.enum(['esp32s3_devkitc', 'frdm_rw612', 'nrf7002dk']);
+export const KorraBoardTypeSchema = z.enum(['esp32c6_devkitc', 'esp32s3_devkitc', 'frdm_rw612', 'nrf7002dk']);
 export type KorraBoardType = z.infer<typeof KorraBoardTypeSchema>;
-export const KORRA_BOARD_TYPES = ['esp32s3_devkitc', 'frdm_rw612', 'nrf7002dk'] as const;
+export const KORRA_BOARD_TYPES = ['esp32c6_devkitc', 'esp32s3_devkitc', 'frdm_rw612', 'nrf7002dk'] as const;
 
 export const KorraFirmwareFrameworkSchema = z.enum(['zephyr', 'arduino', 'espidf']);
 export type KorraFirmwareFramework = z.infer<typeof KorraFirmwareFrameworkSchema>;

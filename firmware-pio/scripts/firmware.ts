@@ -11,16 +11,15 @@ import * as semver from 'semver';
 import packageJson from '../package.json' with { type: 'json' };
 
 const KNOWN_ENVIRONMENTS = [
+  'arduino-keeper-esp32c6_devkitc',
+  'arduino-pot-esp32c6_devkitc',
   'arduino-keeper-esp32s3_devkitc',
   'arduino-pot-esp32s3_devkitc',
 
+  // 'espidf-keeper-esp32c6_devkitc',
+  // 'espidf-pot-esp32c6_devkitc',
   // 'espidf-keeper-esp32s3_devkitc',
   // 'espidf-pot-esp32s3_devkitc',
-
-  // 'zephyr-keeper-esp32s3_devkitc',
-  // 'zephyr-pot-esp32s3_devkitc',
-
-  // add other board/framework targets here
 ];
 
 const version = new Command('version')

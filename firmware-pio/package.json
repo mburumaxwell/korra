@@ -6,11 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "pio run --project-dir ../",
-    "build:keeper": "pnpm build --environment arduino-keeper-esp32s3_devkitc",
-    "build:pot": "pnpm build --environment arduino-pot-esp32s3_devkitc",
     "flash": "pio run --project-dir ../ --target upload",
-    "flash:keeper": "pnpm flash --environment arduino-keeper-esp32s3_devkitc",
-    "flash:pot": "pnpm flash --environment arduino-pot-esp32s3_devkitc",
     "collect": "tsx scripts/firmware.ts collect",
     "avail": "tsx scripts/firmware.ts avail",
     "clean": "rimraf .pio .turbo binaries",

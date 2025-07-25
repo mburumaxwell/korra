@@ -6,6 +6,18 @@
   },
   "configurePresets": [
     {
+      "name": "build-keeper-esp32c6_devkitc",
+      "displayName": "Keeper - esp32c6_devkitc",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build-keeper-esp32c6_devkitc",
+      "cacheVariables": {
+        "NCS_TOOLCHAIN_VERSION": "NONE",
+        "BOARD": "esp32c6_devkitc/esp32c6/hpcore",
+        "EXTRA_CONF_FILE": "apps/keeper.conf;local.conf",
+        "EXTRA_DTC_OVERLAY_FILE": "apps/keeper.overlay"
+      }
+    },
+    {
       "name": "build-keeper-esp32s3_devkitc",
       "displayName": "Keeper - esp32s3_devkitc",
       "generator": "Ninja",
@@ -42,6 +54,18 @@
       }
     },
 
+    {
+      "name": "build-pot-esp32c6_devkitc",
+      "displayName": "Pot - esp32c6_devkitc",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build-pot-esp32c6_devkitc",
+      "cacheVariables": {
+        "NCS_TOOLCHAIN_VERSION": "NONE",
+        "BOARD": "esp32c6_devkitc/esp32c6/hpcore",
+        "EXTRA_CONF_FILE": "apps/pot.conf;local.conf",
+        "EXTRA_DTC_OVERLAY_FILE": "apps/pot.overlay"
+      }
+    },
     {
       "name": "build-pot-esp32s3_devkitc",
       "displayName": "Pot - esp32s3_devkitc",

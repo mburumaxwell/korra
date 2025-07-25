@@ -14,6 +14,7 @@ datasource db {
 }
 
 enum BoardType {
+  esp32c6_devkitc
   esp32s3_devkitc
   frdm_rw612
   nrf7002dk
