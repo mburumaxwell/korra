@@ -6,13 +6,11 @@ on:
     tags: ['firmware@*']
     paths:
       - firmware/**
-      - west-manifest/**
       - .github/workflows/firmware.yml
   pull_request:
     branches: [main]
     paths:
       - firmware/**
-      - west-manifest/**
       - .github/workflows/firmware.yml
   workflow_dispatch:
 
@@ -47,7 +45,7 @@ jobs:
       - name: Set up Zephyr SDK
         uses: zephyrproject-rtos/action-zephyr-setup@v1
         with:
-          app-path: ${{ github.workspace }}/west-manifest
+          app-path: ${{ github.workspace }}/firmware
           toolchains: arm-zephyr-eabi:xtensa-espressif_esp32s3_zephyr-elf
 
       - name: Setup pnpm
@@ -76,7 +74,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: ${{ github.workspace }}/external/modules/hal/*/zephyr/blobs
-          key: blobs-${{ hashFiles('west-manifest/west.yml') }}
+          key: blobs-${{ hashFiles('firmware/west.yml') }}
           restore-keys: |
             blobs-
 

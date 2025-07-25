@@ -9,7 +9,7 @@
       "name": "build-keeper-esp32s3_devkitc",
       "displayName": "Keeper - esp32s3_devkitc",
       "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build/keeper/esp32s3_devkitc",
+      "binaryDir": "${sourceDir}/build-keeper-esp32s3_devkitc",
       "cacheVariables": {
         "NCS_TOOLCHAIN_VERSION": "NONE",
         "BOARD": "esp32s3_devkitc/esp32s3/procpu",
@@ -21,7 +21,7 @@
       "name": "build-keeper-frdm_rw612",
       "displayName": "Keeper - frdm_rw612",
       "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build/keeper/frdm_rw612",
+      "binaryDir": "${sourceDir}/build-keeper-frdm_rw612",
       "cacheVariables": {
         "NCS_TOOLCHAIN_VERSION": "NONE",
         "BOARD": "frdm_rw612/rw612",
@@ -33,7 +33,7 @@
       "name": "build-keeper-nrf7002dk",
       "displayName": "Keeper - nrf7002dk",
       "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build/keeper/nrf7002dk",
+      "binaryDir": "${sourceDir}/build-keeper-nrf7002dk",
       "cacheVariables": {
         "NCS_TOOLCHAIN_VERSION": "NONE",
         "BOARD": "nrf7002dk/nrf5340/cpuapp",
@@ -46,7 +46,7 @@
       "name": "build-pot-esp32s3_devkitc",
       "displayName": "Pot - esp32s3_devkitc",
       "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build/pot/esp32s3_devkitc",
+      "binaryDir": "${sourceDir}/build-pot-esp32s3_devkitc",
       "cacheVariables": {
         "NCS_TOOLCHAIN_VERSION": "NONE",
         "BOARD": "esp32s3_devkitc/esp32s3/procpu",
@@ -58,7 +58,7 @@
       "name": "build-pot-frdm_rw612",
       "displayName": "Pot - frdm_rw612",
       "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build/pot/frdm_rw612",
+      "binaryDir": "${sourceDir}/build-pot-frdm_rw612",
       "cacheVariables": {
         "NCS_TOOLCHAIN_VERSION": "NONE",
         "BOARD": "frdm_rw612/rw612",
@@ -70,7 +70,7 @@
       "name": "build-pot-nrf7002dk",
       "displayName": "Pot - nrf7002dk",
       "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build/pot/nrf7002dk",
+      "binaryDir": "${sourceDir}/build-pot-nrf7002dk",
       "cacheVariables": {
         "NCS_TOOLCHAIN_VERSION": "NONE",
         "BOARD": "nrf7002dk/nrf5340/cpuapp",
