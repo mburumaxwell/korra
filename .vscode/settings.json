@@ -6,6 +6,7 @@
         "delayable",
         "devkitc",
         "eduroam",
+        "esp32c6_devkitc",
         "esp32s3_devkitc",
         "espidf",
         "espressif",

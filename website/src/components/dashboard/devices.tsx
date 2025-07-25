@@ -26,6 +26,8 @@ export function getNetworkIcon(kind?: KorraNetworkKind | null) {
 
 export function getBoardName(board: KorraBoardType) {
   switch (board) {
+    case 'esp32c6_devkitc':
+      return 'ESP32-C6 DevKitC';
     case 'esp32s3_devkitc':
       return 'ESP32-S3 DevKitC';
     case 'frdm_rw612':

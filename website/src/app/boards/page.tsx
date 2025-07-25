@@ -12,6 +12,24 @@ export const metadata: Metadata = {
   description: 'Supported boards and their details',
 };
 
+const sensors = [
+  'DHT22 - Temperature/Humidity',
+  'BME280 - Environmental sensor',
+  'Soil moisture sensors',
+  'pH sensors',
+  'Light sensors',
+
+  // 'Industrial temperature sensors',
+  // 'Precision humidity sensors',
+  // 'Professional pH meters',
+  // 'High-accuracy pressure sensors',
+
+  // 'Low-power temperature sensors',
+  // 'Battery-optimized humidity sensors',
+  // 'Ultra-low power soil sensors',
+  // 'Energy-harvesting compatible sensors',
+];
+
 const boards = [
   {
     id: 'esp32s3_devkitc',
@@ -41,32 +59,60 @@ const boards = [
       'Vector instructions',
     ],
     useCases: ['Smart agriculture sensors', 'Environmental monitoring', 'Edge AI applications', 'IoT gateways'],
-    pros: [
-      'Excellent performance/cost ratio',
-      'Strong ecosystem support',
-      'Advanced connectivity options',
-      'AI/ML capabilities',
-      'Active development community',
-    ],
-    cons: [
-      'Higher power consumption than some alternatives',
-      'Complex peripheral configuration',
-      'Limited real-time guarantees',
-    ],
     frameworks: ['Arduino', 'ESP-IDF', 'Zephyr'],
-    sensors: [
-      'DHT22 - Temperature/Humidity',
-      'BME280 - Environmental sensor',
-      'Soil moisture sensors',
-      'pH sensors',
-      'Light sensors',
-    ],
     applications: {
       keeper: 'Environmental control with WiFi connectivity and sensor fusion',
       pot: 'Individual plant monitoring with low-power wireless communication',
     },
     documentation: 'https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/',
     datasheet: 'https://www.espressif.com/sites/default/files/documentation/esp32-s3_datasheet_en.pdf',
+  },
+  {
+    id: 'esp32c6_devkitc',
+    name: 'ESP32-C6 DevKitC-1',
+    manufacturer: 'Espressif Systems',
+    description: 'Efficient RISC-V microcontroller with WiFi 6, Bluetooth 5 LE, and 802.15.4 connectivity',
+    status: 'Experimental',
+    price: '$10-15',
+    availability: 'Available',
+    specifications: {
+      cpu: 'Dual-core RISC-V @ 160 MHz',
+      memory: '512KB SRAM + 320KB ROM',
+      flash: '8MB (configurable)',
+      connectivity: [
+        'Wi-Fi 6 (802.11 b/g/n/ax, 2.4 GHz)',
+        'Bluetooth 5.3 LE',
+        'IEEE 802.15.4 (Zigbee 3.0, Thread 1.3)',
+        'USB 2.0 Full Speed',
+      ],
+      gpio: '30 programmable GPIOs',
+      adc: '12-bit SAR ADCs',
+      interfacesList: ['SPI', 'I2C', 'I2S', 'UART', 'CAN', 'USB'],
+      power: '3.3V, 500mA typical',
+      dimensions: '51.8 × 25.4 mm',
+    },
+    features: [
+      '802.11ax Wi-Fi 6 support',
+      'Bluetooth 5.3 LE',
+      'IEEE 802.15.4 (Thread & Zigbee)',
+      'Hardware security (Secure Boot, Flash Encryption)',
+      'USB Serial/JTAG interface',
+      'Low-power sensor and sleep modes',
+    ],
+    useCases: [
+      'Thread/Zigbee border router',
+      'IoT gateway',
+      'Smart home hub',
+      'Wireless sensor networks',
+      'Industrial automation node',
+    ],
+    frameworks: ['Arduino', 'ESP-IDF', 'Zephyr'],
+    applications: {
+      keeper: 'Environmental control with WiFi connectivity and sensor fusion',
+      pot: 'Individual plant monitoring with low-power wireless communication',
+    },
+    documentation: 'https://docs.espressif.com/projects/esp-idf/en/latest/esp32c6/',
+    datasheet: 'https://www.espressif.com/sites/default/files/documentation/esp32-c6_datasheet_en.pdf',
   },
   {
     id: 'frdm_rw612',
@@ -101,26 +147,7 @@ const boards = [
       'Smart building systems',
       'Professional development',
     ],
-    pros: [
-      'Cutting-edge wireless technologies',
-      'Hardware security features',
-      'High performance processors',
-      'Professional development tools',
-      'Future-proof connectivity',
-    ],
-    cons: [
-      'Higher cost',
-      'Complex development environment',
-      'Limited community support',
-      'Newer platform with fewer examples',
-    ],
     frameworks: ['Zephyr'],
-    sensors: [
-      'Industrial temperature sensors',
-      'Precision humidity sensors',
-      'Professional pH meters',
-      'High-accuracy pressure sensors',
-    ],
     applications: {
       keeper: 'Advanced environmental control with Thread mesh networking and security',
       pot: 'Professional-grade plant monitoring with encrypted data transmission',
@@ -156,26 +183,7 @@ const boards = [
       'Real-time debugging',
     ],
     useCases: ['Battery-powered sensors', 'Long-term monitoring', 'Wearable devices', 'Remote sensing applications'],
-    pros: [
-      'Exceptional power efficiency',
-      'Professional development tools',
-      'Strong Nordic ecosystem',
-      'Advanced debugging capabilities',
-      'Long battery life applications',
-    ],
-    cons: [
-      'Higher initial cost',
-      'Nordic-specific toolchain',
-      'Smaller community compared to ESP32',
-      'Limited third-party libraries',
-    ],
     frameworks: ['Zephyr'],
-    sensors: [
-      'Low-power temperature sensors',
-      'Battery-optimized humidity sensors',
-      'Ultra-low power soil sensors',
-      'Energy-harvesting compatible sensors',
-    ],
     applications: {
       keeper: 'Long-term environmental monitoring with months of battery life',
       pot: 'Ultra-low power plant monitoring for remote or battery-powered installations',
@@ -201,7 +209,7 @@ export default async function Page() {
               IoT applications.
             </p>
             <div className="mb-8 flex flex-wrap justify-center gap-2">
-              <Badge variant="secondary">3 Boards Supported</Badge>
+              <Badge variant="secondary">4 Boards Supported</Badge>
               <Badge variant="secondary">Multi-Framework</Badge>
               <Badge variant="secondary">Production Ready</Badge>
               <Badge variant="secondary">Professional Grade</Badge>
@@ -224,6 +232,7 @@ export default async function Page() {
                 <tr>
                   <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Specification</th>
                   <th className="px-6 py-4 text-center text-sm font-medium text-blue-600">ESP32-S3 DEVKIT-C</th>
+                  <th className="px-6 py-4 text-center text-sm font-medium text-blue-600">ESP32-C6 DEVKIT-C</th>
                   <th className="px-6 py-4 text-center text-sm font-medium text-purple-600">FRDM-RW612</th>
                   <th className="px-6 py-4 text-center text-sm font-medium text-green-600">nRF7002 DK</th>
                 </tr>
@@ -232,18 +241,21 @@ export default async function Page() {
                 <tr>
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">CPU Performance</td>
                   <td className="px-6 py-4 text-center text-sm text-gray-600">240MHz Dual-core</td>
+                  <td className="px-6 py-4 text-center text-sm text-gray-600">160MHz Dual-core</td>
                   <td className="px-6 py-4 text-center text-sm text-gray-600">260MHz Dual-core</td>
                   <td className="px-6 py-4 text-center text-sm text-gray-600">128MHz Single-core</td>
                 </tr>
                 <tr className="bg-gray-50">
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">Flash</td>
                   <td className="px-6 py-4 text-center text-sm text-gray-600">384KB ROM + 8MB QSPI</td>
+                  <td className="px-6 py-4 text-center text-sm text-gray-600">320KB ROM + 8MB QSPI</td>
                   <td className="px-6 py-4 text-center text-sm text-gray-600">256KB ROM + 64MB QSPI</td>
                   <td className="px-6 py-4 text-center text-sm text-gray-600">1MB ROM</td>
                 </tr>
                 <tr className="bg-gray-50">
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">Memory</td>
                   <td className="px-6 py-4 text-center text-sm text-gray-600">512KB SRAM + 4MB PSRAM</td>
+                  <td className="px-6 py-4 text-center text-sm text-gray-600">512KB SRAM</td>
                   <td className="px-6 py-4 text-center text-sm text-gray-600">1.2MB SRAM + 8MB PSRAM</td>
                   <td className="px-6 py-4 text-center text-sm text-gray-600">512KB RAM</td>
                 </tr>
@@ -251,6 +263,9 @@ export default async function Page() {
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">Wireless</td>
                   <td className="px-6 py-4 text-center">
                     <Badge variant="outline">WiFi + BLE</Badge>
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <Badge variant="default">WiFi 6 + BLE + Thread</Badge>
                   </td>
                   <td className="px-6 py-4 text-center">
                     <Badge variant="default">WiFi 6 + BLE + Thread</Badge>
@@ -268,12 +283,16 @@ export default async function Page() {
                     <Badge variant="secondary">Good</Badge>
                   </td>
                   <td className="px-6 py-4 text-center">
+                    <Badge variant="secondary">Good</Badge>
+                  </td>
+                  <td className="px-6 py-4 text-center">
                     <Badge variant="default">Excellent</Badge>
                   </td>
                 </tr>
                 <tr>
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">Price Range</td>
                   <td className="px-6 py-4 text-center text-sm text-gray-600">$8-12</td>
+                  <td className="px-6 py-4 text-center text-sm text-gray-600">$10-15</td>
                   <td className="px-6 py-4 text-center text-sm text-gray-600">$25-35</td>
                   <td className="px-6 py-4 text-center text-sm text-gray-600">$50-70</td>
                 </tr>
@@ -450,7 +469,7 @@ export default async function Page() {
                     </CardHeader>
                     <CardContent>
                       <ul className="space-y-2">
-                        {board.sensors.slice(0, 4).map((sensor, idx) => (
+                        {sensors.slice(0, 4).map((sensor, idx) => (
                           <li key={idx} className="text-sm text-gray-600">
                             <span className="font-medium">{sensor.split(' - ')[0]}</span>
                             <br />

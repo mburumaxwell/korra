@@ -20,6 +20,7 @@ import packageJson from '../package.json' with { type: 'json' };
 const isCI = Boolean(process.env['CI'] || process.env['GITHUB_ACTIONS']);
 const KNOWN_APPS = ['keeper', 'pot'];
 const KNOWN_BOARDS = [
+  'esp32c6_devkitc/esp32c6/hpcore',
   'esp32s3_devkitc/esp32s3/procpu',
   'frdm_rw612',
   'nrf7002dk/nrf5340/cpuapp',
