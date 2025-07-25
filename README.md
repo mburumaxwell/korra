@@ -52,20 +52,14 @@ cd korra
 ```bash
 west init --local firmware && \
 west update && \
+west config zephyr.base external/zephyr && \
 cd firmware && \
 pnpm blobs:fetch
 ```
 
-For tooling to recognize the version in use, you may need to update the `.west/config` file to add `zephyr.base=external/zephyr` hence have something like this:
+When setting up in the IDE, you may need to run `west config zephyr.base external/zephyr` (part of script above), for it to recognize the version in use.
 
-```toml
-[manifest]
-path = firmware
-file = west.yml
-
-[zephyr]
-base = external/zephyr
-```
+The default board for zephyr is `frdm_rw612` for the `keeper` app. For the IDE to automatically offer navigation, you would need to build this target. Otherwise, you can change the value of `"C_Cpp.default.compileCommands"` in `.vscode/settings.json` to a more befitting one.
 
 #### 3. Set up PlatformIO (for `firmware-pio`)
 

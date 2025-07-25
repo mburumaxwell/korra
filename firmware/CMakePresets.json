@@ -11,7 +11,6 @@
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build-keeper-esp32c6_devkitc",
       "cacheVariables": {
-        "NCS_TOOLCHAIN_VERSION": "NONE",
         "BOARD": "esp32c6_devkitc/esp32c6/hpcore",
         "EXTRA_CONF_FILE": "apps/keeper.conf;local.conf",
         "EXTRA_DTC_OVERLAY_FILE": "apps/keeper.overlay"
@@ -23,7 +22,6 @@
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build-keeper-esp32s3_devkitc",
       "cacheVariables": {
-        "NCS_TOOLCHAIN_VERSION": "NONE",
         "BOARD": "esp32s3_devkitc/esp32s3/procpu",
         "EXTRA_CONF_FILE": "apps/keeper.conf;local.conf",
         "EXTRA_DTC_OVERLAY_FILE": "apps/keeper.overlay"
@@ -35,7 +33,6 @@
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build-keeper-frdm_rw612",
       "cacheVariables": {
-        "NCS_TOOLCHAIN_VERSION": "NONE",
         "BOARD": "frdm_rw612/rw612",
         "EXTRA_CONF_FILE": "apps/keeper.conf;local.conf",
         "EXTRA_DTC_OVERLAY_FILE": "apps/keeper.overlay"
@@ -47,7 +44,6 @@
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build-keeper-nrf7002dk",
       "cacheVariables": {
-        "NCS_TOOLCHAIN_VERSION": "NONE",
         "BOARD": "nrf7002dk/nrf5340/cpuapp",
         "EXTRA_CONF_FILE": "apps/keeper.conf;local.conf",
         "EXTRA_DTC_OVERLAY_FILE": "apps/keeper.overlay"
@@ -60,7 +56,6 @@
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build-pot-esp32c6_devkitc",
       "cacheVariables": {
-        "NCS_TOOLCHAIN_VERSION": "NONE",
         "BOARD": "esp32c6_devkitc/esp32c6/hpcore",
         "EXTRA_CONF_FILE": "apps/pot.conf;local.conf",
         "EXTRA_DTC_OVERLAY_FILE": "apps/pot.overlay"
@@ -72,7 +67,6 @@
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build-pot-esp32s3_devkitc",
       "cacheVariables": {
-        "NCS_TOOLCHAIN_VERSION": "NONE",
         "BOARD": "esp32s3_devkitc/esp32s3/procpu",
         "EXTRA_CONF_FILE": "apps/pot.conf;local.conf",
         "EXTRA_DTC_OVERLAY_FILE": "apps/pot.overlay"
@@ -84,7 +78,6 @@
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build-pot-frdm_rw612",
       "cacheVariables": {
-        "NCS_TOOLCHAIN_VERSION": "NONE",
         "BOARD": "frdm_rw612/rw612",
         "EXTRA_CONF_FILE": "apps/pot.conf;local.conf",
         "EXTRA_DTC_OVERLAY_FILE": "apps/pot.overlay"
@@ -96,7 +89,6 @@
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build-pot-nrf7002dk",
       "cacheVariables": {
-        "NCS_TOOLCHAIN_VERSION": "NONE",
         "BOARD": "nrf7002dk/nrf5340/cpuapp",
         "EXTRA_CONF_FILE": "apps/pot.conf;local.conf",
         "EXTRA_DTC_OVERLAY_FILE": "apps/pot.overlay"

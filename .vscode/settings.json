@@ -1,4 +1,6 @@
 {
+    "C_Cpp.default.compileCommands": "${workspaceFolder}/firmware/build-keeper-frdm_rw612/compile_commands.json",
+    "cmake.configureOnOpen": false,
     "cSpell.words": [
         "actuations",
         "BSSID",
@@ -30,5 +32,7 @@
     "yaml.format.singleQuote": true,
     "nrf-connect.applications": [
         "${workspaceFolder}/firmware"
-    ]
+    ],
+    "files.associations": {
+    }
 }
