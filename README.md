@@ -56,7 +56,7 @@ cd firmware && \
 pnpm blobs:fetch
 ```
 
-For tooling to recognise the version in use, you may need to update the `.west/config` file to add `zephyr.base=external/zephyr` hence have something like this:
+For tooling to recognize the version in use, you may need to update the `.west/config` file to add `zephyr.base=external/zephyr` hence have something like this:
 
 ```toml
 [manifest]
