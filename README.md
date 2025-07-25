@@ -50,10 +50,21 @@ cd korra
 #### 2. Set up Zephyr (for `firmware`)
 
 ```bash
-cd west-manifest && west init --local && cd ../ && \
+west init --local firmware && \
 west update && \
 cd firmware && \
 pnpm blobs:fetch
+```
+
+For tooling to recognise the version in use, you may need to update the `.west/config` file to add `zephyr.base=external/zephyr` hence have something like this:
+
+```toml
+[manifest]
+path = firmware
+file = west.yml
+
+[zephyr]
+base = external/zephyr
 ```
 
 #### 3. Set up PlatformIO (for `firmware-pio`)
@@ -109,7 +120,6 @@ internet-cred-clear
 - `processor/` — C#/.NET backend for processing events from IoTHub
 - `website/` — Next.js web dashboard
 - `deploy/` — Azure infrastructure templates (Bicep)
-- `west-manifest/` — Zephyr west manifest and configuration
 
 ## Versioning
 

@@ -1,11 +1,4 @@
 {
-    "terminal.integrated.defaultProfile.osx": "Zephyr IDE Terminal",
-    "terminal.integrated.automationProfile.osx":{
-        "path": "/bin/zsh",
-        "icon": "terminal"
-    },
-    "C_Cpp.default.compileCommands": "${workspaceFolder}/.vscode/compile_commands.json",
-    "cmake.configureOnOpen": false,
     "cSpell.words": [
         "actuations",
         "BSSID",
