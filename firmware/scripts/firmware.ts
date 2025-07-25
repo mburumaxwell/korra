@@ -32,7 +32,7 @@ const KNOWN_BLOBS_MODULES = [
   // add other blobs needed here
 ];
 
-const makeBuildDir = ({ app, board }) => `build/${app}/${board}`;
+const makeBuildDir = ({ app, board }) => `build-${app}-${board}`;
 
 const version = new Command('version')
   .description('Generate VERSION file for zephyr.')
@@ -265,7 +265,7 @@ const collect = new Command('collect')
 
     for (const app of apps) {
       for (const board of boards) {
-        const buildDir = `build/${app}/${board}/zephyr`;
+        const buildDir = `${makeBuildDir({ app, board })}/zephyr`;
         const binSrc = join(buildDir, 'zephyr.bin');
         const elfSrc = join(buildDir, 'zephyr.elf');
         const binDest = join(outputDir, `${app}-${board.split('/')[0]}.bin`);

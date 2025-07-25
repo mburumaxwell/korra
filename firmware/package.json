@@ -29,7 +29,7 @@
 
     "collect": "tsx scripts/firmware.ts collect",
     "avail": "tsx scripts/firmware.ts avail",
-    "clean": "rimraf .turbo build binaries",
+    "clean": "rimraf .turbo build build-* binaries",
     "packages:version": "tsx scripts/firmware.ts version"
   },
   "devDependencies": {
