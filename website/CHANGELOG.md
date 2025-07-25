@@ -1,5 +1,11 @@
 # website
 
+## 0.6.1
+
+### Patch Changes
+
+- b499cdb: Add support for ESP32-C6 DevKitC
+
 ## 0.6.0
 
 ### Minor Changes

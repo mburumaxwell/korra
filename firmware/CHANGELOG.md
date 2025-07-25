@@ -1,5 +1,12 @@
 # firmware
 
+## 0.2.4
+
+### Patch Changes
+
+- b499cdb: Add support for ESP32-C6 DevKitC
+- 965d4ce: Update zephyr to v4.2.0
+
 ## 0.2.3
 
 ### Patch Changes
