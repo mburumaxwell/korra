@@ -13,8 +13,14 @@
 #endif
 
 // Functions that may exist in C++ but not in C but for consistency we use macros
+#ifndef MAX
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
+#endif // MAX
+#ifndef MIN
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
+#endif // MIN
+#ifndef CLAMP
 #define CLAMP(val, low, high) (((val) <= (low)) ? (low) : MIN(val, high))
+#endif // CLAMP
 
 #endif // CONFIG_H
