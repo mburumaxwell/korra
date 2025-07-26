@@ -26,7 +26,7 @@ struct korra_credential_generateble {
   const enum korra_credential_tag_type tag;
 #ifdef CONFIG_TLS_CREDENTIALS_BACKEND_VOLATILE
   const char *settings_name_prefix;
-#endif // CONFIG_TLS_CREDENTIALS_BACKEND_PROTECTED_STORAGE
+#endif // CONFIG_TLS_CREDENTIALS_BACKEND_VOLATILE
 };
 
 static struct korra_credential credentials[] = {
@@ -474,7 +474,7 @@ static int load_credentials() {
       }
     }
   }
-#endif // CONFIG_TLS_CREDENTIALS_BACKEND_PROTECTED_STORAGE
+#endif // CONFIG_TLS_CREDENTIALS_BACKEND_VOLATILE
 
   return ret;
 }
