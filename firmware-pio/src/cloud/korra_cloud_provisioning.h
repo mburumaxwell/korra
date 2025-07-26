@@ -140,10 +140,10 @@ protected:
     char *device_id;
 
     /** The status of the operation. */
-    provisioning_registration_status status;
+    enum provisioning_registration_status status;
 
     /** The substatus of the operation. */
-    provisioning_registration_sub_status sub_status;
+    enum provisioning_registration_sub_status sub_status;
 
     /** The generation Id. */
     char *generation_id;
@@ -170,10 +170,10 @@ protected:
     char *operation_id;
 
     /** The device enrollment status. */
-    provisioning_registration_status status;
+    enum provisioning_registration_status status;
 
     /** The device registration status. */
-    device_provisioning_result registration_state;
+    struct device_provisioning_result registration_state;
 
     /** the Retry-After header. */
     char *retry_after;
