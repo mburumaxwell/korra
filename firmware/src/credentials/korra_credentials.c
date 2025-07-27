@@ -399,9 +399,9 @@ static int generate_credentials(const char *devid, const size_t devid_len) {
 #ifdef CONFIG_TLS_CREDENTIALS_BACKEND_VOLATILE
         // when using volatile backend, save the generated cert and key
         LOG_DBG("Saving '%s' to settings", settings_name_cert);
-        settings_save_one(settings_name_cert, cert_pem, strlen(cert_pem));
+        settings_save_one(settings_name_cert, cert_pem, strlen(cert_pem) + 1); // Include null terminator
         LOG_DBG("Saving '%s' to settings", settings_name_key);
-        settings_save_one(settings_name_key, key_pem, strlen(key_pem));
+        settings_save_one(settings_name_key, key_pem, strlen(key_pem) + 1); // Include null terminator
 #endif // CONFIG_TLS_CREDENTIALS_BACKEND_VOLATILE
       }
     }
@@ -410,10 +410,10 @@ static int generate_credentials(const char *devid, const size_t devid_len) {
       if (credentials[j].tag == generateble_credentials[i].tag) {
         if (credentials[j].type == TLS_CREDENTIAL_PUBLIC_CERTIFICATE) {
           credentials[j].data = cert_pem;
-          credentials[j].len = strlen(cert_pem);
+          credentials[j].len = strlen(cert_pem) + 1; // Include null terminator for PEM format
         } else if (credentials[j].type == TLS_CREDENTIAL_PRIVATE_KEY) {
           credentials[j].data = key_pem;
-          credentials[j].len = strlen(key_pem);
+          credentials[j].len = strlen(key_pem) + 1; // Include null terminator for PEM format
         }
       }
     }

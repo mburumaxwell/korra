@@ -46,7 +46,7 @@ int main(void) {
   korra_credentials_init(devid, (size_t)devid_len);
 
   // Print the device certificate for ease with provisioning
-  size_t devcert_len = korra_credentials_get_device_cert(NULL, 0) + 1;
+  size_t devcert_len = korra_credentials_get_device_cert(NULL, 0);
   if (devcert_len > 1) {
     char *devcert = k_malloc(devcert_len);
     devcert_len = korra_credentials_get_device_cert(devcert, devcert_len);
