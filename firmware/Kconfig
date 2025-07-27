@@ -86,6 +86,7 @@ config BOARD_HAS_INTERNET # Invisible because it has no prompt (no string after 
     select NET_IPV6
     select NET_SOCKETS
     select NET_SOCKETS_TLS
+    select NET_SOCKETS_SOCKOPT_TLS
     select NET_TCP
     select NET_UDP
     select NET_DHCPV4 # Get IPv4 address from DHCP

@@ -14,7 +14,7 @@ int korra_resolve_address(const char *host, uint16_t port, int family, int sockt
   LOG_DBG("getaddrinfo for %s", host);
   int ret = getaddrinfo(host, NULL, &hints, &res);
   if (ret) {
-    LOG_INF("getaddrinfo failed (%d, errno %d)", ret, errno);
+    LOG_INF("getaddrinfo for %s failed (%d, errno %d)", host, ret, errno);
     return ret;
   }
 

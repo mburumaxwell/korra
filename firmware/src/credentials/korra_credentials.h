@@ -20,7 +20,7 @@ enum korra_credential_tag_type {
   KORRA_CREDENTIAL_AZURE_CA_TAG = 0x20,
 
   /* Device */
-  KORRA_CREDENTIAL_DEVICE_TAG,
+  KORRA_CREDENTIAL_DEVICE_TAG = 0x40,
 };
 
 /**

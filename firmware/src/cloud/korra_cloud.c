@@ -23,7 +23,7 @@ LOG_MODULE_REGISTER(korra_cloud, LOG_LEVEL_INF);
 #include "korra_cloud.h"
 #include "korra_cloud_provisioning.h"
 
-#define CLOUD_THREAD_STACK_SIZE 1024
+#define CLOUD_THREAD_STACK_SIZE 3072
 
 static K_THREAD_STACK_DEFINE(cloud_stack, CLOUD_THREAD_STACK_SIZE);
 static struct k_thread cloud_thread;
@@ -73,14 +73,23 @@ static void cloud_thread_start(void *arg_1, void *arg_2, void *arg_3) {
   korra_wait_for_event(KORRA_EVENT_TIME_SYNCED, K_FOREVER);
   LOG_INF("Time synced");
 
-  while (1) {
-    if (!prov.valid) {
-      ret = korra_cloud_provisioning_run();
-    }
+  // if we don't have valid provisioning info, run provisioning
+  if (!prov.valid) {
     while (1) {
-      // TODO: complete this logic
-      k_sleep(K_FOREVER);
+      ret = korra_cloud_provisioning_run(&prov);
+      if (ret) {
+        LOG_ERR("Provisioning failed: %d", ret);
+        k_sleep(K_SECONDS(30)); // Retry after 30 seconds
+        continue;
+      }
+      LOG_INF("Provisioning successful");
+      break;
     }
+  }
+
+  while (1) {
+    // TODO: complete this logic
+    k_sleep(K_FOREVER);
   }
 }
 
