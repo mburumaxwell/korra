@@ -17,8 +17,8 @@ LOG_MODULE_REGISTER(korra_cloud_provisioning, LOG_LEVEL_INF);
 #define SETTINGS_NAME_DEVICEID "azure-deviceid"
 #define DPS_HOSTNAME "global.azure-devices-provisioning.net"
 
-#define DPS_CONNECT_TRIES 10
-#define DPS_SLEEP_DURATION K_MSEC(500)
+#define DPS_CONNECT_TRIES 3
+#define DPS_SLEEP_DURATION K_SECONDS(3)
 
 // official/ref docs
 // - https://learn.microsoft.com/en-us/azure/iot/iot-mqtt-connect-to-iot-dps
@@ -234,7 +234,7 @@ int korra_cloud_provisioning_run(struct korra_cloud_provisioning_info *result) {
     return 0;
   }
 
-  return -EINVAL;
+  return -1;
 }
 
 int korra_cloud_provisioning_clear() {
@@ -285,7 +285,6 @@ static int client_init(struct mqtt_client *client) {
   client->transport.tls.config.sec_tag_list = m_sec_tags;
   client->transport.tls.config.sec_tag_count = ARRAY_SIZE(m_sec_tags);
   client->transport.tls.config.hostname = DPS_HOSTNAME;
-  client->transport.tls.config.cert_nocopy = TLS_CERT_NOCOPY_OPTIONAL;
 
   return 0;
 }
