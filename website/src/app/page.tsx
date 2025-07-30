@@ -110,7 +110,7 @@ const stack = [
   },
   { name: 'PlatformIO', category: 'Dev Tools', description: 'Embedded development platform' },
   { name: 'Azure IoT', category: 'Cloud', description: 'Device provisioning, messaging & management' },
-  { name: 'Neon PostgreSQL', category: 'Database', description: 'Sensor data storage' },
+  { name: 'MongoDB', category: 'Database', description: 'Sensor data storage' },
   { name: 'Vercel', category: 'Frontend', description: 'Web dashboard hosting' },
   { name: 'Tinybird', category: 'Analytics', description: 'Real-time data processing' },
   { name: 'GitHub Actions', category: 'DevOps', description: 'CI/CD automation' },
@@ -457,9 +457,9 @@ export default function Home() {
               <AccordionItem value="item-6">
                 <AccordionTrigger>How is the data stored and processed?</AccordionTrigger>
                 <AccordionContent>
-                  Sensor data is transmitted to Azure IoT Hub, stored in Neon PostgreSQL database, and processed using
-                  Tinybird for real-time analytics. The web dashboard is hosted on Vercel, providing real-time
-                  visualization and device management capabilities.
+                  Sensor data is transmitted to Azure IoT Hub, stored in MongoDB, and processed using Tinybird for
+                  real-time analytics. The web dashboard is hosted on Vercel, providing real-time visualization and
+                  device management capabilities.
                 </AccordionContent>
               </AccordionItem>
             </Accordion>

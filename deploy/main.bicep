@@ -13,10 +13,30 @@ param blobContainers BlobContainerDefinition[] = [
   { name: 'iothub-checkpoints-dev' }
 ]
 
+var administratorLoginPasswordMongo = '${skip(uniqueString(resourceGroup().id), 5)}^${uniqueString('mongo-password', resourceGroup().id)}' // e.g. abcde%zecnx476et7xm (19 characters)
+
 /* Managed Identity */
 resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: name
   location: location
+}
+
+/* Key Vault */
+resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
+  name: '${name}store'
+  location: location
+  properties: {
+    tenantId: subscription().tenantId
+    sku: { name: 'standard', family: 'A' }
+    enabledForDeployment: true
+    enabledForDiskEncryption: true
+    enabledForTemplateDeployment: true
+    enableRbacAuthorization: true
+    enableSoftDelete: true
+    softDeleteRetentionInDays: 90
+  }
+
+  resource mongoPasswordSecret 'secrets' = { name: 'mongo-password', properties: { contentType: 'text/plain', value: administratorLoginPasswordMongo } }
 }
 
 /* Storage Account */
@@ -111,6 +131,7 @@ resource iotDps 'Microsoft.Devices/provisioningServices@2022-12-12' = {
   sku: { name: 'S1', capacity: 1 }
 }
 
+/* IoT Device Update */
 resource iotUpdateAccount 'Microsoft.DeviceUpdate/accounts@2023-07-01' = {
   name: name
   location: location
@@ -155,6 +176,26 @@ resource appEnvironment 'Microsoft.App/managedEnvironments@2023-05-01' = {
         sharedKey: logAnalyticsWorkspace.listKeys().primarySharedKey
       }
     }
+  }
+}
+
+/* MongoDB Cluster */
+resource mongoCluster 'Microsoft.DocumentDB/mongoClusters@2024-07-01' = {
+  name: name
+  location: 'francecentral' // no free tier in UK yet
+  properties: {
+    #disable-next-line use-secure-value-for-secure-inputs
+    administrator: { userName: 'puppy', password: administratorLoginPasswordMongo }
+    serverVersion: '8.0'
+    compute: { tier: 'Free' }
+    storage: { sizeGb: 32 }
+    sharding: { shardCount: 1 }
+    highAvailability: { targetMode: 'Disabled' }
+  }
+
+  resource allowAzure 'firewallRules' = {
+    name: 'AllowAllAzureServicesAndResourcesWithinAzureIps'
+    properties: { endIpAddress: '0.0.0.0', startIpAddress: '0.0.0.0' }
   }
 }
 
@@ -213,3 +254,4 @@ output managedIdentityPrincipalId string = managedIdentity.properties.principalI
 output iotHubHostName string = iotHub.properties.hostName
 output iotDpsServiceHostName string = iotDps.properties.serviceOperationsHostName
 output staticWebAppHostName string = staticWebApp.properties.defaultHostname
+output mongoConnectionString string = replace(mongoCluster.properties.connectionString, '<user>', mongoCluster.properties.administrator.userName)

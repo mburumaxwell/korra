@@ -9,7 +9,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
@@ -45,7 +45,7 @@ enum NetworkKind {
 
 // list of known firmware
 model AvailableFirmware {
-  id            String            @id @default(cuid())
+  id            String            @id @default(cuid()) @map("_id") @db.ObjectId
   created       DateTime          @default(now())
   updated       DateTime          @updatedAt
   board         BoardType
@@ -63,13 +63,13 @@ model AvailableFirmware {
 }
 
 model Device {
-  id               String                     @id
+  id               String                     @id @map("_id") @db.ObjectId
   created          DateTime                   @default(now())
   updated          DateTime                   @updatedAt
   board            BoardType
   usage            DeviceUsage
   framework        FirmwareFramework?
-  label            String                     @db.VarChar(20) // e.g. W1, K1, D2
+  label            String // e.g. W1, K1, D2
   moistureCategory MoistureCategory?
   certificatePem   String?
   connected        Boolean                    @default(false)
@@ -83,7 +83,7 @@ model Device {
 
 model DeviceActuator {
   device          Device    @relation(fields: [deviceId], references: [id])
-  deviceId        String    @id
+  deviceId        String    @id @map("_id") @db.ObjectId
   enabled         Boolean   @default(false)
   duration        Int?
   equilibriumTime Int?
@@ -95,26 +95,26 @@ model DeviceActuator {
 
 model DeviceFirmware {
   device            Device             @relation(fields: [deviceId], references: [id])
-  deviceId          String             @id
+  deviceId          String             @id @map("_id") @db.ObjectId
   currentVersion    String?
   desiredVersion    String?
-  desiredFirmwareId String?
+  desiredFirmwareId String?            @db.ObjectId
   desiredFirmware   AvailableFirmware? @relation(fields: [desiredFirmwareId], references: [id])
 }
 
 model DeviceNetwork {
   device   Device       @relation(fields: [deviceId], references: [id])
-  deviceId String       @id
+  deviceId String       @id @map("_id") @db.ObjectId
   kind     NetworkKind?
-  mac      String?      @db.VarChar(50)
-  name     String?      @db.VarChar(50)
-  localIp  String?      @db.VarChar(100)
+  mac      String?
+  name     String?
+  localIp  String?
 }
 
 model DeviceTelemetrySensors {
-  id          String      @id
+  id          String      @id @map("_id") @db.ObjectId
   device      Device      @relation(fields: [deviceId], references: [id])
-  deviceId    String
+  deviceId    String      @db.ObjectId
   usage       DeviceUsage
   created     DateTime
   received    DateTime?
@@ -129,9 +129,9 @@ model DeviceTelemetrySensors {
 }
 
 model DeviceTelemetryActuation {
-  id       String      @id
+  id       String      @id @map("_id") @db.ObjectId
   device   Device      @relation(fields: [deviceId], references: [id])
-  deviceId String
+  deviceId String      @db.ObjectId
   usage    DeviceUsage
   created  DateTime
   received DateTime?
