@@ -36,7 +36,10 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
     softDeleteRetentionInDays: 90
   }
 
-  resource mongoPasswordSecret 'secrets' = { name: 'mongo-password', properties: { contentType: 'text/plain', value: administratorLoginPasswordMongo } }
+  resource mongoPasswordSecret 'secrets' = {
+    name: 'mongo-password'
+    properties: { contentType: 'text/plain', value: administratorLoginPasswordMongo }
+  }
 }
 
 /* Storage Account */
@@ -55,14 +58,16 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
   resource blobServices 'blobServices' existing = {
     name: 'default'
 
-    resource containers 'containers' = [for bc in blobContainers: {
-      name: bc.name
-      properties: {
-        defaultEncryptionScope: '$account-encryption-key'
-        denyEncryptionScopeOverride: false
-        publicAccess: (bc.?public ?? false) ? 'Blob' : 'None'
+    resource containers 'containers' = [
+      for bc in blobContainers: {
+        name: bc.name
+        properties: {
+          defaultEncryptionScope: '$account-encryption-key'
+          denyEncryptionScopeOverride: false
+          publicAccess: (bc.?public ?? false) ? 'Blob' : 'None'
+        }
       }
-    }]
+    ]
   }
 }
 
