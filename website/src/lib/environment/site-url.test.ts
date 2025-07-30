@@ -9,7 +9,7 @@ const WEBSITE_AUTH_V2_CONFIG_JSON_2 =
 
 test('should work for Azure ContainerApps', () => {
   // should return undefined if CONTAINER_APP_ENV_DNS_SUFFIX is not set
-  process.env.CONTAINER_APP_NAME = 'paklo-website';
+  process.env.CONTAINER_APP_NAME = 'korra';
   expect(getSiteUrlForAca()).toBe(undefined);
   delete process.env.CONTAINER_APP_NAME;
 
@@ -20,8 +20,8 @@ test('should work for Azure ContainerApps', () => {
 
   // should return the correct site URL
   process.env.CONTAINER_APP_ENV_DNS_SUFFIX = 'jollyplant-9349db20.westeurope.azurecontainerapps.io';
-  process.env.CONTAINER_APP_NAME = 'paklo-website';
-  expect(getSiteUrlForAca()).toBe('https://paklo-website.jollyplant-9349db20.westeurope.azurecontainerapps.io');
+  process.env.CONTAINER_APP_NAME = 'korra';
+  expect(getSiteUrlForAca()).toBe('https://korra.jollyplant-9349db20.westeurope.azurecontainerapps.io');
   delete process.env.CONTAINER_APP_ENV_DNS_SUFFIX;
   delete process.env.CONTAINER_APP_NAME;
 });
@@ -31,8 +31,8 @@ test('should work for Azure WebApps', () => {
   expect(getSiteUrlForAppService()).toBe(undefined);
 
   // should return the correct site URL
-  process.env.WEBSITE_HOSTNAME = 'paklo-website.azurewebsites.net';
-  expect(getSiteUrlForAppService()).toBe('https://paklo-website.azurewebsites.net');
+  process.env.WEBSITE_HOSTNAME = 'korra.azurewebsites.net';
+  expect(getSiteUrlForAppService()).toBe('https://korra.azurewebsites.net');
   delete process.env.WEBSITE_HOSTNAME;
 });
 
@@ -73,17 +73,17 @@ test('main uses default value', () => {
 test('non-main uses correct value', () => {
   // works for ACA
   process.env.CONTAINER_APP_ENV_DNS_SUFFIX = 'blackbush-020715303.westeurope.azurecontainerapps.io';
-  process.env.CONTAINER_APP_NAME = 'paklo-website';
+  process.env.CONTAINER_APP_NAME = 'korra';
   expect(getSiteUrlCombined({ development: false, main: false, defaultValue: 'https://contoso.com' })).toBe(
-    'https://paklo-website.blackbush-020715303.westeurope.azurecontainerapps.io',
+    'https://korra.blackbush-020715303.westeurope.azurecontainerapps.io',
   );
   delete process.env.CONTAINER_APP_ENV_DNS_SUFFIX;
   delete process.env.CONTAINER_APP_NAME;
 
   // works for App Service
-  process.env.WEBSITE_HOSTNAME = 'paklo-website.azurewebsites.net';
+  process.env.WEBSITE_HOSTNAME = 'korra.azurewebsites.net';
   expect(getSiteUrlCombined({ development: false, main: false, defaultValue: 'https://contoso.com' })).toBe(
-    'https://paklo-website.azurewebsites.net',
+    'https://korra.azurewebsites.net',
   );
   delete process.env.WEBSITE_HOSTNAME;
 
