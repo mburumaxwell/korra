@@ -29,10 +29,20 @@ env:
 
   # SWA_ENVIRONMENT_FOR_PR: ${{ (github.event_name == 'pull_request' && format('ra{0}', github.event.pull_request.number)) || '' }}
   SWA_ENVIRONMENT_FOR_PR: ${{ (github.event_name == 'pull_request' && format('{0}', github.event.pull_request.number)) || '' }}
+  WEB_APP_SLOT_FOR_PR: ${{ (github.event_name == 'pull_request' && format('ra{0}', github.event.pull_request.number)) || 'Production' }}
 
   GITHUB_SHA: ${{ github.sha }} # not discovered by default
   GITHUB_REF_NAME: ${{ github.ref_name }} # not discovered by default
   RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
+
+  # Some settings are here because we cannot use Managed Identity on the free tiers
+  WEB_APP_SETTINGS: >
+    GITHUB_SHA="${{ github.sha }}"
+    GITHUB_REF_NAME="${{ github.ref_name }}"
+    DATABASE_URL="${{ secrets.DATABASE_URL }}"
+    IOT_HUB_CONNECTION_STRING="${{ secrets.IOT_HUB_CONNECTION_STRING }}"
+    PROCESSOR_API_KEY="${{ secrets.PROCESSOR_API_KEY }}"
+    FIRMWARE_API_KEY="${{ secrets.FIRMWARE_API_KEY }}"
 
 jobs:
   Website:
@@ -111,10 +121,21 @@ jobs:
         timeout-minutes: 2
         with:
           app-name: korra
-          slot-name: Production
+          slot-name: ${{ env.WEB_APP_SLOT_FOR_PR }}
           package: ./website/.next/standalone
           clean: true
           restart: true
+
+      - name: Set app settings for Web App # bear in mind that this creates or updates but does not remove
+        uses: azure/cli@v2
+        if: ${{ !contains(github.actor, '[bot]')  && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main') }}
+        with:
+          inlineScript: >
+            az webapp config appsettings set
+            --resource-group ${{ env. RESOURCE_GROUP }}
+            --name korra
+            ${{ env.WEB_APP_SLOT_FOR_PR != 'Production' && format('--slot {0}', env.WEB_APP_SLOT_FOR_PR) || '' }}
+            --settings ${{ env.WEB_APP_SETTINGS }}
 
       - name: Deploy to SWA
         if: ${{ !contains(github.actor, '[bot]') }}
@@ -125,7 +146,7 @@ jobs:
           # repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for GitHub integrations (i.e. PR comments)
           action: 'upload'
           app_location: 'website'
-          deployment_environment: ${{ env.SWA_ENVIRONMENT_FOR_PR }}
+          deployment_environment: ${{ env.WEB_APP_SETTINGS }}
           skip_app_build: true
           skip_api_build: true
         env:
