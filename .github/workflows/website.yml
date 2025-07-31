@@ -96,12 +96,6 @@ jobs:
           echo 'Done'
         working-directory: website
 
-      - name: Azure Login
-        uses: azure/login@v2
-        if: ${{ !contains(github.actor, '[bot]') }}
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         id: web-app
