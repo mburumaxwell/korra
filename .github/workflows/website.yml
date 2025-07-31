@@ -66,8 +66,6 @@ jobs:
         with:
           provider: 'github'
           cache-prefix: turbo_website_
-          max-age: 5w
-          max-size: 1gb
 
       - name: Download deps
         run: pnpm install

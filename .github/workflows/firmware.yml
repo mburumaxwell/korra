@@ -62,8 +62,6 @@ jobs:
         with:
           provider: 'github'
           cache-prefix: turbo_firmware_
-          max-age: 5w
-          max-size: 1gb
 
       - name: Download deps
         run: pnpm install
