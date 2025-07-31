@@ -42,9 +42,6 @@ resource processor 'Microsoft.App/containerApps@2025-01-01' = {
         { name: 'dashboard-endpoint', value: 'https://korra.maxwellweru.com' } // easier to override as a secret in the Azure portal
         #disable-next-line use-secure-value-for-secure-inputs
         { name: 'dashboard-api-key', value: '#{PROCESSOR_API_KEY}#' }
-
-        #disable-next-line use-secure-value-for-secure-inputs
-        { name: 'tinybird-token', value: '#{TINYBIRD_TOKEN}#' }
       ]
     }
     template: {
@@ -66,8 +63,6 @@ resource processor 'Microsoft.App/containerApps@2025-01-01' = {
 
             { name: 'Dashboard__Endpoint', secretRef: 'dashboard-endpoint' }
             { name: 'Dashboard__ApiKey', secretRef: 'dashboard-api-key' }
-
-            { name: 'Tinybird__Token', secretRef: 'tinybird-token' }
           ]
           resources: { cpu: json('0.25'), memory: '0.5Gi' }
         }

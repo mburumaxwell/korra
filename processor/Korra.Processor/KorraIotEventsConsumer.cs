@@ -9,9 +9,8 @@ using SC = Korra.Processor.KorraProcessorSerializerContext;
 namespace Korra.Processor;
 
 [ConsumerName(EventHubConsumerClient.DefaultConsumerGroupName)]
-internal class KorraIotEventsConsumer(KorraDashboardClient dashboardClient,
-                                      TinybirdClient tinybirdClient,
-                                      ILogger<KorraIotEventsConsumer> logger) : IEventConsumer<KorraIotHubEvent>
+internal class KorraIotEventsConsumer(KorraDashboardClient dashboardClient, ILogger<KorraIotEventsConsumer> logger)
+    : IEventConsumer<KorraIotHubEvent>
 {
     public async Task ConsumeAsync(EventContext<KorraIotHubEvent> context, CancellationToken cancellationToken)
     {
@@ -77,20 +76,6 @@ internal class KorraIotEventsConsumer(KorraDashboardClient dashboardClient,
                 logger.LogDebug("{Telemetry}", JsonSerializer.Serialize(sensors, SC.Default.KorraTelemetrySensors));
             }
             await dashboardClient.SendAsync(sensors, cancellationToken);
-
-            var tbp = new System.Text.Json.Nodes.JsonObject
-            {
-                ["id"] = sensors.Id,
-                // tinybird expects a specific format for date-time
-                ["timestamp"] = sensors.Created.ToString("yyyy-MM-dd'T'HH:mm:ss"),
-                ["device_id"] = sensors.DeviceId,
-                ["app_kind"] = sensors.AppKind.GetEnumMemberAttrValueOrDefault(),
-                ["temperature"] = sensors.Temperature,
-                ["humidity"] = sensors.Humidity,
-                ["moisture"] = sensors.Moisture,
-                ["ph"] = sensors.PH,
-            };
-            await tinybirdClient.SendAsync("telemetry", tbp, cancellationToken);
         }
         else if (type is KorraIotHubTelemetryType.Actuators)
         {
@@ -111,20 +96,6 @@ internal class KorraIotEventsConsumer(KorraDashboardClient dashboardClient,
                 logger.LogDebug("{Telemetry}", JsonSerializer.Serialize(actuators, SC.Default.KorraTelemetryActuators));
             }
             await dashboardClient.SendAsync(actuators, cancellationToken);
-
-            var tbp = new System.Text.Json.Nodes.JsonObject
-            {
-                ["id"] = actuators.Id,
-                // tinybird expects a specific format for date-time
-                ["timestamp"] = actuators.Created.ToString("yyyy-MM-dd'T'HH:mm:ss"),
-                ["device_id"] = actuators.DeviceId,
-                ["app_kind"] = actuators.AppKind.GetEnumMemberAttrValueOrDefault(),
-                ["pump_duration"] = actuators.Pump?.Duration,
-                ["pump_quantity"] = actuators.Pump?.Quantity,
-                ["fan_duration"] = actuators.Fan?.Duration,
-                ["fan_quantity"] = actuators.Fan?.Quantity,
-            };
-            await tinybirdClient.SendAsync("actuator_telemetry", tbp, cancellationToken);
         }
         else
         {

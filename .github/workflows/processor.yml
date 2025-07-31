@@ -268,7 +268,6 @@ jobs:
         env:
           DOCKER_IMAGE_TAG: ${{ needs.Docker.outputs.short_sha }}
           PROCESSOR_API_KEY: ${{ secrets.PROCESSOR_API_KEY }}
-          TINYBIRD_TOKEN: ${{ secrets.TINYBIRD_TOKEN }}
 
       - name: Azure Login
         if: ${{ !contains(github.head_ref, 'changeset-release/') && !contains(github.head_ref, 'dependabot/') }}

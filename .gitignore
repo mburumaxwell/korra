@@ -14,9 +14,6 @@ node_modules/
 .pio
 app_version.h
 
-# tinybird
-.tinyb
-
 # testing
 /coverage
 

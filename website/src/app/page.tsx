@@ -112,7 +112,7 @@ const stack = [
   { name: 'Azure IoT', category: 'Cloud', description: 'Device provisioning, messaging & management' },
   { name: 'MongoDB', category: 'Database', description: 'Sensor data storage' },
   { name: 'Vercel', category: 'Frontend', description: 'Web dashboard hosting' },
-  { name: 'Tinybird', category: 'Analytics', description: 'Real-time data processing' },
+  { name: 'Azure App Service', category: 'Frontend', description: 'Web dashboard hosting' },
   { name: 'GitHub Actions', category: 'DevOps', description: 'CI/CD automation' },
   { name: 'Azure Container Apps', category: 'Cloud', description: 'Containerized services' },
 ];
@@ -457,9 +457,8 @@ export default function Home() {
               <AccordionItem value="item-6">
                 <AccordionTrigger>How is the data stored and processed?</AccordionTrigger>
                 <AccordionContent>
-                  Sensor data is transmitted to Azure IoT Hub, stored in MongoDB, and processed using Tinybird for
-                  real-time analytics. The web dashboard is hosted on Vercel, providing real-time visualization and
-                  device management capabilities.
+                  Sensor data is transmitted to Azure IoT Hub, stored in MongoDB. The web dashboard is hosted on Azure
+                  App Service and Vercel, providing real-time visualization and device management capabilities.
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
