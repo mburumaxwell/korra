@@ -233,28 +233,6 @@ resource appInsightsWebsite 'Microsoft.Insights/components@2020-02-02' = {
   properties: { Application_Type: 'web', WorkspaceResourceId: logAnalyticsWorkspace.id }
 }
 
-/* Static WebApp */
-resource staticWebApp 'Microsoft.Web/staticSites@2024-11-01' = {
-  name: name
-  location: 'westeurope' // not available in UK yet
-  properties: {
-    repositoryUrl: 'https://github.com/mburumaxwell/korra'
-    branch: 'main'
-    stagingEnvironmentPolicy: 'Enabled'
-    allowConfigFileUpdates: true
-    provider: 'GitHub'
-    enterpriseGradeCdnStatus: 'Disabled'
-    #disable-next-line BCP037
-    deploymentAuthPolicy: 'DeploymentToken'
-    #disable-next-line BCP037
-    #disable-next-line BCP037
-    trafficSplitting: { environmentDistribution: { default: 100 } }
-    publicNetworkAccess: 'Enabled'
-  }
-  sku: { name: 'Free', tier: 'Free' }
-  // identity: { type: 'UserAssigned', userAssignedIdentities: { '${managedIdentity.id}': {} } }
-}
-
 /** WebApps */
 resource webApp 'Microsoft.Web/sites@2024-04-01' = {
   name: name
@@ -306,5 +284,4 @@ output mongoConnectionString string = replace(
   '<user>',
   mongoCluster.properties.administrator.userName
 )
-output staticWebAppHostName string = staticWebApp.properties.defaultHostname
 output webAppHostName string = webApp.properties.defaultHostName

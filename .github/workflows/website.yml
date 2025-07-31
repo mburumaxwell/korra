@@ -27,22 +27,11 @@ env:
   NEXT_TELEMETRY_DISABLED: 1 # Disable Next.js telemetry
   TURBO_TELEMETRY_DISABLED: 1 # Disable Turbo telemetry
 
-  # SWA_ENVIRONMENT_FOR_PR: ${{ (github.event_name == 'pull_request' && format('ra{0}', github.event.pull_request.number)) || '' }}
-  SWA_ENVIRONMENT_FOR_PR: ${{ (github.event_name == 'pull_request' && format('{0}', github.event.pull_request.number)) || '' }}
   WEB_APP_SLOT_FOR_PR: ${{ (github.event_name == 'pull_request' && format('ra{0}', github.event.pull_request.number)) || 'Production' }}
 
   GITHUB_SHA: ${{ github.sha }} # not discovered by default
   GITHUB_REF_NAME: ${{ github.ref_name }} # not discovered by default
   RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
-
-  # Some settings are here because we cannot use Managed Identity on the free tiers
-  WEB_APP_SETTINGS: >
-    GITHUB_SHA="${{ github.sha }}"
-    GITHUB_REF_NAME="${{ github.ref_name }}"
-    DATABASE_URL="${{ secrets.DATABASE_URL }}"
-    IOT_HUB_CONNECTION_STRING="${{ secrets.IOT_HUB_CONNECTION_STRING }}"
-    PROCESSOR_API_KEY="${{ secrets.PROCESSOR_API_KEY }}"
-    FIRMWARE_API_KEY="${{ secrets.FIRMWARE_API_KEY }}"
 
 jobs:
   Website:
@@ -109,12 +98,14 @@ jobs:
 
       - name: Azure Login
         uses: azure/login@v2
-        if: ${{ startsWith(github.ref, 'refs/heads/main') }}
+        if: ${{ !contains(github.actor, '[bot]') }}
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
+        id: web-app
+        # if: ${{ !contains(github.actor, '[bot]') }}
         if: ${{ startsWith(github.ref, 'refs/heads/main') }}
         timeout-minutes: 2
         with:
@@ -126,6 +117,7 @@ jobs:
 
       - name: Set app settings for Web App # bear in mind that this creates or updates but does not remove
         uses: azure/cli@v2
+        # if: ${{ !contains(github.actor, '[bot]') }}
         if: ${{ startsWith(github.ref, 'refs/heads/main') }}
         with:
           inlineScript: >
@@ -133,36 +125,9 @@ jobs:
             --resource-group ${{ env. RESOURCE_GROUP }}
             --name korra
             ${{ env.WEB_APP_SLOT_FOR_PR != 'Production' && format('--slot {0}', env.WEB_APP_SLOT_FOR_PR) || '' }}
-            --settings ${{ env.WEB_APP_SETTINGS }}
-
-      - name: Deploy to SWA
-        if: ${{ !contains(github.actor, '[bot]') }}
-        id: swa
-        uses: azure/static-web-apps-deploy@v1
-        with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_SWA_TOKEN_WEBSITE }}
-          # repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for GitHub integrations (i.e. PR comments)
-          action: 'upload'
-          app_location: 'website'
-          deployment_environment: ${{ env.WEB_APP_SETTINGS }}
-          skip_app_build: true
-          skip_api_build: true
+            --settings ${{ env.APP_SETTINGS }}
         env:
-          NODE_VERSION: 24
-
-      - name: Set app settings for SWA # bear in mind that this creates or updates but does not remove
-        uses: azure/cli@v2
-        if: ${{ !contains(github.actor, '[bot]') }}
-        with:
-          inlineScript: >
-            az staticwebapp appsettings set
-            --resource-group ${{ env. RESOURCE_GROUP }}
-            --name korra
-            --environment-name '${{ env.SWA_ENVIRONMENT_FOR_PR }}'
-            --setting-names ${{ env.SWA_SETTINGS }}
-        env:
-          # Some settings are here because we cannot use Managed Identity on the free tier of SWA
-          SWA_SETTINGS: >
+          APP_SETTINGS: >
             GITHUB_SHA="${{ github.sha }}"
             GITHUB_REF_NAME="${{ github.ref_name }}"
             DATABASE_URL="${{ secrets.DATABASE_URL }}"
@@ -172,11 +137,12 @@ jobs:
 
       - name: Publish review app URLs
         uses: thollander/actions-comment-pull-request@v3
-        if: ${{ !contains(github.actor, '[bot]') && github.event_name == 'pull_request' }}
+        # remove false once we are deploying to slots or ACA
+        if: ${{ false && !contains(github.actor, '[bot]') && github.event_name == 'pull_request' }}
         with:
           message: |
             Review App for `website` succeeded.
-            [Preview](${{ steps.swa.outputs.static_web_app_url }})
+            [Preview](${{ steps.web-app.outputs.webapp-url }})
           comment-tag: website
 
       - name: Save .next/cache
