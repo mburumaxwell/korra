@@ -25,5 +25,8 @@
         "${workspaceFolder}/firmware"
     ],
     "files.associations": {
+    },
+    "nrf-connect.debugging.bindings": {
+        "${workspaceFolder}/firmware/build-keeper-frdm_rw612": "Launch build-keeper-frdm_rw612"
     }
 }
