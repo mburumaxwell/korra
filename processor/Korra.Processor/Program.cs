@@ -35,7 +35,6 @@ var inMemConfigSource = new MemoryConfigurationSource
         ["IotHub:EventHubs:HubName"] = "iothub-ehub-test-dev-0000000-0aaaa000aa",
         ["Dashboard:Endpoint"] = "http://localhost:3000",
         ["Dashboard:ApiKey"] = "overridden-in-secrets-or-env",
-        ["Tinybird:Token"] = "overridden-in-secrets-or-env",
     },
 };
 var index = builder.Configuration.Sources.IndexOf(
@@ -53,14 +52,6 @@ builder.Services.AddHttpApiClient<KorraDashboardClient, KorraDashboardClientOpti
                 {
                     client.BaseAddress = new Uri(builder.Configuration["Dashboard:Endpoint"]!, UriKind.Absolute);
                 });
-
-// Add client for sending events to Tinybird
-// https://www.tinybird.co/docs/api-reference/overview#regions-and-endpoints
-builder.Services.Configure<TinybirdClientOptions>(options => options.Token = builder.Configuration["Tinybird:Token"])
-                .ConfigureOptions<TinybirdClientConfigureOptions>()
-                .AddHttpApiClient<TinybirdClient, TinybirdClientOptions>()
-                .AddUserAgentVersionHandler<TinybirdClient>("korra-processor", clear: true)
-                .ConfigureHttpClient(client => client.BaseAddress = new Uri("https://api.europe-west2.gcp.tinybird.co"));
 
 builder.Services.AddSlimEventBus(eb =>
 {

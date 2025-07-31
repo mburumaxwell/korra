@@ -18,7 +18,6 @@
         "printk",
         "RSSI",
         "SNTP",
-        "Tinybird",
         "Vercel"
     ],
     "yaml.format.singleQuote": true,

@@ -19,5 +19,4 @@ sudo docker run \
 -e IotHub__EventHubs__HubName="<event-hub-name>" \
 -e Dashboard__Endpoint="<your-base-url-without-trailing-slash>" \
 -e Dashboard__ApiKey="<your-api-key>" \
--e Tinybird__Token="<get-from-tinybird-dashboard>" \
 ghcr.io/mburumaxwell/korra/processor:latest
