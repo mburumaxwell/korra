@@ -1,5 +1,14 @@
 # firmware
 
+## 0.2.4
+
+### Patch Changes
+
+- b499cdb: Add support for ESP32-C6 DevKitC
+- 061214c: Fix null terminator handling in generated device credential
+- 965d4ce: Update zephyr to v4.2.0
+- 6faef95: Remove support WPA Supplicant which is quite buggy
+
 ## 0.2.3
 
 ### Patch Changes

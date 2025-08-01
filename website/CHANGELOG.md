@@ -1,5 +1,18 @@
 # website
 
+## 0.7.0
+
+### Minor Changes
+
+- 864c742: Remove tinybird as we no longer need quick graphs
+- 46686d5: Migrate from postgres to mongo
+
+### Patch Changes
+
+- b499cdb: Add support for ESP32-C6 DevKitC
+- c669f97: Remove deployment to Azure Static WebApps
+- 7311c5e: Deployment of website to Azure App Service
+
 ## 0.6.0
 
 ### Minor Changes
