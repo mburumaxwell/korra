@@ -45,7 +45,7 @@ enum NetworkKind {
 
 // list of known firmware
 model AvailableFirmware {
-  id            String            @id @default(cuid()) @map("_id") @db.ObjectId
+  id            String            @id @default(cuid()) @map("_id")
   created       DateTime          @default(now())
   updated       DateTime          @updatedAt
   board         BoardType
@@ -63,7 +63,7 @@ model AvailableFirmware {
 }
 
 model Device {
-  id               String                     @id @map("_id") @db.ObjectId
+  id               String                     @id @map("_id")
   created          DateTime                   @default(now())
   updated          DateTime                   @updatedAt
   board            BoardType
@@ -83,7 +83,7 @@ model Device {
 
 model DeviceActuator {
   device          Device    @relation(fields: [deviceId], references: [id])
-  deviceId        String    @id @map("_id") @db.ObjectId
+  deviceId        String    @id @map("_id")
   enabled         Boolean   @default(false)
   duration        Int?
   equilibriumTime Int?
@@ -95,16 +95,16 @@ model DeviceActuator {
 
 model DeviceFirmware {
   device            Device             @relation(fields: [deviceId], references: [id])
-  deviceId          String             @id @map("_id") @db.ObjectId
+  deviceId          String             @id @map("_id")
   currentVersion    String?
   desiredVersion    String?
-  desiredFirmwareId String?            @db.ObjectId
+  desiredFirmwareId String?           
   desiredFirmware   AvailableFirmware? @relation(fields: [desiredFirmwareId], references: [id])
 }
 
 model DeviceNetwork {
   device   Device       @relation(fields: [deviceId], references: [id])
-  deviceId String       @id @map("_id") @db.ObjectId
+  deviceId String       @id @map("_id")
   kind     NetworkKind?
   mac      String?
   name     String?
@@ -112,9 +112,9 @@ model DeviceNetwork {
 }
 
 model DeviceTelemetrySensors {
-  id          String      @id @map("_id") @db.ObjectId
+  id          String      @id @map("_id")
   device      Device      @relation(fields: [deviceId], references: [id])
-  deviceId    String      @db.ObjectId
+  deviceId    String     
   usage       DeviceUsage
   created     DateTime
   received    DateTime?
@@ -129,9 +129,9 @@ model DeviceTelemetrySensors {
 }
 
 model DeviceTelemetryActuation {
-  id       String      @id @map("_id") @db.ObjectId
+  id       String      @id @map("_id")
   device   Device      @relation(fields: [deviceId], references: [id])
-  deviceId String      @db.ObjectId
+  deviceId String     
   usage    DeviceUsage
   created  DateTime
   received DateTime?
