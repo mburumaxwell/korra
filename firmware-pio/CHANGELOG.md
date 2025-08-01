@@ -1,5 +1,15 @@
 # firmware-pio
 
+## 0.7.0
+
+### Minor Changes
+
+- 65311b8: Update platform version for ESP32 environment from 54.03.21 to 55.03.30
+
+### Patch Changes
+
+- b499cdb: Add support for ESP32-C6 DevKitC
+
 ## 0.6.0
 
 ### Minor Changes
