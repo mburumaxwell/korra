@@ -1,0 +1,41 @@
+{
+    "tags": {
+        "label": "W3",
+        "usage": "pot"
+    },
+    "properties": {
+        "desired": {
+            "$version": 8,
+            "actuator": {
+                "duration": 5,
+                "enabled": true,
+                "equilibrium_time": 5,
+                "target": 65
+            },
+            "firmware": {
+                "hash": "5dbda423c43c73b2ad17bd8d88bdbe53e01fcbb3f90fdd6e0db2e424927add7d",
+                "signature": "tbd",
+                "url": "https://github.com/mburumaxwell/korra/releases/download/firmware-pio%400.7.0/arduino-pot-esp32s3_devkitc.bin",
+                "version": {
+                    "semver": "0.7.0",
+                    "value": 1792
+                }
+            }
+        },
+        "reported": {
+            "$version": 348,
+            "firmware": {
+                "version": {
+                    "semver": "0.7.0",
+                    "value": 1792
+                }
+            },
+            "network": {
+                "kind": "wifi",
+                "local_ip": "10.50.48.26",
+                "mac": "34:85:18:A1:3E:48",
+                "name": "eduroam"
+            }
+        }
+    }
+}
