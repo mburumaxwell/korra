@@ -42,12 +42,13 @@ jobs:
           retention-days: 1
 
       - name: Azure Login
+        if: ${{ !contains(github.actor, '[bot]') }}
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Validate Azure Resources
-        if: ${{ github.event_name == 'pull_request' }}
+        if: ${{ !contains(github.actor, '[bot]') && github.event_name == 'pull_request' }}
         uses: azure/arm-deploy@v2
         with:
           subscriptionId: ${{ env.AZURE_SUBSCRIPTION_ID }}
@@ -58,7 +59,7 @@ jobs:
           deploymentName: 'main-pr${{ github.event.number }}' # allows for concurrent validation
 
       - name: Deploy Azure Resources
-        if: ${{ github.event_name != 'pull_request' }}
+        if: ${{ !contains(github.actor, '[bot]') && github.event_name != 'pull_request' }}
         uses: azure/arm-deploy@v2
         with:
           subscriptionId: ${{ env.AZURE_SUBSCRIPTION_ID }}
