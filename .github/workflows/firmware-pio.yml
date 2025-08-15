@@ -46,7 +46,8 @@ jobs:
             ~/.platformio/.cache
           key: ${{ runner.os }}-pio
 
-      - uses: actions/setup-python@v5
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.13'
           # cache: 'pip' # cache works when there is a requirements.txt, pyproject.toml, poetry.lock or pipfile.lock
