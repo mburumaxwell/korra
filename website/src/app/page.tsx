@@ -342,9 +342,9 @@ export default function Home() {
 
           <div className="mx-auto max-w-6xl">
             <div className="mb-8 grid grid-cols-3 gap-12">
-              <div className="text-center font-semibold text-gray-700">Control</div>
-              <div className="text-center font-semibold text-gray-700">Treatment A</div>
-              <div className="text-center font-semibold text-gray-700">2nd Generation</div>
+              <div className="text-center font-semibold text-gray-700">Almost Dry</div>
+              <div className="text-center font-semibold text-gray-700">Medium</div>
+              <div className="text-center font-semibold text-gray-700">Wet</div>
             </div>
 
             <div className="grid grid-cols-3 gap-12">
