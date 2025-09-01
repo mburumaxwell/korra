@@ -15,6 +15,7 @@ import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { granularityOptions, timeRangeOptions, type Granularity, type TimeRange } from '@/lib/aggregation';
 import { copyToClipboard } from '@/lib/utils';
+import { Route } from 'next';
 
 export function DeviceViewHeader({ device }: { device: DisplayableDevice }) {
   const UsageIcon = getUsageIcon(device.usage);
@@ -222,7 +223,7 @@ export function DeviceSensorsHistory({ device, defaultRange, defaultGranularity,
     const params = new URLSearchParams(Array.from(searchParams.entries()));
     if (updates.range != null) params.set('range', updates.range);
     if (updates.granularity != null) params.set('granularity', updates.granularity);
-    router.push(pathname + '?' + params.toString());
+    router.push((pathname + '?' + params.toString()) as Route);
   }
 
   function formatTimestamp(date: Date) {

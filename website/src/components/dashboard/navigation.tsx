@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import avatarImage from '@/images/avatar.png';
 import { type Environment } from '@/lib/environment';
 import { cn } from '@/lib/utils';
+import { Route } from 'next';
 
 const navigationItems = [
   { title: 'Devices', href: '/dashboard/devices', icon: Flower2 },
@@ -61,7 +62,7 @@ export function Navigation({ environment }: { environment: Environment }) {
               return (
                 <Link
                   key={item.href}
-                  href={item.href}
+                  href={item.href as Route}
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={cn(
                     'flex items-center space-x-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',

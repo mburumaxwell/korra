@@ -14,6 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { TabsContent } from '@/components/ui/tabs';
 import { type KorraBoardType, type KorraFirmwareFramework, type KorraUsageType } from '@/lib/schemas';
 import { copyToClipboard } from '@/lib/utils';
+import { Route } from 'next';
 
 export type AvailableFirmwareTabProps = {
   value: string;
@@ -47,7 +48,7 @@ export function AvailableFirmwareTab({
     if (updates.board != null) params.set('board', updates.board);
     if (updates.usage != null) params.set('usage', updates.usage);
     if (updates.framework != null) params.set('framework', updates.framework);
-    router.push(pathname + '?' + params.toString());
+    router.push((pathname + '?' + params.toString()) as Route);
   }
 
   return (
