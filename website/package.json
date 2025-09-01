@@ -15,7 +15,7 @@
     "ui:diff": "pnpm ui diff",
     "ui:generate": "pnpm ui add --overwrite accordion alert-dialog badge button card chart input label select separator table tabs textarea tooltip",
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint .",
     "test": "vitest",
