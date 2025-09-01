@@ -162,7 +162,7 @@ jobs:
           minor: ${{ needs.Build.outputs.minor }}
 
       - name: Download Artifact (binaries)
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: binaries
           pattern: binaries-*
@@ -224,7 +224,7 @@ jobs:
           name: binaries-*
 
       - name: Download Artifact (releases)
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: ${{ github.workspace }}/releases
           pattern: releases-*
@@ -296,7 +296,7 @@ jobs:
 
     steps:
       - name: Download Artifact (releases)
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: ${{ github.workspace }}/releases
           name: releases
