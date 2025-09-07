@@ -10,12 +10,10 @@ export const revalidate = 0; // no caching
 const defaultRange: TimeRange = '6h';
 const defaultGranularity: Granularity = '15m';
 
-type ViewDevicePageProps = {
-  params: Promise<{ id: string }>;
-  searchParams: Promise<{ range?: TimeRange; granularity?: Granularity }>;
-};
-
-export async function generateMetadata(props: ViewDevicePageProps, parent: ResolvingMetadata): Promise<Metadata> {
+export async function generateMetadata(
+  props: PageProps<'/dashboard/devices/[id]'>,
+  parent: ResolvingMetadata,
+): Promise<Metadata> {
   const params = await props.params;
   const { id } = params;
   const device = await getDevice(id);
@@ -29,7 +27,7 @@ export async function generateMetadata(props: ViewDevicePageProps, parent: Resol
   };
 }
 
-export default async function Page(props: ViewDevicePageProps) {
+export default async function Page(props: PageProps<'/dashboard/devices/[id]'>) {
   const params = await props.params;
   const { id } = params;
   const device = await getDevice(id);
@@ -38,7 +36,10 @@ export default async function Page(props: ViewDevicePageProps) {
   }
 
   const searchParams = await props.searchParams;
-  const { range = defaultRange, granularity = defaultGranularity } = searchParams;
+  const { range = defaultRange, granularity = defaultGranularity } = searchParams as {
+    range?: TimeRange;
+    granularity?: Granularity;
+  };
   const { start, end } = getDateTimeRange(range);
   const granularityMs = granularityToMilliseconds(granularity);
   const sensors = await getDeviceTelemetries({ deviceId: device.id, start, end, granularity: granularityMs });

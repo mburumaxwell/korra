@@ -8,18 +8,22 @@ import { DevicesFirmwareTab } from './tabs-devices';
 
 export const revalidate = 60; // cache for 60 seconds
 
-type FirmwarePageProps = {
-  searchParams: Promise<{ usage?: KorraUsageType; board?: KorraBoardType; framework?: KorraFirmwareFramework }>;
-};
-
 export const metadata: Metadata = {
   title: 'Firmware',
   description: 'Manage firmware versions',
 };
 
-export default async function Page(props: FirmwarePageProps) {
+export default async function Page(props: PageProps<'/dashboard/firmware'>) {
   const searchParams = await props.searchParams;
-  const { usage = 'all', board = 'all', framework = 'all' } = searchParams;
+  const {
+    usage = 'all',
+    board = 'all',
+    framework = 'all',
+  } = searchParams as {
+    usage?: KorraUsageType;
+    board?: KorraBoardType | 'all';
+    framework?: KorraFirmwareFramework | 'all';
+  };
   const entries = await getAvailableFirmware({
     usage: usage !== 'all' ? usage : undefined,
     board: board !== 'all' ? board : undefined,
