@@ -83,7 +83,7 @@ jobs:
           # queries: security-extended,security-and-quality
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         if: ${{ matrix.build-mode == 'manual'  && matrix.language == 'c-cpp' }}
         with:
           python-version: '3.13'
