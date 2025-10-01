@@ -7,11 +7,15 @@ on:
     paths:
       - firmware/**
       - .github/workflows/firmware.yml
+      - 'package.json'
+      - 'turbo.json'
   pull_request:
     branches: [main]
     paths:
       - firmware/**
       - .github/workflows/firmware.yml
+      - 'package.json'
+      - 'turbo.json'
   workflow_dispatch:
 
 permissions:

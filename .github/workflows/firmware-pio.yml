@@ -8,12 +8,16 @@ on:
       - firmware-pio/**
       - platformio.ini
       - .github/workflows/firmware-pio.yml
+      - 'package.json'
+      - 'turbo.json'
   pull_request:
     branches: [main]
     paths:
       - firmware-pio/**
       - platformio.ini
       - .github/workflows/firmware-pio.yml
+      - 'package.json'
+      - 'turbo.json'
 
 permissions:
   contents: write # write required for ncipollo/release-action to create a release

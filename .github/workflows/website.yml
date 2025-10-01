@@ -8,11 +8,15 @@ on:
     paths:
       - 'website/**'
       - '.github/workflows/website.yml'
+      - 'package.json'
+      - 'turbo.json'
   pull_request:
     branches: [main]
     paths:
       - 'website/**'
       - '.github/workflows/website.yml'
+      - 'package.json'
+      - 'turbo.json'
 
 permissions:
   contents: read
