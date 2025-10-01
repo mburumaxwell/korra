@@ -34,8 +34,10 @@ env:
 
 jobs:
   Build:
-    # using macos-latest because it tends to be faster and closely mirrors dev environment
-    runs-on: macos-latest
+    # not using using macos because there seems to be capacity issues as of 2025-10-01
+    runs-on: ubuntu-latest
+    # # using macos because it tends to be faster and closely mirrors dev environment
+    # runs-on: macos-latest
     timeout-minutes: 15
 
     steps:
