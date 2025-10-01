@@ -19,9 +19,13 @@ updates:
     groups:
       npm:
         patterns: ['*'] # grouping all to avoid PR noise
-        exclude-patterns: ['@microsoft/applicationinsights-*'] # these are often buggy so we keep them separate below
+        exclude-patterns:
+          - '@microsoft/applicationinsights-*' # these are often buggy so we keep them separate below
+          - '*turbo' # affect more than just typescript packages in the repo
       application-insights:
         patterns: ['@microsoft/applicationinsights-*']
+      turbo:
+        patterns: ['*turbo']
     ignore:
       - dependency-name: recharts
         update-types: [version-update:semver-major] # shadcn still doesn;t support (https://github.com/shadcn-ui/ui/issues/7669)
