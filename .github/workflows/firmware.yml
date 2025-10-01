@@ -30,7 +30,7 @@ jobs:
   Build:
     # using macos-latest because it tends to be faster and closely mirrors dev environment
     runs-on: macos-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     steps:
       - name: Checkout
