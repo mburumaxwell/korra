@@ -1,7 +1,6 @@
 {
   "$schema": "https://turborepo.com/schema.json",
   "extends": ["//"],
-  "globalDependencies": ["../platformio.ini"],
   "tasks": {
     "build": {
       "outputs": [".pio/**"]
