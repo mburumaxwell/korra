@@ -1,5 +1,9 @@
 # Korra
 
+> [!WARNING]
+> As of 03 Oct 2025, this repository has served its purpose and is no longer under active development.
+> The code remains available for reference and educational purposes.
+ 
 <!-- Project logo could go here in the future -->
 
 ![Firmware](https://img.shields.io/github/actions/workflow/status/mburumaxwell/korra/firmware.yml?branch=main&label=Firmware&style=flat-square)
