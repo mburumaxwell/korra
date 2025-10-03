@@ -1,7 +1,7 @@
 # Korra
 
 > [!WARNING]
-> As of 03 Oct 2025, this repository has served its purpose and is no longer under active development.
+> As of 03 October 2025, this project and its repository has served its purpose and I no longer do active development here.
 > The code remains available for reference and educational purposes.
  
 <!-- Project logo could go here in the future -->
